@@ -1,0 +1,101 @@
+🚀 КАК ЗАГРУЗИТЬ CIPHER v3 НА GITHUB
+
+ПОШАГОВО:
+
+═══════════════════════════════════════════════════════════════
+
+1️⃣ СОЗДАЙ РЕПОЗИТОРИЙ НА GITHUB
+
+Перейди на github.com:
+- Нажми "+" вверху → "New repository"
+- Имя: CIPHER-v3 (или любое другое)
+- Описание: Competitive Intelligence Platform for SaaS
+- Тип: Public (чтоб все видели)
+- НЕ выбирай "Initialize with README" (у нас уже есть)
+- Нажми "Create repository"
+
+═══════════════════════════════════════════════════════════════
+
+2️⃣ СКАЧАЙ ВСЕ ФАЙЛЫ ИЗ /mnt/user-data/outputs
+
+Скачай 2 файла:
+- CIPHER_v3_FINAL.html
+- README.md
+
+═══════════════════════════════════════════════════════════════
+
+3️⃣ ЗАГРУЗИ ФАЙЛЫ НА GITHUB (ВАРИАНТ A - ЧЕРЕЗ БРАУЗЕР)
+
+На странице репозитория:
+- Нажми "Add file" → "Upload files"
+- Перетащи CIPHER_v3_FINAL.html
+- Перетащи README.md
+- Нажми "Commit changes"
+
+✅ ГОТОВО! Файлы загружены.
+
+═══════════════════════════════════════════════════════════════
+
+3️⃣ ЗАГРУЗИ ФАЙЛЫ НА GITHUB (ВАРИАНТ B - ЧЕРЕЗ GIT ТЕРМИНАЛ)
+
+Если у тебя установлен Git:
+
+# 1. Клонируй репозиторий
+git clone https://github.com/ТВОЙ_ЮЗЕР/CIPHER-v3.git
+cd CIPHER-v3
+
+# 2. Положи файлы в папку (скопируй туда CIPHER_v3_FINAL.html и README.md)
+
+# 3. Переименуй HTML в index.html (чтоб открывалась сразу)
+mv CIPHER_v3_FINAL.html index.html
+
+# 4. Добавь файлы в Git
+git add .
+git commit -m "🚀 Initial commit: CIPHER v3 - Competitive Intelligence Platform"
+git push origin main
+
+✅ ГОТОВО! Файлы в GitHub.
+
+═══════════════════════════════════════════════════════════════
+
+4️⃣ ВКЛЮЧИ GITHUB PAGES (ДА, ПРЯМО СЕЙЧАС!)
+
+Открой репозиторий → Settings → Pages
+
+Выбери:
+- Source: main branch
+- Folder: / (root)
+- Нажми Save
+
+GitHub сгенерирует ссылку:
+https://ТВОЙ_ЮЗЕР.github.io/CIPHER-v3
+
+═══════════════════════════════════════════════════════════════
+
+5️⃣ ГОТОВО! 🎉
+
+Твой CIPHER v3 теперь ONLINE:
+https://ТВОЙ_ЮЗЕР.github.io/CIPHER-v3
+
+Поделись этой ссылкой с друзьями!
+
+═══════════════════════════════════════════════════════════════
+
+АЛЬТЕРНАТИВА: ЕСЛИ НЕ ХОЧЕШЬ GITHUB PAGES
+
+Можешь загрузить на другие бесплатные хостинги:
+
+1. Vercel (vercel.com)
+   - Залей просто index.html
+   - Готово за 1 минуту
+
+2. Netlify (netlify.com)
+   - Перетащи файл на сайт
+   - Готово за 30 секунд
+
+3. Surge (surge.sh)
+   - surge --project . --domain myapp.surge.sh
+
+═══════════════════════════════════════════════════════════════
+
+ГОТОВО! CIPHER v3 LIVE! 🚀

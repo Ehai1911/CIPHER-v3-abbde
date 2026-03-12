@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIPHER v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080a10;--bg2:#0d1018;--bg3:#131620;
+  --line2:#ffffff12;
+  --acid:#b8ff3c;--acid-d:#b8ff3c18;
+  --sky:#41c8ff;
+  --txt:#dde1f0;--txt2:#7c819a;--txt3:#3d4157;
+}
+
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope',sans-serif;overflow:hidden}
+
+.app{position:relative;height:100vh;display:flex;flex-direction:column}
+
+.hdr{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line2);background:rgba(8,10,16,.95);gap:12px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:4px;color:var(--acid)}
+
+.screen{display:none;flex:1;overflow:hidden}
+.screen.active{display:flex}
+
+#questionsScreen{flex-direction:row;gap:0}
+
+.nova-side{width:320px;background:rgba(8,10,16,.7);border-right:1px solid var(--line2);display:flex;flex-direction:column;padding:20px;overflow-y:auto;flex-shrink:0}
+.nova-side::-webkit-scrollbar{width:6px}
+.nova-side::-webkit-scrollbar-track{background:var(--bg2)}
+.nova-side::-webkit-scrollbar-thumb{background:var(--acid);border-radius:3px}
+
+.nova-avatar{width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,#0a1628,#0d2040,#102a50);border:1px solid rgba(65,200,255,.15);display:grid;place-items:center;font-size:36px;margin:0 auto 20px}
+
+.nova-hint{font-size:11px;color:var(--txt2);line-height:1.6;text-align:center;margin-bottom:20px}
+
+.step-counter{text-align:center;font-size:10px;color:var(--txt3);margin-bottom:10px}
+
+.step-progress{height:2px;background:var(--line2);border-radius:1px;overflow:hidden}
+.step-progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--acid));transition:width .4s}
+
+.form-side{flex:1;display:flex;flex-direction:column;padding:30px;overflow-y:auto}
+.form-side::-webkit-scrollbar{width:6px}
+.form-side::-webkit-scrollbar-track{background:var(--bg2)}
+.form-side::-webkit-scrollbar-thumb{background:var(--acid);border-radius:3px}
+
+.q-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--acid);margin-bottom:20px;max-width:600px}
+
+.q-options{display:flex;flex-direction:column;gap:12px;max-width:600px}
+
+.q-option{padding:12px 16px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;cursor:pointer;transition:.2s;font-size:12px;color:var(--txt)}
+.q-option:hover{background:var(--bg3);border-color:var(--sky)}
+.q-option.selected{background:var(--acid-d);border-color:var(--acid);color:var(--acid);font-weight:600}
+
+.q-input{padding:12px 14px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:12px;outline:none;max-width:600px}
+.q-input:focus{border-color:var(--sky);background:rgba(65,200,255,.02)}
+
+.q-textarea{padding:12px 14px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:12px;outline:none;resize:none;min-height:100px;max-width:600px}
+.q-textarea:focus{border-color:var(--sky);background:rgba(65,200,255,.02)}
+
+.q-multi-option{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--line2);border-radius:6px;cursor:pointer;transition:.2s;font-size:12px}
+.q-multi-option:hover{background:var(--bg3)}
+.q-multi-option.selected{background:var(--acid-d);border-color:var(--acid)}
+.q-multi-option input{cursor:pointer}
+
+.buttons-bottom{display:flex;gap:10px;margin-top:auto;padding-top:20px;border-top:1px solid var(--line2)}
+
+.btn{padding:10px 20px;border:none;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer;transition:.2s}
+.btn-secondary{background:var(--bg2);color:var(--txt);border:1px solid var(--line2)}
+.btn-secondary:hover{background:var(--bg3)}
+.btn-primary{background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);color:var(--bg);flex:1}
+.btn-primary:hover{box-shadow:0 8px 25px rgba(184,255,60,.3);transform:translateY(-1px)}
+
+#analysisScreen{flex-direction:column;gap:0}
+
+.tabs-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:12px;border-bottom:2px solid var(--line2);background:rgba(8,10,16,.7);flex-shrink:0}
+
+.tab{padding:10px 8px;border:none;background:var(--bg2);color:var(--txt3);cursor:pointer;font-size:11px;font-weight:600;transition:.2s;border-radius:6px;border:1px solid var(--line2);font-family:'Syne',sans-serif;text-align:center}
+.tab:hover{background:var(--bg3);border-color:var(--sky)}
+.tab.on{color:var(--acid);background:var(--acid-dd);border-color:var(--acid)}
+
+.content{flex:1;overflow-y:auto;padding:20px}
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-track{background:var(--bg2)}
+.content::-webkit-scrollbar-thumb{background:var(--acid);border-radius:3px}
+
+.table-wrapper{overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
+thead{background:rgba(184,255,60,.1);border-bottom:2px solid rgba(184,255,60,.2)}
+th{padding:10px;text-align:left;font-weight:600;color:var(--acid);font-size:9px}
+td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--txt2)}
+tbody tr:hover{background:rgba(184,255,60,.05)}
+td strong{color:var(--txt)}
+
+.summary-box{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px;margin-bottom:14px}
+.summary-title{font-size:11px;font-weight:600;color:var(--acid);margin-bottom:8px}
+.summary-item{font-size:10px;color:var(--txt2);line-height:1.5;margin-bottom:6px}
+
+.rec-item{background:rgba(184,255,60,.05);border-left:2px solid var(--acid);border-radius:6px;padding:10px;margin-bottom:10px}
+.rec-pri{font-size:9px;font-weight:600;margin-bottom:2px}
+.rec-title{font-size:11px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.rec-details{font-size:9px;color:var(--sky)}
+
+.btn-analysis{width:100%;padding:10px;margin-top:12px;background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);color:var(--bg);border:none;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;overflow-y:auto;padding:20px}
+.modal.open{display:block}
+.modal-content{background:var(--bg);border:1px solid var(--line2);border-radius:8px;max-width:700px;margin:0 auto;padding:20px;position:relative}
+.modal-close{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--txt3);font-size:16px;cursor:pointer}
+.modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--acid);margin-bottom:12px}
+.modal-text{font-size:10px;color:var(--txt2);line-height:1.6}
+
+@media(max-width:900px){
+  #questionsScreen{flex-direction:column}
+  .nova-side{width:100%;max-height:120px}
+  .form-side{padding:20px}
+}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="hdr">
+      <div class="logo">CIPHER</div>
+    </div>
+
+    <div id="questionsScreen" class="screen active">
+      <div class="nova-side">
+        <div class="nova-avatar">🤖</div>
+        <div class="nova-hint" id="novaHint">Эта информация помогает найти конкурентов</div>
+        <div class="step-counter" id="stepCounter">1 из 7</div>
+        <div class="step-progress"><div class="step-progress-fill" id="stepProgress"></div></div>
+      </div>
+
+      <div class="form-side">
+        <div class="q-title" id="qTitle"></div>
+        <div id="qAnswers"></div>
+        <div class="buttons-bottom">
+          <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="display:none">← НАЗАД</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">ДАЛЬШЕ →</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="analysisScreen" class="screen">
+      <div class="tabs-bar" id="tabsBar"></div>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-text" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const QUESTIONS = [
+      {id:'area',title:'Какую сферу охватываешь?',hint:'Это определяет область',type:'radio',options:['Софтвер для бизнеса','Образование','Консультирование','E-commerce','Маркетинг','Другое']},
+      {id:'segment',title:'Кто твой целевой клиент?',hint:'От этого зависит стратегия',type:'radio',options:['Эксперты','SMB (5-500)','Крупный бизнес (500+)']},
+      {id:'product',title:'Название продукта?',hint:'Рабочее название',type:'input',placeholder:'Например: MyCRM'},
+      {id:'description',title:'Описание в 1-2 предложениях',hint:'Помогает классифицировать рынок',type:'textarea',placeholder:'CRM для sales teams...'},
+      {id:'geography',title:'Географический рынок?',hint:'Локализация важна',type:'multi',options:['Казахстан','СНГ','Европа','США','Азия','Глобально']},
+      {id:'advantages',title:'Основные преимущества?',hint:'Позиционирование',type:'multi',options:['Дешевле','Проще','Быстрее','Лучше поддержка','AI','Локализирован','Быстрый старт','Mobile','Интеграции']},
+      {id:'price',title:'Средняя стоимость?',hint:'Ценовой диапазон',type:'radio',options:['Free','Freemium','$14-50/мес','$50-200/мес','$200-1000/мес','Enterprise']}
+    ];
+
+    const TABS = [
+      {id:'market',emoji:'📊',title:'Рыночный анализ'},
+      {id:'audience',emoji:'👤',title:'Аудитория'},
+      {id:'economics',emoji:'💰',title:'Экономика'},
+      {id:'channels',emoji:'📣',title:'Каналы'},
+      {id:'product',emoji:'🔧',title:'Продукт'},
+      {id:'reputation',emoji:'⭐',title:'Репутация'},
+      {id:'macro',emoji:'🌍',title:'Макро'},
+      {id:'strategy',emoji:'📋',title:'Стратегия'}
+    ];
+
+    const TAB_DATA = {
+      market: {
+        headers: ['Компания','TAM','CAGR','Доля','Позиция'],
+        rows: [
+          ['Salesforce','$128B','13%','26%','Enterprise CRM'],
+          ['HubSpot','$128B','20%','12%','All-in-one SMB'],
+          ['Pipedrive','$128B','25%','5%','Sales-focused'],
+          ['amoCRM','$128B','30%','4%','СНГ лидер'],
+          ['Zoho','$128B','18%','3%','Budget']
+        ],
+        summary: ['Рынок растёт на 13-30% в год','TOP 5 занимают 50% рынка','Главная боль: долгая настройка']
+      },
+      audience: {
+        headers: ['Компания','Сегмент','Роли','Jobs','Зрелость'],
+        rows: [
+          ['Salesforce','Enterprise','CTO, VP','Complex','Advanced'],
+          ['HubSpot','SMB','Manager','Easy setup','Middle'],
+          ['Pipedrive','Sales teams','Sales Rep','Quick wins','Middle'],
+          ['amoCRM','SMB СНГ','Manager','Affordability','Basic'],
+          ['Zoho','Budget','Owner','Cost','Basic']
+        ],
+        summary: ['SMB ищет простоту и быстрый ROI','Ключевые роли: Sales Manager, CTO, CFO','Jobs: "нужна CRM за день"']
+      },
+      economics: {
+        headers: ['Компания','Модель','Цена','LTV','CAC','Payback'],
+        rows: [
+          ['Salesforce','SaaS','$165-500','$48K','$8K','6 мес'],
+          ['HubSpot','Freemium','Free-3200','$18K','$3K','6 мес'],
+          ['Pipedrive','SaaS','$14-99','$8.4K','$600','14 мес'],
+          ['amoCRM','SaaS','$15-60','$6K','$500','12 мес'],
+          ['Zoho','SaaS','$15-45','$5K','$400','12 мес']
+        ],
+        summary: ['SaaS модель доминирует','LTV/CAC ratio 8-14x','Freemium лучше retention']
+      },
+      channels: {
+        headers: ['Компания','GTM','Вторичные','Контент','Расходы'],
+        rows: [
+          ['Salesforce','Enterprise','Partns','Whitepapers','High'],
+          ['HubSpot','PLG+Content','Email','Blog','Medium'],
+          ['Pipedrive','PLG','Affiliate','YouTube','Low'],
+          ['amoCRM','Direct','Content','Blog','Low'],
+          ['Zoho','PLG','Partner','Content','Low']
+        ],
+        summary: ['PLG — основной тренд','Content Marketing работает','Партнёрские программы эффективны']
+      },
+      product: {
+        headers: ['Компания','Features','AI','Интеграции','Mobile','Барьеры'],
+        rows: [
+          ['Salesforce','All','Einstein','500+','Native','Complex'],
+          ['HubSpot','Sales+CRM','Yes','1000+','App','Medium'],
+          ['Pipedrive','Sales','Basic','50+','App','Low'],
+          ['amoCRM','Sales ops','No','30+','App','Low'],
+          ['Zoho','All','No','100+','App','Low']
+        ],
+        summary: ['AI в CRM обязателен','Slack, Teams критичны','Mobile apps нужны']
+      },
+      reputation: {
+        headers: ['Компания','G2','Отзывы','Жалобы','NPS','PR'],
+        rows: [
+          ['Salesforce','4.4/5','18K','Дорого','45','High'],
+          ['HubSpot','4.5/5','14K','Сложно','50','High'],
+          ['Pipedrive','4.3/5','8K','Ограничен','48','Med'],
+          ['amoCRM','4.2/5','5K','Поддержка','42','Low'],
+          ['Zoho','4.1/5','3K','UI/UX','40','Low']
+        ],
+        summary: ['G2 4.2-4.5 — стандарт','Жалобы: onboarding, цена, локализация','NPS 40-50']
+      },
+      macro: {
+        headers: ['Компания','GDPR','SOC2','Локальный','Хранение','Стандарты'],
+        rows: [
+          ['Salesforce','Yes','Yes','EU, US','Global','ISO, FedRAMP'],
+          ['HubSpot','Yes','Yes','EU, US','Global','ISO, SOC2'],
+          ['Pipedrive','Yes','Yes','EU','Global','GDPR'],
+          ['amoCRM','Partial','No','RU','Local','GDPR'],
+          ['Zoho','Yes','Yes','Global','Local','ISO, GDPR']
+        ],
+        summary: ['GDPR и SOC2 обязательны','Локальное хранение требуется','Compliance критичен']
+      }
+    };
+
+    let state = {step:0, data:{}};
+
+    function renderQuestion() {
+      const q = QUESTIONS[state.step];
+      document.getElementById('qTitle').textContent = q.title;
+      document.getElementById('novaHint').textContent = q.hint;
+      document.getElementById('stepCounter').textContent = (state.step + 1) + ' из 7';
+      document.getElementById('stepProgress').style.width = ((state.step + 1) / 7 * 100) + '%';
+      document.getElementById('prevBtn').style.display = state.step > 0 ? 'block' : 'none';
+      document.getElementById('nextBtn').textContent = state.step === 6 ? '🚀 НАЧАТЬ АНАЛИЗ' : 'ДАЛЬШЕ →';
+
+      let html = '';
+      if(q.type === 'radio') {
+        html = q.options.map(o => `<div><div class="q-option ${state.data[q.id] === o ? 'selected' : ''}" onclick="select('${q.id}', '${o}')">${o}</div>${o === 'Другое' && state.data[q.id] === o ? `<input type="text" class="q-input" style="margin-top:8px" placeholder="Укажи свой вариант..." value="${state.data[q.id + '_other'] || ''}" onchange="updateText('${q.id}_other', this.value)">` : ''}</div>`).join('');
+      } else if(q.type === 'input') {
+        html = `<input type="text" class="q-input" placeholder="${q.placeholder}" value="${state.data[q.id] || ''}" onchange="updateText('${q.id}', this.value)">`;
+      } else if(q.type === 'textarea') {
+        html = `<textarea class="q-textarea" placeholder="${q.placeholder}" onchange="updateText('${q.id}', this.value)">${state.data[q.id] || ''}</textarea>`;
+      } else if(q.type === 'multi') {
+        const selected = state.data[q.id] || [];
+        html = q.options.map(o => `<div class="q-multi-option ${selected.includes(o) ? 'selected' : ''}" onclick="toggleMulti('${q.id}', '${o}')"><input type="checkbox" ${selected.includes(o) ? 'checked' : ''} style="pointer-events:none"><span>${o}</span></div>`).join('');
+      }
+
+      document.getElementById('qAnswers').innerHTML = html;
+    }
+
+    function select(id, val) {state.data[id] = val; renderQuestion();}
+    function updateText(id, val) {state.data[id] = val;}
+    function toggleMulti(id, val) {
+      if(!state.data[id]) state.data[id] = [];
+      const arr = state.data[id];
+      if(arr.includes(val)) {state.data[id] = arr.filter(v => v !== val);} else {state.data[id].push(val);}
+      renderQuestion();
+    }
+
+    function nextStep() {
+      const q = QUESTIONS[state.step];
+      const val = state.data[q.id];
+      if(!val || (Array.isArray(val) && val.length === 0)) {alert('Выбери ответ'); return;}
+      if(state.step < 6) {state.step++; renderQuestion();} else {startAnalysis();}
+    }
+
+    function prevStep() {if(state.step > 0) {state.step--; renderQuestion();}}
+
+    function startAnalysis() {
+      document.getElementById('questionsScreen').classList.remove('active');
+      document.getElementById('analysisScreen').classList.add('active');
+      renderTabs();
+    }
+
+    function renderTabs() {
+      const html = TABS.map((t,i) => `<button class="tab ${i === 0 ? 'on' : ''}" onclick="switchTab(${i})">${t.emoji} ${t.title}</button>`).join('');
+      document.getElementById('tabsBar').innerHTML = html;
+      switchTab(0);
+    }
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('on', i === idx));
+      
+      const tab = TABS[idx];
+      const product = state.data.product || 'Ваш продукт';
+      const segment = state.data.segment || 'ваш сегмент';
+      const geo = Array.isArray(state.data.geography) ? state.data.geography[0] : 'ваш регион';
+      
+      if(tab.id === 'strategy') {
+        const html = `
+          <h2 style="color:var(--acid);margin-bottom:16px;font-size:16px;font-family:'Syne',sans-serif">📋 СТРАТЕГИЯ ДЛЯ ${product.toUpperCase()}</h2>
+          
+          <div class="summary-box" style="background:rgba(184,255,60,.08);border:2px solid rgba(184,255,60,.3)">
+            <div class="summary-title" style="font-size:12px">🚀 ПЛАН НА ГОД</div>
+            <div class="summary-item">💵 Инвестиции: ~$200K | 📈 ARR: +$1.5M | ⏱️ Payback: 6-8 месяцев</div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-title" style="font-size:13px">🔴 Q1 (Месяц 1-3): ФУНДАМЕНТ</div>
+            <div style="font-size:10px;color:var(--txt2);line-height:1.8;margin-bottom:8px">
+              <strong style="color:var(--acid)">📌 Главная цель:</strong> Создать уникальное предложение для ${geo}<br>
+              <strong style="color:var(--acid)">👤 Учись у:</strong> <span style="color:var(--sky)">HubSpot (быстрый старт) + amoCRM (локализация)</span>
+            </div>
+            <div class="summary-item">✓ <strong>Локализируй ${product}</strong> под ${geo} ($5K)</div>
+            <div class="summary-item">  └ Касса, платежи, ЯП, обозначения</div>
+            <div class="summary-item">✓ <strong>Оптимизируй для ${segment}</strong> ($8K)</div>
+            <div class="summary-item">  └ UI/UX, документация, видео-обучение</div>
+            <div class="summary-item">✓ <strong>Встроь AI асистента</strong> ($15K)</div>
+            <div class="summary-item">  └ ChatGPT интеграция, автоматизация</div>
+            <div style="background:rgba(65,200,255,.05);border-left:2px solid var(--sky);padding:8px;border-radius:4px;margin-top:8px;font-size:10px">
+              <strong style="color:var(--acid)">📊 Метрики:</strong> +40% конверсии, +$300K ARR, -30% CAC
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-title" style="font-size:13px">🟡 Q2 (Месяц 4-6): РАСШИРЕНИЕ</div>
+            <div style="font-size:10px;color:var(--txt2);line-height:1.8;margin-bottom:8px">
+              <strong style="color:var(--acid)">📌 Главная цель:</strong> Масштабировать через PLG и контент<br>
+              <strong style="color:var(--acid)">👤 Учись у:</strong> <span style="color:var(--sky)">HubSpot (Content) + Pipedrive (PLG)</span>
+            </div>
+            <div class="summary-item">✓ <strong>Запусти PLG стратегию</strong> ($10K)</div>
+            <div class="summary-item">  └ Free trial 14 дней, guided onboarding, в-во интеграций</div>
+            <div class="summary-item">✓ <strong>Content Marketing</strong> ($8K/мес)</div>
+            <div class="summary-item">  └ Blog (50 постов), YouTube (10 видео), гайды, кейсы</div>
+            <div class="summary-item">✓ <strong>Интеграции Slack/Teams</strong> ($10K)</div>
+            <div class="summary-item">  └ Native бот, уведомления, синхронизация</div>
+            <div style="background:rgba(65,200,255,.05);border-left:2px solid var(--sky);padding:8px;border-radius:4px;margin-top:8px;font-size:10px">
+              <strong style="color:var(--acid)">📊 Метрики:</strong> -50% CAC, +100K органических visitors, +25% signup
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-title" style="font-size:13px">🟡 Q3 (Месяц 7-9): МОНЕТИЗАЦИЯ</div>
+            <div style="font-size:10px;color:var(--txt2);line-height:1.8;margin-bottom:8px">
+              <strong style="color:var(--acid)">📌 Главная цель:</strong> Увеличить LTV и доступность<br>
+              <strong style="color:var(--acid)">👤 Учись у:</strong> <span style="color:var(--sky)">HubSpot (Freemium) + Salesforce (Enterprise)</span>
+            </div>
+            <div class="summary-item">✓ <strong>Freemium план</strong> ($3K)</div>
+            <div class="summary-item">  └ Бесплатный уровень для SMB, upgrade после 50 контактов</div>
+            <div class="summary-item">✓ <strong>SOC2 сертификация</strong> ($8K)</div>
+            <div class="summary-item">  └ Обязательно для Enterprise, даёт доверие</div>
+            <div class="summary-item">✓ <strong>Enterprise план</strong> ($2K)</div>
+            <div class="summary-item">  └ Custom интеграции, SSO, белая этикетка, поддержка 24/7</div>
+            <div style="background:rgba(65,200,255,.05);border-left:2px solid var(--sky);padding:8px;border-radius:4px;margin-top:8px;font-size:10px">
+              <strong style="color:var(--acid)">📊 Метрики:</strong> +60% free users, +$500K Enterprise ARR potential, LTV/CAC = 12x
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-title" style="font-size:13px">🟢 Q4 (Месяц 10-12): МАСШТАБИРОВАНИЕ</div>
+            <div style="font-size:10px;color:var(--txt2);line-height:1.8;margin-bottom:8px">
+              <strong style="color:var(--acid)">📌 Главная цель:</strong> Захватить нишу, подготовить год 2<br>
+              <strong style="color:var(--acid)">👤 Учись у:</strong> <span style="color:var(--sky)">Pipedrive (Affiliate) + Zoho (Mobile)</span>
+            </div>
+            <div class="summary-item">✓ <strong>Affiliate Program</strong> ($2K)</div>
+            <div class="summary-item">  └ 20 партнёров, 20-30% комиссия, маркетинг материалы</div>
+            <div class="summary-item">✓ <strong>Native мобильное приложение</strong> ($25K)</div>
+            <div class="summary-item">  └ iOS + Android, offline режим, push-уведомления</div>
+            <div class="summary-item">✓ <strong>PR & медиа в ${geo}</strong> ($10K)</div>
+            <div class="summary-item">  └ TechCrunch, Forbes, местные издания, интервью</div>
+            <div style="background:rgba(65,200,255,.05);border-left:2px solid var(--sky);padding:8px;border-radius:4px;margin-top:8px;font-size:10px">
+              <strong style="color:var(--acid)">📊 Метрики:</strong> +40% mobile adoption, +$150K ARR из affiliate, +10M media impressions
+            </div>
+          </div>
+
+          <div style="background:rgba(255,194,51,.05);border:1px solid rgba(255,194,51,.2);border-radius:8px;padding:12px;margin-top:16px">
+            <div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:8px">💰 ИТОГОВЫЙ ФИНАНСОВЫЙ ПРОГНОЗ ДЛЯ ${product.toUpperCase()}</div>
+            <div style="font-size:10px;color:var(--txt2);line-height:1.8">
+              <strong>Год 1 (Инвестиции):</strong><br>
+              └ Q1: $28K | Q2: $28K | Q3: $19K | Q4: $37K | <strong style="color:var(--acid)">ИТОГО: $112K</strong><br><br>
+              <strong>Год 1 (Доход):</strong><br>
+              └ Q1: $50K | Q2: $200K | Q3: $450K | Q4: $800K | <strong style="color:var(--acid)">ARR: $1.5M</strong><br><br>
+              <strong>Финансовые показатели:</strong><br>
+              └ Payback period: 6-8 месяцев<br>
+              └ LTV/CAC ratio: 12x<br>
+              └ Gross Margin: 80%+<br>
+              └ CAC: $400 → $200 (снижение на 50%)
+            </div>
+          </div>
+        `;
+        document.getElementById('content').innerHTML = html;
+      } else {
+        const data = TAB_DATA[tab.id];
+        let bestCompany = 'HubSpot';
+        let bestAdvice = 'быстрый старт и простоту';
+        
+        if(tab.id === 'market') {bestCompany = 'Salesforce'; bestAdvice = 'доминирование через Enterprise';}
+        else if(tab.id === 'audience') {bestCompany = 'HubSpot'; bestAdvice = 'фокус на SMB боли';}
+        else if(tab.id === 'economics') {bestCompany = 'HubSpot'; bestAdvice = 'Freemium модель';}
+        else if(tab.id === 'channels') {bestCompany = 'Pipedrive'; bestAdvice = 'PLG + YouTube';}
+        else if(tab.id === 'product') {bestCompany = 'HubSpot'; bestAdvice = 'интеграции + AI';}
+        else if(tab.id === 'reputation') {bestCompany = 'HubSpot'; bestAdvice = 'G2 стратегия и NPS';}
+        else if(tab.id === 'macro') {bestCompany = 'Salesforce'; bestAdvice = 'SOC2 + GDPR compliance';}
+        
+        const tableHtml = `
+          <table>
+            <thead><tr>${data.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${data.rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>
+        `;
+
+        const html = `
+          <h2 style="color:var(--acid);margin-bottom:12px;font-size:14px">${tab.emoji} ${tab.title}</h2>
+          
+          <div style="background:rgba(65,200,255,.08);border:1px solid rgba(65,200,255,.2);border-radius:8px;padding:10px;margin-bottom:14px">
+            <div style="font-size:10px;color:var(--txt2)">
+              <strong style="color:var(--sky)">👤 Учись у ${bestCompany}:</strong> ${bestAdvice}
+            </div>
+          </div>
+
+          <div class="table-wrapper">${tableHtml}</div>
+          
+          <div class="summary-box">
+            <div class="summary-title">📍 ВЫВОДЫ</div>
+            ${data.summary.map(s => `<div class="summary-item">• ${s}</div>`).join('')}
+          </div>
+
+          <div class="rec-item">
+            <div class="rec-pri">🔴 КРИТИЧНО</div>
+            <div class="rec-title">Локализируйте ${product}</div>
+            <div class="rec-details">Budget: $5K | Timeline: 10 дней | Результат: +30%</div>
+          </div>
+
+          <div class="rec-item">
+            <div class="rec-pri">🟡 ВАЖНО</div>
+            <div class="rec-title">Оптимизируйте для ${segment}</div>
+            <div class="rec-details">Budget: $8K | Timeline: 3 нед | Результат: +40%</div>
+          </div>
+
+          <button class="btn-analysis" onclick="showModal(${idx})">📊 ПОЛНЫЙ АНАЛИЗ</button>
+        `;
+        document.getElementById('content').innerHTML = html;
+      }
+    }
+
+    function showModal(idx) {
+      const tab = TABS[idx];
+      const data = TAB_DATA[tab.id];
+      const product = state.data.product || 'Ваш продукт';
+      
+      document.getElementById('modalTitle').textContent = tab.emoji + ' ' + tab.title + ' для ' + product;
+      
+      let tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:9px;margin-bottom:12px">';
+      tableHtml += '<thead style="background:rgba(184,255,60,.1)"><tr>';
+      tableHtml += data.headers.map(h => `<th style="padding:8px;text-align:left;color:var(--acid);border-bottom:2px solid rgba(184,255,60,.2)">${h}</th>`).join('');
+      tableHtml += '</tr></thead>';
+      tableHtml += '<tbody>';
+      tableHtml += data.rows.map(row => `<tr>${row.map(cell => `<td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)">${cell}</td>`).join('')}</tr>`).join('');
+      tableHtml += '</tbody></table>';
+
+      document.getElementById('modalBody').innerHTML = `
+        ${tableHtml}
+        <div style="margin-bottom:12px">
+          <div style="font-weight:600;color:var(--acid);margin-bottom:6px;font-size:11px">📍 АНАЛИЗ</div>
+          <div style="font-size:10px;color:var(--txt2);line-height:1.6">${data.summary.join(' | ')}</div>
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--acid);margin-bottom:6px;font-size:11px">💡 РЕКОМЕНДАЦИИ</div>
+          <div style="font-size:10px;color:var(--txt2)">1. Локализируйте ${product}<br>2. Оптимизируйте стратегию<br>3. Запустите инициативы</div>
+        </div>
+      `;
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
