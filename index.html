@@ -112,6 +112,32 @@ td strong{color:var(--txt)}
 .modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--acid);margin-bottom:12px}
 .modal-text{font-size:10px;color:var(--txt2);line-height:1.6}
 
+.helper-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);border:none;color:var(--bg);font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(184,255,60,.3);transition:.3s;z-index:99}
+.helper-btn:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(184,255,60,.4)}
+
+.helper-chat{display:none;position:fixed;bottom:80px;right:20px;width:340px;height:500px;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:98;flex-direction:column;overflow:hidden}
+.helper-chat.open{display:flex}
+
+.helper-header{padding:16px;border-bottom:1px solid var(--line2);background:rgba(184,255,60,.05);display:flex;align-items:center;justify-content:space-between}
+.helper-title{font-weight:800;color:var(--acid);font-size:13px;font-family:'Syne',sans-serif}
+.helper-close{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:18px}
+
+.helper-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.helper-messages::-webkit-scrollbar{width:4px}
+.helper-messages::-webkit-scrollbar-track{background:var(--bg)}
+.helper-messages::-webkit-scrollbar-thumb{background:var(--acid);border-radius:2px}
+
+.msg{display:flex;gap:8px;font-size:10px;line-height:1.4}
+.msg-bot{justify-content:flex-start}
+.msg-avatar{width:24px;height:24px;border-radius:6px;background:rgba(184,255,60,.1);display:grid;place-items:center;flex-shrink:0;font-size:12px}
+.msg-text{background:rgba(65,200,255,.1);border-left:2px solid var(--sky);padding:8px;border-radius:6px;color:var(--txt);flex:1}
+
+.helper-input{padding:12px;border-top:1px solid var(--line2);display:flex;gap:8px}
+.helper-input input{flex:1;background:var(--bg);border:1px solid var(--line2);border-radius:4px;color:var(--txt);padding:8px;font-size:10px;outline:none}
+.helper-input input:focus{border-color:var(--sky)}
+.helper-input button{background:var(--acid);color:var(--bg);border:none;border-radius:4px;padding:8px 12px;font-weight:600;font-size:10px;cursor:pointer;transition:.2s}
+.helper-input button:hover{background:#a8e814}
+
 @media(max-width:1024px){
   .tabs-bar{grid-template-columns:repeat(2,1fr)}
 }
@@ -228,6 +254,25 @@ td strong{color:var(--txt)}
       <button class="modal-close" onclick="closeModal()">✕</button>
       <div class="modal-title" id="modalTitle"></div>
       <div class="modal-text" id="modalBody"></div>
+    </div>
+  </div>
+
+  <button class="helper-btn" onclick="toggleHelper()" title="Помощник NOVA">🤖</button>
+  
+  <div class="helper-chat" id="helperChat">
+    <div class="helper-header">
+      <span class="helper-title">NOVA - Ассистент</span>
+      <button class="helper-close" onclick="toggleHelper()">✕</button>
+    </div>
+    <div class="helper-messages" id="helperMessages">
+      <div class="msg msg-bot">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-text">Привет! Я NOVA, твой ассистент. Задай мне вопрос об анализе — помогу разобраться! 👋</div>
+      </div>
+    </div>
+    <div class="helper-input">
+      <input type="text" id="helperInput" placeholder="Что-то непонятно?" onkeypress="if(event.key==='Enter'){sendHelperMessage()}">
+      <button onclick="sendHelperMessage()">Send</button>
     </div>
   </div>
 
@@ -578,6 +623,112 @@ td strong{color:var(--txt)}
     }
 
     renderQuestion();
-  </script>
+
+    // ===== ПОМОЩНИК NOVA =====
+    const HELPER_KNOWLEDGE = {
+      tam: {keywords: ['tam', 'рынок', 'объём', 'размер'], answer: 'TAM (Total Addressable Market) — общий размер рынка. В CRM рынок составляет ~$128B в год с ростом 13-30% в зависимости от сегмента.'},
+      cagr: {keywords: ['cagr', 'рост', 'годовой'], answer: 'CAGR — среднегодовой темп роста. TOP 5 CRM растут на 13-30% в год. Лучше всего растут PLG-компании (Pipedrive, amoCRM).'},
+      ltv: {keywords: ['ltv', 'жизненный цикл', 'стоимость клиента'], answer: 'LTV (Lifetime Value) — общая сумма прибыли от клиента за всё время. Для CRM обычно $5K-$48K в зависимости от сегмента.'},
+      cac: {keywords: ['cac', 'стоимость привлечения', 'цена', 'маркетинг'], answer: 'CAC (Customer Acquisition Cost) — сколько стоит привлечь одного клиента. Для CRM это $200-$8K. PLG компании имеют ниже CAC.'},
+      payback: {keywords: ['payback', 'окупаемость', 'когда окупится'], answer: 'Payback period — за сколько месяцев окупается CAC. Для хороших SaaS это 6-8 месяцев. Это означает, что через 6-8 месяцев прибыль покроет расходы на привлечение.'},
+      segment: {keywords: ['segment', 'сегмент', 'smb', 'enterprise', 'целевой'], answer: 'Разные сегменты требуют разные стратегии: SMB (5-500) хочет простоты, Enterprise — надежности и функций. Выбор сегмента определяет цену, посадку и GTM.'},
+      gtm: {keywords: ['gtm', 'доступ к рынку', 'стратегия входа', 'как продвигать'], answer: 'GTM (Go-To-Market) — стратегия выхода на рынок. Для CRM популярны: PLG (бесплатно + upgrade), контент-маркетинг (блоги, видео) и партнёрства.'},
+      plg: {keywords: ['plg', 'product-led', 'бесплатная версия'], answer: 'PLG (Product-Led Growth) — когда продукт сам себя продаёт через бесплатный триал. Работает лучше всего для SaaS. CAC становится на 50% ниже.'},
+      localization: {keywords: ['локализ', 'язык', 'страна', 'валюта'], answer: 'Локализация — адаптация под регион. Для СНГ: русский язык, рубли, местные платежи, налоги. Даёт +30% конверсии.'},
+      freemium: {keywords: ['freemium', 'бесплатный', 'платный'], answer: 'Freemium модель — бесплатный уровень с ограничениями (например, до 50 контактов), премиум за деньги. Увеличивает LTV на 20-30%.'},
+      soc2: {keywords: ['soc2', 'gdpr', 'безопасность', 'compliance', 'сертификат'], answer: 'SOC2 — сертификат безопасности. Обязателен для Enterprise продаж. SOC2 — для США, GDPR для Европы. Без них Enterprise не купит.'},
+      affiliate: {keywords: ['affiliate', 'партнёр', 'партнёрская программа'], answer: 'Affiliate Program — партнёры продвигают твой продукт за комиссию (20-30%). Даёт +40% трафика без прямых расходов на маркетинг.'},
+      ai: {keywords: ['ai', 'искусственный интеллект', 'машинное обучение'], answer: 'AI в CRM — автоматизация (распределение лидов, анализ писем, прогнозы). Необходим в 2026+ году для конкуренции. Интеграция стоит $15K-$25K.'},
+      mobile: {keywords: ['mobile', 'приложение', 'мобильное', 'ios', 'android'], answer: 'Мобильное приложение — iOS + Android для работы в дороге. Стоит $25-50K. Даёт +30-40% adoption среди sales teams.'},
+      q1: {keywords: ['q1', 'первый квартал', 'фундамент'], answer: 'Q1 стратегия: локализоваца ($5K), оптимизация для сегмента ($8K), AI ($15K). Результат: +40% конверсии, +$300K ARR.'},
+      q2: {keywords: ['q2', 'второй квартал', 'расширение'], answer: 'Q2 стратегия: PLG ($10K), контент-маркетинг ($8K/мес), интеграции Slack/Teams ($10K). Результат: -50% CAC, +100K трафика.'},
+      q3: {keywords: ['q3', 'третий квартал', 'монетизация'], answer: 'Q3 стратегия: Freemium план ($3K), SOC2 ($8K), Enterprise план ($2K). Результат: +60% free users, +$500K потенциал.'},
+      q4: {keywords: ['q4', 'четвёртый квартал', 'масштабирование'], answer: 'Q4 стратегия: Affiliate программа ($2K), мобильное приложение ($25K), PR ($10K). Результат: +40% adoption мобилки, +$150K ARR.'},
+      investment: {keywords: ['инвестиц', 'бюджет', 'сколько потребуется', 'расходы'], answer: 'Общие инвестиции в год 1: ~$112K. Распределение: Q1=$28K, Q2=$28K, Q3=$19K, Q4=$37K. Ожидаемый ARR: $1.5M (ROI 1250%).'},
+      roi: {keywords: ['roi', 'рентабельность', 'возврат'], answer: 'ROI год 1 = 1250% (инвестиции $112K → доход $1.5M). Payback за 6-8 месяцев. LTVCAC ratio: 12x (идеальная метрика).'}
+    };
+
+    function toggleHelper() {
+      const chat = document.getElementById('helperChat');
+      chat.classList.toggle('open');
+      if(chat.classList.contains('open')) {
+        document.getElementById('helperInput').focus();
+      }
+    }
+
+    function sendHelperMessage() {
+      const input = document.getElementById('helperInput');
+      const text = input.value.trim();
+      if(!text) return;
+
+      addHelperMessage(text, 'user');
+      input.value = '';
+      
+      setTimeout(() => {
+        const response = getHelperResponse(text);
+        addHelperMessage(response, 'bot');
+      }, 800);
+    }
+
+    function addHelperMessage(text, type) {
+      const msgs = document.getElementById('helperMessages');
+      const msg = document.createElement('div');
+      msg.className = `msg msg-${type === 'bot' ? 'bot' : ''}`;
+      
+      if(type === 'bot') {
+        msg.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-text">${text}</div>`;
+      } else {
+        msg.innerHTML = `<div style="flex:1;text-align:right"><div style="background:rgba(184,255,60,.15);border-right:2px solid var(--acid);padding:8px;border-radius:6px;color:var(--txt);display:inline-block;max-width:70%">${text}</div></div>`;
+      }
+      
+      msgs.appendChild(msg);
+      msg.style.animation = 'fadeIn .3s ease-in';
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function getHelperResponse(question) {
+      const q = question.toLowerCase();
+      
+      // Поиск по ключевым словам
+      for(let key in HELPER_KNOWLEDGE) {
+        const kb = HELPER_KNOWLEDGE[key];
+        if(kb.keywords.some(kw => q.includes(kw))) {
+          return kb.answer;
+        }
+      }
+
+      // Контекстные ответы
+      if(q.includes('что') || q.includes('как') || q.includes('зачем') || q.includes('почему')) {
+        if(q.includes('лучший') || q.includes('лидер')) {
+          return 'Лучшие компании для обучения: 🥇 HubSpot (простота + growth), 🥈 Salesforce (масштаб), 🥉 Pipedrive (PLG модель). Учись у каждого своему!';
+        }
+        if(q.includes('стартап') || q.includes('новая') || q.includes('начать')) {
+          return 'Начни с: 1️⃣ Локализации под свой регион, 2️⃣ PLG триала, 3️⃣ Контента. Это даст первые 100 клиентов за 3 месяца.';
+        }
+        if(q.includes('конкур')) {
+          return 'TOP 5 конкурентов в CRM: Salesforce (Enterprise), HubSpot (SMB), Pipedrive (Sales-focused), amoCRM (СНГ), Zoho (Budget). Каждый занимает свою нишу.';
+        }
+      }
+
+      if(q.includes('сколько') || q.includes('цена') || q.includes('стоит')) {
+        return 'Примерные цены CRM в 2026: Salesforce $165-500/мес, HubSpot Free-$3200, Pipedrive $14-99, amoCRM $15-60, Zoho $15-45. Выбор зависит от сегмента.';
+      }
+
+      if(q.includes('помощь') || q.includes('вопрос') || q.includes('не ясно')) {
+        return 'Задай вопрос про: TAM, CAC, LTV, CAGR, стратегию по кварталам (Q1-Q4), локализацию, PLG, freemium, SOC2, мобильные приложения, инвестиции. Я помогу!';
+      }
+
+      return '🤔 Интересный вопрос! К сожалению, я не уверен в ответе. Попробуй спросить про метрики (TAM, CAC, LTV), стратегию (Q1-Q4) или технологии (AI, Mobile, Интеграции).';
+    }
+
+    // Добавляем CSS анимацию
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
 </body>
 </html>
