@@ -27,38 +27,9 @@ function httpPost(hostname, path, headers, body) {
   });
 }
 
-// ─── Агент 1: Поиск в интернете (OpenAI + web_search) ─────────────────────
-async function searchAgent(area, segment, geo, product, description, apiKey) {
-  const query = `Find TOP 5 real competitors for a "${area}" product called "${product}" — ${description}. Target segment: ${segment}, geography: ${geo}. For each competitor provide: market share %, CAGR, pricing tiers, free plan availability, trial period, lead magnet/free offer, loyalty program, traffic sources breakdown (organic/paid/social/email %), main customer complaints, support rating — real 2024-2025 data.`;
-
-  try {
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Search timeout')), 8000)
-    );
-    const search = httpPost('api.openai.com', '/v1/chat/completions',
-      { 'Authorization': `Bearer ${apiKey}` },
-      {
-        model: 'gpt-4o-search-preview',
-        web_search_options: { search_context_size: 'low' },
-        messages: [{ role: 'user', content: query }]
-      }
-    );
-
-    const resp = await Promise.race([search, timeout]);
-    if (resp.choices && resp.choices[0] && resp.choices[0].message) {
-      return resp.choices[0].message.content || '';
-    }
-  } catch (e) {
-    console.error('Search agent skipped:', e.message);
-  }
-  return '';
-}
-
-// ─── Агент 2: Структурирование данных в JSON (GPT-4o Chat Completions) ─────
+// ─── Анализ: GPT-4o генерирует конкурентный анализ ─────────────────────────
 async function analysisAgent(area, segment, product, description, geo, adv, price, searchContext, apiKey) {
-  const contextBlock = searchContext
-    ? `\nРЕАЛЬНЫЕ ДАННЫЕ ИЗ ПОИСКА (используй их как основу):\n${searchContext}\n`
-    : '';
+  const contextBlock = '';
 
   const prompt = `Ты эксперт по конкурентному анализу. Пользователь описал свой продукт:
 - Сфера: ${area}
@@ -203,11 +174,7 @@ exports.handler = async (event) => {
     const geo = Array.isArray(geography) ? geography.join(', ') : (geography || 'глобально');
     const adv = Array.isArray(advantages) ? advantages.join(', ') : (advantages || '');
 
-    // Агент 1: ищем в интернете
-    const searchContext = await searchAgent(area, segment, geo, product, description, apiKey);
-
-    // Агент 2: структурируем в JSON
-    const analysis = await analysisAgent(area, segment, product, description, geo, adv, price, searchContext, apiKey);
+    const analysis = await analysisAgent(area, segment, product, description, geo, adv, price, '', apiKey);
 
     return {
       statusCode: 200,
