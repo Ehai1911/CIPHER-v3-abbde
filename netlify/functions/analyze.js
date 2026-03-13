@@ -28,8 +28,10 @@ function httpPost(hostname, path, headers, body) {
 }
 
 // ─── Анализ: GPT-4o генерирует конкурентный анализ ─────────────────────────
-async function analysisAgent(area, segment, product, description, geo, adv, price, searchContext, apiKey) {
-  const contextBlock = '';
+async function analysisAgent(area, segment, product, description, geo, competitors, price, searchContext, apiKey) {
+  const competitorsBlock = competitors
+    ? `\nИЗВЕСТНЫЕ КОНКУРЕНТЫ (пользователь назвал их сам — обязательно включи их в анализ):\n${competitors}\n`
+    : '';
 
   const prompt = `Ты эксперт по конкурентному анализу. Пользователь описал свой продукт:
 - Сфера: ${area}
@@ -37,11 +39,10 @@ async function analysisAgent(area, segment, product, description, geo, adv, pric
 - Название продукта: ${product}
 - Описание: ${description}
 - География: ${geo}
-- Преимущества: ${adv}
 - Ценовой диапазон: ${price}
-${contextBlock}
+${competitorsBlock}
 Найди TOP 5 реальных конкурентов для сферы "${area}" и географии "${geo}".
-НЕ используй CRM компании если сфера не CRM. Подбери конкурентов релевантных описанию.
+Подбери конкурентов строго релевантных описанию продукта и сфере. Не используй компании из других ниш.
 
 Верни ТОЛЬКО валидный JSON (без markdown) в таком формате:
 
@@ -164,7 +165,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { area, segment, product, description, geography, advantages, price } = JSON.parse(event.body);
+    const { area, segment, product, description, geography, competitors, price } = JSON.parse(event.body);
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
@@ -172,9 +173,8 @@ exports.handler = async (event) => {
     }
 
     const geo = Array.isArray(geography) ? geography.join(', ') : (geography || 'глобально');
-    const adv = Array.isArray(advantages) ? advantages.join(', ') : (advantages || '');
 
-    const analysis = await analysisAgent(area, segment, product, description, geo, adv, price, '', apiKey);
+    const analysis = await analysisAgent(area, segment, product, description, geo, competitors || '', price, '', apiKey);
 
     return {
       statusCode: 200,
