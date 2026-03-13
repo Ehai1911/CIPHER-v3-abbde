@@ -32,23 +32,20 @@ async function searchAgent(area, segment, geo, product, description, apiKey) {
   const query = `Find TOP 5 real competitors for a "${area}" product called "${product}" — ${description}. Target segment: ${segment}, geography: ${geo}. For each competitor provide: pricing, market share, TAM, CAGR, CAC, LTV — real 2024-2025 data.`;
 
   try {
-    const resp = await httpPost('api.openai.com', '/v1/responses',
+    const resp = await httpPost('api.openai.com', '/v1/chat/completions',
       { 'Authorization': `Bearer ${apiKey}` },
       {
         model: 'gpt-4o-search-preview',
         web_search_options: { search_context_size: 'medium' },
-        input: query
+        messages: [{ role: 'user', content: query }]
       }
     );
 
-    if (resp.output) {
-      const msg = resp.output.find(item => item.type === 'message');
-      if (msg && msg.content) {
-        const txt = msg.content.find(c => c.type === 'output_text');
-        if (txt) return txt.text;
-      }
+    if (resp.choices && resp.choices[0] && resp.choices[0].message) {
+      return resp.choices[0].message.content || '';
     }
   } catch (e) {
+    console.error('Search agent error:', e.message);
     // Если поиск недоступен — продолжаем без него
   }
   return '';
