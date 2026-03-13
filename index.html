@@ -424,6 +424,7 @@ td strong{color:var(--txt)}
         clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
         [0,1,2,3].forEach(i => setLoadingStep(i, 'done'));
         state.aiData = null;
+        state.lastError = e.message;
       }
 
       setTimeout(() => {
@@ -544,6 +545,7 @@ td strong{color:var(--txt)}
               <div style="font-size:11px;color:var(--txt2);max-width:320px;line-height:1.6">
                 Не удалось получить данные от AI для раздела <strong style="color:var(--txt)">${tab.emoji} ${tab.title}</strong>.<br>Попробуй запустить анализ ещё раз.
               </div>
+              ${state.lastError ? `<div style="font-size:10px;color:#ff6b6b;background:rgba(255,100,100,.08);border:1px solid rgba(255,100,100,.2);border-radius:6px;padding:8px 14px;max-width:360px;word-break:break-all">${state.lastError}</div>` : ''}
               <button onclick="retryAnalysis()" style="padding:12px 28px;background:linear-gradient(135deg,var(--acid),#85dd1f);color:var(--bg);border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px">
                 🔄 ПОПРОБОВАТЬ СНОВА
               </button>
