@@ -8,11 +8,11 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#080a10;--bg2:#0d1018;--bg3:#131620;
-  --line2:#ffffff12;
-  --acid:#b8ff3c;--acid-d:#b8ff3c18;--acid-dd:#b8ff3c18;
-  --sky:#41c8ff;
-  --txt:#dde1f0;--txt2:#7c819a;--txt3:#3d4157;
+  --bg:#070910;--bg2:#0c0f1a;--bg3:#11152200;
+  --line2:#ffffff0f;
+  --acid:#4F8EF7;--acid-d:rgba(79,142,247,0.10);--acid-dd:rgba(79,142,247,0.07);
+  --sky:#818CF8;
+  --txt:#d8ddf0;--txt2:#6b7090;--txt3:#353850;
 }
 
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope',sans-serif;overflow:hidden}
@@ -32,7 +32,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope
 .nova-side::-webkit-scrollbar-track{background:var(--bg2)}
 .nova-side::-webkit-scrollbar-thumb{background:var(--acid);border-radius:3px}
 
-.nova-avatar{width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,#0a1628,#0d2040,#102a50);border:1px solid rgba(65,200,255,.15);display:grid;place-items:center;font-size:36px;margin:0 auto 20px}
+.nova-avatar{width:100px;height:100px;border-radius:20px;background:linear-gradient(135deg,#0c1535,#111d48,#0f1a40);border:1px solid rgba(79,142,247,.2);display:grid;place-items:center;margin:0 auto 20px;position:relative;overflow:hidden}
+.nova-avatar::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(79,142,247,.15),transparent 60%)}
+.nova-n{font-family:'Syne',sans-serif;font-weight:800;font-size:52px;line-height:1;background:linear-gradient(135deg,#4F8EF7,#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
 
 .nova-hint{font-size:11px;color:var(--txt2);line-height:1.6;text-align:center;margin-bottom:20px}
 
@@ -54,11 +56,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope
 .q-option:hover{background:var(--bg3);border-color:var(--sky)}
 .q-option.selected{background:var(--acid-d);border-color:var(--acid);color:var(--acid);font-weight:600}
 
-.q-input{padding:12px 14px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:12px;outline:none;max-width:600px}
-.q-input:focus{border-color:var(--sky);background:rgba(65,200,255,.02)}
+.q-input{padding:14px 16px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:14px;outline:none;width:100%;max-width:640px}
+.q-input:focus{border-color:var(--sky);background:rgba(79,142,247,.03)}
 
-.q-textarea{padding:12px 14px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:12px;outline:none;resize:none;min-height:100px;max-width:600px}
-.q-textarea:focus{border-color:var(--sky);background:rgba(65,200,255,.02)}
+.q-textarea{padding:14px 16px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);font-family:'Manrope',sans-serif;font-size:14px;outline:none;resize:none;min-height:120px;width:100%;max-width:640px}
+.q-textarea:focus{border-color:var(--sky);background:rgba(79,142,247,.03)}
 
 .q-multi-option{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--line2);border-radius:6px;cursor:pointer;transition:.2s;font-size:12px}
 .q-multi-option:hover{background:var(--bg3)}
@@ -70,8 +72,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope
 .btn{padding:10px 20px;border:none;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer;transition:.2s}
 .btn-secondary{background:var(--bg2);color:var(--txt);border:1px solid var(--line2)}
 .btn-secondary:hover{background:var(--bg3)}
-.btn-primary{background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);color:var(--bg);flex:1}
-.btn-primary:hover{box-shadow:0 8px 25px rgba(184,255,60,.3);transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--acid) 0%,var(--sky) 100%);color:#fff;flex:1}
+.btn-primary:hover{box-shadow:0 8px 25px rgba(79,142,247,.35);transform:translateY(-1px)}
 
 #analysisScreen{flex-direction:column;gap:0}
 
@@ -88,10 +90,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Manrope
 
 .table-wrapper{overflow-x:auto;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
-thead{background:rgba(184,255,60,.1);border-bottom:2px solid rgba(184,255,60,.2)}
+thead{background:rgba(79,142,247,.08);border-bottom:2px solid rgba(79,142,247,.2)}
 th{padding:10px;text-align:left;font-weight:600;color:var(--acid);font-size:9px}
-td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--txt2)}
-tbody tr:hover{background:rgba(184,255,60,.05)}
+td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--txt2)}
+tbody tr:hover{background:rgba(79,142,247,.04)}
 td strong{color:var(--txt)}
 
 .summary-box{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:12px;margin-bottom:14px}
@@ -103,7 +105,7 @@ td strong{color:var(--txt)}
 .rec-title{font-size:11px;font-weight:600;color:var(--txt);margin-bottom:4px}
 .rec-details{font-size:9px;color:var(--sky)}
 
-.btn-analysis{width:100%;padding:10px;margin-top:12px;background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);color:var(--bg);border:none;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer}
+.btn-analysis{width:100%;padding:10px;margin-top:12px;background:linear-gradient(135deg,var(--acid) 0%,var(--sky) 100%);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer}
 
 #loadingScreen{flex-direction:column;align-items:center;justify-content:center;gap:16px}
 .loading-spinner{width:56px;height:56px;border:3px solid var(--line2);border-top:3px solid var(--acid);border-radius:50%;animation:spin 1s linear infinite}
@@ -122,8 +124,9 @@ td strong{color:var(--txt)}
 .modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--acid);margin-bottom:12px}
 .modal-text{font-size:10px;color:var(--txt2);line-height:1.6}
 
-.helper-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--acid) 0%,#85dd1f 100%);border:none;color:var(--bg);font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(184,255,60,.3);transition:.3s;z-index:99}
-.helper-btn:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(184,255,60,.4)}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(79,142,247,.5),0 4px 20px rgba(79,142,247,.3)}70%{box-shadow:0 0 0 14px rgba(79,142,247,0),0 4px 20px rgba(79,142,247,.2)}100%{box-shadow:0 0 0 0 rgba(79,142,247,0),0 4px 20px rgba(79,142,247,.3)}}
+.helper-btn{position:fixed;bottom:24px;right:24px;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#3a7af0 0%,#6d5ef5 100%);border:none;color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;cursor:pointer;animation:pulse-ring 2.5s ease-out infinite;transition:.3s;z-index:99}
+.helper-btn:hover{transform:scale(1.08)}
 
 .helper-chat{display:none;position:fixed;bottom:80px;right:20px;width:340px;height:500px;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:98;flex-direction:column;overflow:hidden}
 .helper-chat.open{display:flex}
@@ -171,7 +174,7 @@ td strong{color:var(--txt)}
   
   #questionsScreen{flex-direction:column}
   .nova-side{width:100%;max-height:100px;padding:15px}
-  .nova-avatar{width:60px;height:60px;font-size:28px;margin:0 auto 12px}
+  .nova-avatar{width:50px;height:50px;margin:0 auto 8px}.nova-n{font-size:28px}
   .nova-hint{font-size:10px;margin-bottom:12px}
   .step-counter{font-size:9px;margin-bottom:8px}
   
@@ -232,12 +235,12 @@ td strong{color:var(--txt)}
 <body>
   <div class="app">
     <div class="hdr">
-      <div class="logo">CIPHER</div>
+      <div class="logo">NEUROVIA LABS</div>
     </div>
 
     <div id="questionsScreen" class="screen active">
       <div class="nova-side">
-        <div class="nova-avatar">🤖</div>
+        <div class="nova-avatar"><div class="nova-n">N</div></div>
         <div class="nova-hint" id="novaHint">Эта информация помогает найти конкурентов</div>
         <div class="step-counter" id="stepCounter">1 из 7</div>
         <div class="step-progress"><div class="step-progress-fill" id="stepProgress"></div></div>
@@ -280,7 +283,7 @@ td strong{color:var(--txt)}
     </div>
   </div>
 
-  <button class="helper-btn" onclick="toggleHelper()" title="Помощник NOVA">🤖</button>
+  <button class="helper-btn" onclick="toggleHelper()" title="Помощник NOVA">N</button>
   
   <div class="helper-chat" id="helperChat">
     <div class="helper-header">
