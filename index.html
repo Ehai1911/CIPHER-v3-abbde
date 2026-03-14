@@ -649,12 +649,9 @@ td:first-child{color:var(--text);font-weight:500}
           <div class="q-card-dot" style="background:${dotColor}"></div>
           ${label}
         </div>
-        <div class="q-card-goal">
-          <strong>Цель:</strong> ${data.goal || '—'} &nbsp;·&nbsp;
-          <strong>Учись у:</strong> <span style="color:var(--blue)">${data.learnFrom || '—'}</span>
-        </div>
+        <div class="q-card-goal"><strong>Главная задача:</strong> ${data.goal || '—'}</div>
         ${actions}
-        <div class="q-metrics"><span>Метрики:</span> ${data.metrics || '—'}</div>
+        <div class="q-metrics"><span>Как понять что план выполнен:</span> ${data.metrics || '—'}</div>
       </div>`;
   }
 
@@ -680,20 +677,26 @@ td:first-child{color:var(--text);font-weight:500}
       const s = ai;
       const f = s.finance || {};
       document.getElementById('content').innerHTML = `
-        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:20px">
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:16px">
           Стратегия для ${product}
         </div>
+        ${s.criticalRec ? `
+        <div style="background:linear-gradient(135deg,rgba(248,113,113,0.12),rgba(248,113,113,0.04));border:1.5px solid var(--red);border-radius:12px;padding:16px 20px;margin-bottom:20px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;margin-bottom:6px">⚡ Что сделать прямо сейчас</div>
+          <div style="font-size:14px;color:var(--text);line-height:1.6">${s.criticalRec}</div>
+        </div>` : ''}
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:0.5px">ФИНАНСОВЫЙ ПРОГНОЗ НА 12 МЕСЯЦЕВ</div>
         <div class="fin-grid">
-          <div class="fin-card"><div class="fin-lbl">Инвестиции</div><div class="fin-val">${f.totalInvest||'—'}</div><div class="fin-sub">год 1</div></div>
-          <div class="fin-card"><div class="fin-lbl">ARR</div><div class="fin-val">${f.arr||'—'}</div><div class="fin-sub">прогноз</div></div>
-          <div class="fin-card"><div class="fin-lbl">Payback</div><div class="fin-val">${f.payback||'—'}</div><div class="fin-sub">период окупаемости</div></div>
-          <div class="fin-card"><div class="fin-lbl">ROI</div><div class="fin-val">${f.roi||'—'}</div><div class="fin-sub">возврат</div></div>
+          <div class="fin-card"><div class="fin-lbl">Вложить</div><div class="fin-val">${f.totalInvest||'—'}</div><div class="fin-sub">бюджет на год</div></div>
+          <div class="fin-card"><div class="fin-lbl">Годовая выручка</div><div class="fin-val">${f.arr||'—'}</div><div class="fin-sub">прогноз ARR</div></div>
+          <div class="fin-card"><div class="fin-lbl">Окупаемость</div><div class="fin-val">${f.payback||'—'}</div><div class="fin-sub">через сколько вернёшь</div></div>
+          <div class="fin-card"><div class="fin-lbl">Прибыль на вложения</div><div class="fin-val">${f.roi||'—'}</div><div class="fin-sub">ROI за год</div></div>
         </div>
-        ${renderStrategyQuarter('q1',s.q1||{},'Q1 · Месяц 1–3 · Фундамент','#f87171')}
-        ${renderStrategyQuarter('q2',s.q2||{},'Q2 · Месяц 4–6 · Расширение','#fbbf24')}
-        ${renderStrategyQuarter('q3',s.q3||{},'Q3 · Месяц 7–9 · Монетизация','#fbbf24')}
-        ${renderStrategyQuarter('q4',s.q4||{},'Q4 · Месяц 10–12 · Масштабирование','#34d399')}
-        ${s.criticalRec ? `<div class="rec-item" style="border-color:var(--red)"><div class="rec-pri" style="color:var(--red)">Критично</div><div class="rec-title">${s.criticalRec}</div></div>` : ''}
+        <div style="font-size:11px;color:var(--muted);margin:20px 0 10px;font-weight:600;letter-spacing:0.5px">ПЛАН ПО КВАРТАЛАМ</div>
+        ${renderStrategyQuarter('q1',s.q1||{},'Первые 3 месяца · Фундамент','#f87171')}
+        ${renderStrategyQuarter('q2',s.q2||{},'Месяцы 4–6 · Расширение','#fbbf24')}
+        ${renderStrategyQuarter('q3',s.q3||{},'Месяцы 7–9 · Монетизация','#fbbf24')}
+        ${renderStrategyQuarter('q4',s.q4||{},'Месяцы 10–12 · Масштабирование','#34d399')}
         ${s.importantRec ? `<div class="rec-item"><div class="rec-pri">Важно</div><div class="rec-title">${s.importantRec}</div></div>` : ''}
       `;
       return;
@@ -850,7 +853,7 @@ td:first-child{color:var(--text);font-weight:500}
       audience:{headers:['Компания','Сегмент','Ключевые роли','Главная боль','Зрелость ЦА'],rows:[['Asana','MM/Enterprise','PM, VP of Eng','Сложная онбординг','Высокая'],['Monday.com','SMB/MM','Операционный менеджер','Нет единой картины','Средняя'],['Notion','SMB/PLG','Основатель, соло-команды','Слишком гибкий = хаос','Низкая'],['Trello','SMB','Разработчики','Kanban без аналитики','Высокая'],['ClickUp','SMB/MM','Всё-в-одном команды','Перегруженность функций','Средняя']],summary:['SMB-аудитория хочет простоту, но с реальной аналитикой','Основатели и операционные менеджеры — ключевые чемпионы покупки','Ключевая боль: слишком много инструментов, нет единого места'],bestCompany:'Monday.com',bestAdvice:'Целься в операционного менеджера 20-100 чел. компании — он принимает решение и чувствует боль'},
       pricing:{headers:['Компания','Модель','Старт цена','Бесплатно','Триал','Скидки'],rows:[['Asana','Per-seat','$10.99/мес','✅ до 15','30 дней','Годовая -20%'],['Monday.com','Per-seat','$9/мес','❌','14 дней','Годовая -18%'],['Notion','Per-seat','$8/мес','✅ личный','нет','Годовая -20%'],['Trello','Freemium','$5/мес','✅ навсегда','нет','Годовая -17%'],['ClickUp','Freemium','$7/мес','✅ навсегда','нет','Годовая -45%']],summary:['ClickUp и Trello захватывают базу через freemium — потом апсейл','Средний ARPU в SMB $12–25/мес на пользователя','Годовая скидка 17-45% — стандарт рынка, без неё потеряешь'],bestCompany:'ClickUp',bestAdvice:'Freemium с ограничением по проектам/пользователям + резкая скидка на год — лучшая механика конверсии'},
       channels:{headers:['Компания','GTM-модель','SEO','Платный','Соцсети','Email/Content'],rows:[['Asana','SLG→PLG','35%','25%','15%','25%'],['Monday.com','MLG','20%','40%','20%','20%'],['Notion','PLG','45%','10%','30%','15%'],['Trello','PLG','50%','10%','20%','20%'],['ClickUp','PLG+MLG','40%','25%','20%','15%']],summary:['SEO и PLG — самые эффективные каналы для этого рынка','Monday тратит больше всех на paid: $300M+ в год на рекламу','Notion растёт почти органически через community и word-of-mouth'],bestCompany:'Notion',bestAdvice:'Инвестируй в SEO и template-маркетплейс раньше paid — дешевле и долгосрочнее'},
-      product:{headers:['Компания','Ключевые функции','AI-функции','Интеграции','Мобайл','Барьер переключения'],rows:[['Asana','Goals, Portfolio, Timeline','AI summarizer','900+','✅ хорош','🟢 Высокий'],['Monday.com','WorkOS, CRM, Dev','AI automations','200+','✅ хорош','🟢 Высокий'],['Notion','Wiki+DB+Projects','Notion AI','100+','⚠️ средний','🟡 Средний'],['Trello','Kanban, Butler','⚠️ базовый','200+','✅ хорош','🔴 Низкий'],['ClickUp','All-in-one, Docs','ClickUp AI','1000+','✅ хорош','🟡 Средний']],summary:['AI-функции стали обязательными — без них продукт выглядит устаревшим','ClickUp пытается быть всем сразу — это и преимущество, и слабость','Barierр переключения строится через данные и интеграции, не функции'],bestCompany:'Monday.com',bestAdvice:'Строй WorkOS а не таск-менеджер — платформа стоит дороже и держит клиентов'},
+      product:{headers:['Компания','Ключевые функции','AI-функции','Интеграции','Мобайл','Барьер переключения'],rows:[['Asana','Goals, Portfolio, Timeline','AI summarizer','900+','✅ хорош','🟢 Высокий'],['Monday.com','WorkOS, CRM, Dev','AI automations','200+','✅ хорош','🟢 Высокий'],['Notion','Wiki+DB+Projects','Notion AI','100+','⚠️ средний','🟡 Средний'],['Trello','Kanban, Butler','⚠️ базовый','200+','✅ хорош','🔴 Низкий'],['ClickUp','All-in-one, Docs','ClickUp AI','1000+','✅ хорош','🟡 Средний']],summary:['AI-функции стали обязательными — без них продукт выглядит устаревшим','ClickUp пытается быть всем сразу — это и преимущество, и слабость','Барьер переключения строится через данные и интеграции, не функции'],bestCompany:'Monday.com',bestAdvice:'Строй WorkOS а не таск-менеджер — платформа стоит дороже и держит клиентов'},
       reputation:{headers:['Компания','G2 рейтинг','Кол-во отзывов','Главная жалоба','Поддержка','PR-активность'],rows:[['Asana','4.3/5','9,800','Дорого для малых','4.1/5','🟢 Высокая'],['Monday.com','4.6/5','12,100','Дорого при росте','4.4/5','🟢 Высокая'],['Notion','4.7/5','5,400','Плохой оффлайн','4.2/5','🟡 Средняя'],['Trello','4.4/5','13,500','Нет аналитики','4.0/5','🟡 Средняя'],['ClickUp','4.7/5','9,200','Перегружен UI','4.3/5','🟡 Средняя']],summary:['Notion и ClickUp — лидеры G2 по рейтингу, но жалуются на сложность','Главная боль рынка: дорого при масштабировании — твоё окно','Качество поддержки важно для SMB — инвестируй в onboarding'],bestCompany:'Monday.com',bestAdvice:'Фокус на онбординге и time-to-value — 80% негатива про "сложно начать"'},
       offers:{headers:['Компания','Лид-магнит','Главный оффер','Программа лояльности','Время ответа'],rows:[['Asana','Шаблоны задач','30 дней бесплатно','Asana Together','< 4 ч'],['Monday.com','Готовые воркфлоу','14 дней + демо','Partner Program','< 2 ч'],['Notion','Бесплатный personal','AI бесплатно месяц','Notion Ambassadors','< 8 ч'],['Trello','Freemium навсегда','Power-Ups бесплатно','Atlassian Community','< 12 ч'],['ClickUp','Freemium навсегда','Скидка 45% год','Affiliate 20%','< 3 ч']],summary:['Самый сильный лид-магнит — freemium или готовые шаблоны под нишу','Партнёрская программа и комьюнити — дешёвый канал роста','Быстрый ответ поддержки (<2ч) — значимый дифференциатор для SMB'],bestCompany:'Monday.com',bestAdvice:'Создай библиотеку из 50+ отраслевых шаблонов — лучший лид-магнит для SMB'},
       strategy:{q1:{goal:'Валидация ICP и первые 50 платящих клиентов',actions:[{title:'Запуск freemium с ограничением 3 проекта',budget:'$15K',detail:'Снизить барьер входа, собрать базу для конверсии в платный план'},{title:'SEO-контент: 20 статей под боли SMB',budget:'$8K',detail:'Таргет на "asana alternative", "monday.com vs", "task manager for SMB"'}],metrics:'50 платящих, CAC < $120, trial→paid > 8%'},q2:{goal:'Масштабирование PLG и запуск партнёрской программы',actions:[{title:'In-app онбординг и activation flow',budget:'$12K',detail:'Снизить time-to-value до 15 минут, поднять D30 retention'},{title:'Affiliate программа 25% комиссии',budget:'$5K',detail:'Рекрутировать 30 партнёров через ProductHunt и SaaS-комьюнити'}],metrics:'200 клиентов, MRR $8K, NPS > 40'},q3:{goal:'Рост MRR через апсейл и AI-функции',actions:[{title:'Запуск AI-ассистента в продукте',budget:'$20K',detail:'Автоматизация задач, AI-саммари проекта — ключевой дифференциатор'},{title:'Годовые планы со скидкой 30%',budget:'$3K',detail:'Конвертировать месячников в годовые для улучшения cash flow'}],metrics:'500 клиентов, MRR $25K, Annual plan > 40%'},q4:{goal:'Выход на $50K MRR и подготовка к Series A',actions:[{title:'Enterprise-тариф и SSO/API',budget:'$18K',detail:'Открыть upmarket — компании 100-500 человек, средний чек $200/мес'},{title:'Кейсы и PR: 5 success stories',budget:'$7K',detail:'Публикации в VC.ru, ProductHunt, Forbes — подготовка к раунду'}],metrics:'MRR $50K, ARR $600K, Churn < 3%'},finance:{totalInvest:'$88K',arr:'$600K',payback:'14 мес',roi:'580%'},criticalRec:'Запусти freemium в первый месяц — каждая неделя без него = потерянные пользователи конкурентам',importantRec:'AI-функции обязательны до конца Q2 — рынок уже ожидает их как базовую функциональность'}
