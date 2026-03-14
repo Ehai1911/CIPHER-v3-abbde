@@ -460,6 +460,7 @@ td:first-child{color:var(--text);font-weight:500}
   .content{padding:16px}
   .fin-grid{grid-template-columns:repeat(2,1fr)}
   .tabs-wrap{padding:0 4px}
+  .tab{padding:9px 11px;font-size:11px;gap:3px}
 }
 
 @media(max-width:480px){
@@ -470,6 +471,22 @@ td:first-child{color:var(--text);font-weight:500}
   table{font-size:11px}
   th{font-size:9px;padding:9px 10px}
   td{padding:8px 10px;font-size:11px}
+}
+
+/* ===== NEW TABS MOBILE ===== */
+@media(max-width:600px){
+  .swot-grid{grid-template-columns:1fr}
+  .pos-map{aspect-ratio:3/2;max-width:100%}
+  .pos-label{font-size:8px;letter-spacing:.4px}
+  .pos-dot-name{font-size:8px}
+  .qw-title{font-size:13px}
+  .gap-card{flex-direction:column;gap:8px}
+  .gap-emoji{font-size:22px}
+}
+@media(max-width:400px){
+  /* На очень маленьких экранах скрываем боковые подписи карты */
+  .pos-label.side{display:none}
+  .qw-badges{flex-direction:column;gap:5px}
 }
 
 /* ===== NOVA MOBILE ===== */
@@ -937,8 +954,8 @@ td:first-child{color:var(--text);font-weight:500}
           <div class="pos-line-h"></div>
           <div class="pos-label" style="top:4px;left:50%;transform:translateX(-50%)">${pos.yLabelEnd}</div>
           <div class="pos-label" style="bottom:4px;left:50%;transform:translateX(-50%)">${pos.yLabel}</div>
-          <div class="pos-label" style="left:6px;top:50%;transform:translateY(-50%)">${pos.xLabel}</div>
-          <div class="pos-label" style="right:6px;top:50%;transform:translateY(-50%)">${pos.xLabelEnd}</div>
+          <div class="pos-label side" style="left:6px;top:50%;transform:translateY(-50%)">${pos.xLabel}</div>
+          <div class="pos-label side" style="right:6px;top:50%;transform:translateY(-50%)">${pos.xLabelEnd}</div>
           ${dots}
         </div>
         <div style="background:rgba(212,168,67,.08);border:1px solid var(--gold-border);border-radius:10px;padding:13px 16px;font-size:12px;color:var(--text2);line-height:1.6">${pos.insight}</div>`;
