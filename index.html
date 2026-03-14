@@ -315,6 +315,87 @@ td:first-child{color:var(--text);font-weight:500}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
+/* ===== NOVA SESSION ===== */
+#novaOverlay{display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:row}
+#novaOverlay.open{display:flex}
+.nova-left{
+  width:300px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:26px 22px;overflow-y:auto
+}
+.nova-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.nova-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.nova-logo-icon{
+  width:34px;height:34px;border-radius:9px;background:var(--gold-glow);border:1px solid var(--gold-border);
+  display:grid;place-items:center;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--gold)
+}
+.nova-logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold)}
+.nova-logo-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.nova-sec{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.nova-ctx{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:18px;display:flex;flex-direction:column;gap:5px}
+.nova-ctx-row{font-size:11px;color:var(--text2);line-height:1.4}
+.nova-ctx-row strong{color:var(--text);font-weight:600}
+.nova-agreements{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.nova-agr{
+  display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--text2);
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;
+  animation:fadeIn .3s ease
+}
+.nova-agr-check{color:var(--green);flex-shrink:0;margin-top:1px}
+.nova-agr.pending{color:var(--muted)}
+.nova-hadi-box{
+  background:rgba(212,168,67,.06);border:1px solid var(--gold-border);
+  border-radius:10px;padding:13px;margin-top:auto;display:none
+}
+.nova-hadi-title{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+.nova-hadi-row{font-size:10px;color:var(--text2);line-height:1.6;margin-bottom:5px}
+.nova-hadi-row strong{color:var(--gold-l)}
+.nova-chat-hdr{
+  padding:16px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;background:var(--surface)
+}
+.nova-chat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.nova-chat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.nova-x{background:none;border:1.5px solid var(--border2);border-radius:7px;color:var(--muted);font-size:11px;cursor:pointer;padding:7px 14px;transition:.2s;font-weight:600}
+.nova-x:hover{border-color:var(--text2);color:var(--text)}
+.nova-msgs{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:13px}
+.nova-msgs::-webkit-scrollbar{width:5px}
+.nova-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.nova-msg{display:flex;gap:10px;animation:fadeIn .3s ease}
+.nova-msg-av{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;background:var(--gold-glow);
+  border:1px solid var(--gold-border);display:grid;place-items:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:var(--gold)
+}
+.nova-bubble{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px 12px 12px 12px;padding:11px 14px;
+  font-size:12px;color:var(--text);line-height:1.7;max-width:500px
+}
+.nova-msg.user{flex-direction:row-reverse}
+.nova-msg.user .nova-bubble{background:var(--gold-glow);border-color:var(--gold-border);border-radius:12px 4px 12px 12px}
+.nova-opts{padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nova-opt{
+  background:var(--surface2);border:1.5px solid var(--border2);border-radius:8px;
+  padding:9px 16px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:.2s
+}
+.nova-opt:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}
+.nova-q{width:100%;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.nova-doc-btn{
+  padding:12px 28px;background:linear-gradient(135deg,var(--gold-d),var(--gold));
+  color:#0a0e1a;border:none;border-radius:10px;font-weight:700;font-size:13px;
+  cursor:pointer;font-family:'Syne',sans-serif;transition:.2s
+}
+.nova-doc-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(212,168,67,.3)}
+.nova-trigger{
+  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  padding:13px 30px;background:linear-gradient(135deg,var(--gold-d),var(--gold));
+  color:#0a0e1a;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:800;
+  font-size:13px;cursor:pointer;letter-spacing:.06em;z-index:90;
+  box-shadow:0 4px 24px rgba(212,168,67,.35);transition:.25s
+}
+.nova-trigger.visible{display:block}
+.nova-trigger:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 8px 32px rgba(212,168,67,.45)}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .lp{width:240px;padding:24px 20px}
@@ -430,6 +511,40 @@ td:first-child{color:var(--text);font-weight:500}
     <div class="modal-text" id="modalBody"></div>
   </div>
 </div>
+
+<!-- NOVA SESSION OVERLAY -->
+<div id="novaOverlay">
+  <div class="nova-left">
+    <div class="nova-logo">
+      <div class="nova-logo-icon">N</div>
+      <div><div class="nova-logo-text">NOVA</div><div class="nova-logo-sub">Стратегический советник</div></div>
+    </div>
+    <div class="nova-sec">Контекст анализа</div>
+    <div class="nova-ctx" id="novaCtx"></div>
+    <div class="nova-sec">Договорённости</div>
+    <div class="nova-agreements" id="novaAgr">
+      <div class="nova-agr pending"><div class="nova-agr-check">○</div><div>Заполняется в ходе беседы...</div></div>
+    </div>
+    <div class="nova-hadi-box" id="novaHadiBox">
+      <div class="nova-hadi-title">⚡ HADI · Первый цикл</div>
+      <div id="novaHadiContent"></div>
+    </div>
+  </div>
+  <div class="nova-right">
+    <div class="nova-chat-hdr">
+      <div>
+        <div class="nova-chat-title">Стратегическая сессия</div>
+        <div class="nova-chat-sub">Настраиваем план под твои реальные возможности</div>
+      </div>
+      <button class="nova-x" onclick="closeNova()">✕ Закрыть</button>
+    </div>
+    <div class="nova-msgs" id="novaMsgs"></div>
+    <div class="nova-opts" id="novaOpts"></div>
+  </div>
+</div>
+
+<!-- NOVA TRIGGER (demo only) -->
+<button class="nova-trigger" id="novaTrigger" onclick="openNova()">✦ Стратегическая сессия с Новой</button>
 
 <!-- HELPER -->
 <button class="helper-btn" onclick="toggleHelper()" title="NOVA — Ассистент">N</button>
@@ -862,6 +977,268 @@ td:first-child{color:var(--text);font-weight:500}
     document.getElementById('analysisScreen').classList.add('active');
     document.getElementById('anProduct').textContent = 'FlowDesk · Демо';
     renderTabs();
+    document.getElementById('novaTrigger').classList.add('visible');
+  }
+
+  // ===== NOVA SUB-AGENT (DEMO) =====
+  const novaState = {};
+
+  const NOVA_FLOW = {
+    budget: {
+      question: 'Какой бюджет готов вложить в первые 3 месяца?',
+      options: [
+        {label:'🌱 До $10K', value:'low'},
+        {label:'🚀 $10K–30K', value:'mid'},
+        {label:'💎 $30K+', value:'high'}
+      ],
+      responses: {
+        low: 'Понял — небольшой бюджет означает нужно быть хирургически точным. SEO и freemium — твои лучшие инструменты: работают без постоянных вложений и дают долгосрочный эффект.',
+        mid: 'Хороший старт. С таким бюджетом можно одновременно запустить SEO-контент и небольшой paid, плюс вложиться в онбординг — сбалансированный подход.',
+        high: 'Отлично — можно действовать агрессивно: paid + SEO + партнёрки параллельно. Главное мерить каждый канал и не распыляться.'
+      },
+      agreement: {low:'💰 Бюджет: до $10K', mid:'💰 Бюджет: $10K–30K', high:'💰 Бюджет: $30K+'}
+    },
+    team: {
+      question: 'Есть команда или работаешь один?',
+      options: [
+        {label:'🧑 Один (solo)', value:'solo'},
+        {label:'👥 Команда 2–5', value:'small'},
+        {label:'🏢 Команда 5+', value:'big'}
+      ],
+      responses: {
+        solo: 'Один — значит фокус критичен. Выберем 1–2 канала и пойдём в них глубоко, не распыляясь на всё сразу.',
+        small: 'Маленькая команда — сила гибкости. Можно распределить роли: контент, продукт, продажи. Двигаться быстрее крупных конкурентов.',
+        big: 'С командой 5+ можно параллелить несколько направлений и опережать конкурентов по скорости итераций.'
+      },
+      agreement: {solo:'👥 Команда: solo-основатель', small:'👥 Команда: 2–5 человек', big:'👥 Команда: 5+ человек'}
+    },
+    priority: {
+      question: 'Что для тебя важнее прямо сейчас?',
+      options: [
+        {label:'🎯 Первые платящие клиенты', value:'clients'},
+        {label:'📣 Узнаваемость бренда', value:'brand'},
+        {label:'📈 Привлечь инвестиции', value:'invest'}
+      ],
+      responses: {
+        clients: 'Фокус на клиентах — правильный приоритет. Стратегия: freemium + прямые продажи через LinkedIn и тематические комьюнити.',
+        brand: 'Бренд строится через контент и присутствие. Notion сделал это через template-маркетплейс — этот путь открыт для тебя.',
+        invest: 'Для инвесторов нужны метрики роста. Главное — показать MRR trend и retention. Сфокусируемся на этом в HADI-циклах.'
+      },
+      agreement: {clients:'🎯 Приоритет: первые клиенты', brand:'🎯 Приоритет: узнаваемость', invest:'🎯 Приоритет: инвестиции'}
+    },
+    disagree: {
+      question: 'Есть что-то в стратегии с чем ты не согласен?',
+      options: [
+        {label:'✅ Всё выглядит реалистично', value:'ok'},
+        {label:'💰 Бюджеты кажутся высокими', value:'budget'},
+        {label:'⏱ Сроки слишком сжаты', value:'time'},
+        {label:'🌍 Хочу другую географию', value:'market'}
+      ],
+      responses: {
+        ok: 'Отлично! Стратегия согласована. Сейчас сформирую персональный план с HADI-циклами.',
+        budget: 'Понял. Урежем бюджеты на 40% и сместим акцент на органику — SEO и community работают медленнее, но требуют меньше вложений.',
+        time: 'Хорошо. Растянем план с 12 до 18 месяцев — меньше давления, более устойчивый рост.',
+        market: 'Принято. Скорректируем географию и конкурентное позиционирование под твой рынок в итоговом документе.'
+      },
+      agreement: {ok:'✏️ Стратегия принята без изменений', budget:'✏️ Бюджеты снижены на 40%', time:'✏️ Сроки растянуты до 18 мес', market:'✏️ География скорректирована'}
+    }
+  };
+
+  function getHadiCycles() {
+    const p = novaState.priority;
+    return [
+      {
+        h: 'Freemium снизит барьер входа и создаст поток пользователей для конверсии в платный план',
+        a: 'Запустить бесплатный тариф с ограничением по проектам в течение 2 недель',
+        d: 'Считать: регистрации, trial→paid conversion, CAC',
+        i: 'Если conversion < 5% через 30 дней — пересмотреть ограничения freemium'
+      },
+      p === 'clients' ? {
+        h: 'Прямые продажи через LinkedIn дадут первых клиентов быстрее любой рекламы',
+        a: 'Написать 50 целевым компаниям с персонализированным оффером за 2 недели',
+        d: 'Считать: reply rate, demo rate, close rate',
+        i: 'Если reply rate < 10% — улучшить оффер или сменить целевой сегмент'
+      } : p === 'brand' ? {
+        h: 'SEO-контент и шаблоны под боли SMB дадут органический трафик без рекламного бюджета',
+        a: 'Опубликовать 10 статей по запросам "альтернатива [конкурент]" и создать 20+ шаблонов',
+        d: 'Считать: органический трафик, время на сайте, конверсия в регистрацию',
+        i: 'Если трафик не растёт через 60 дней — менять темы или добавить гостевые публикации'
+      } : {
+        h: 'Публичные метрики роста привлекают инвесторов лучше любого питча',
+        a: 'Запустить публичный дашборд с MRR и ростом, делиться в соцсетях еженедельно',
+        d: 'Считать: MRR trend, D30 retention, NPS',
+        i: 'Если MRR не растёт 2 месяца подряд — переработать ценообразование или ICP'
+      },
+      {
+        h: 'За 90 дней можно проверить гипотезу о product-market fit и скорректировать курс',
+        a: 'Провести 10 глубоких интервью с клиентами через 90 дней после запуска',
+        d: 'Фиксировать: что работает, что просят чаще всего, почему не покупают',
+        i: 'Результаты интервью — основа для приоритетов следующего квартала'
+      }
+    ];
+  }
+
+  function openNova() {
+    Object.assign(novaState, {budget:null, team:null, priority:null, disagree:null});
+    const d = state.data || {};
+    document.getElementById('novaCtx').innerHTML = [
+      ['Продукт', d.product || 'FlowDesk'],
+      ['Рынок', d.area || 'SaaS'],
+      ['Сегмент', d.segment || 'SMB'],
+      ['Цена', d.price || '$50-200/мес'],
+      ['Конкуренты', 'Asana, Monday, Notion, Trello, ClickUp']
+    ].map(([k,v]) => `<div class="nova-ctx-row"><strong>${k}:</strong> ${v}</div>`).join('');
+    document.getElementById('novaAgr').innerHTML = '<div class="nova-agr pending"><div class="nova-agr-check">○</div><div>Заполняется в ходе беседы...</div></div>';
+    document.getElementById('novaHadiBox').style.display = 'none';
+    document.getElementById('novaMsgs').innerHTML = '';
+    document.getElementById('novaOpts').innerHTML = '';
+    document.getElementById('novaOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      addNovaBubble(`Привет! Я изучила анализ <strong>${d.product || 'FlowDesk'}</strong> и хочу поделиться тремя ключевыми выводами:<br><br>📊 <strong>Monday.com</strong> тратит $300M+ на рекламу — конкурировать в платных каналах на старте слишком дорого<br>🎯 <strong>Главная боль рынка</strong> — продукты дорожают при росте. Это твоё окно для дифференциации<br>⚡ <strong>Notion вырос органически</strong> через community и шаблоны — этот путь воспроизводим<br><br>Давай настроим стратегию под твои реальные возможности.`);
+      setTimeout(() => showNovaStep('budget'), 700);
+    }, 350);
+  }
+
+  function closeNova() {
+    document.getElementById('novaOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function addNovaBubble(html, isUser) {
+    const msgs = document.getElementById('novaMsgs');
+    const d = document.createElement('div');
+    d.className = 'nova-msg' + (isUser ? ' user' : '');
+    d.innerHTML = isUser
+      ? `<div class="nova-bubble">${html}</div>`
+      : `<div class="nova-msg-av">N</div><div class="nova-bubble">${html}</div>`;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showNovaStep(stepKey) {
+    const step = NOVA_FLOW[stepKey];
+    const opts = document.getElementById('novaOpts');
+    opts.innerHTML = `<div class="nova-q">${step.question}</div>`;
+    step.options.forEach(o => {
+      const btn = document.createElement('button');
+      btn.className = 'nova-opt';
+      btn.textContent = o.label;
+      btn.onclick = () => handleNovaAnswer(stepKey, o.value, o.label);
+      opts.appendChild(btn);
+    });
+  }
+
+  function handleNovaAnswer(stepKey, value, label) {
+    const step = NOVA_FLOW[stepKey];
+    novaState[stepKey] = value;
+    document.getElementById('novaOpts').innerHTML = '';
+    addNovaBubble(label, true);
+
+    const agrDiv = document.getElementById('novaAgr');
+    const placeholder = agrDiv.querySelector('.pending');
+    if (placeholder) placeholder.remove();
+    const agr = document.createElement('div');
+    agr.className = 'nova-agr';
+    agr.innerHTML = `<div class="nova-agr-check">✓</div><div>${step.agreement[value]}</div>`;
+    agrDiv.appendChild(agr);
+
+    setTimeout(() => {
+      addNovaBubble(step.responses[value]);
+      const nextMap = {budget:'team', team:'priority', priority:'disagree', disagree:null};
+      const next = nextMap[stepKey];
+      if (next) {
+        setTimeout(() => showNovaStep(next), 800);
+      } else {
+        const cycles = getHadiCycles();
+        const h1 = cycles[0];
+        document.getElementById('novaHadiContent').innerHTML = [
+          ['Г', h1.h], ['Д', h1.a], ['Д', h1.d], ['И', h1.i]
+        ].map(([k,v]) => `<div class="nova-hadi-row"><strong>${k}:</strong> ${v}</div>`).join('');
+        document.getElementById('novaHadiBox').style.display = 'block';
+        setTimeout(() => {
+          addNovaBubble('Сессия завершена. Я зафиксировала все договорённости и подготовила персональный план с HADI-циклами.<br><br>Нажми кнопку ниже чтобы получить итоговый документ — его можно сохранить как PDF.');
+          const opts = document.getElementById('novaOpts');
+          opts.innerHTML = '';
+          const btn = document.createElement('button');
+          btn.className = 'nova-doc-btn';
+          btn.textContent = '📄 Сформировать стратегический документ';
+          btn.onclick = generateNovaDoc;
+          opts.appendChild(btn);
+        }, 900);
+      }
+    }, 450);
+  }
+
+  function generateNovaDoc() {
+    const d = state.data || {};
+    const product = d.product || 'FlowDesk';
+    const cycles = getHadiCycles();
+    const lblMap = {
+      budget: {low:'До $10K', mid:'$10K–30K', high:'$30K+'},
+      team: {solo:'Solo-основатель', small:'Команда 2–5 человек', big:'Команда 5+ человек'},
+      priority: {clients:'Первые платящие клиенты', brand:'Узнаваемость бренда', invest:'Привлечение инвестиций'},
+      disagree: {ok:'Стратегия без изменений', budget:'Бюджеты снижены на 40%', time:'Сроки растянуты до 18 мес', market:'География скорректирована'}
+    };
+    const params = [
+      ['Бюджет', lblMap.budget[novaState.budget] || '—'],
+      ['Команда', lblMap.team[novaState.team] || '—'],
+      ['Приоритет', lblMap.priority[novaState.priority] || '—'],
+      ['Корректировка', lblMap.disagree[novaState.disagree] || '—']
+    ];
+    const hadiHtml = cycles.map((c, i) => `
+      <div style="margin-bottom:20px;padding:18px;border:1px solid #1e2d4a;border-radius:10px;background:#0f1628">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#d4a843;text-transform:uppercase;margin-bottom:12px">HADI Цикл ${i+1}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          ${[['Г · Гипотеза','#d4a843',c.h],['Д · Действие','#60a5fa',c.a],['Д · Данные','#34d399',c.d],['И · Инсайты','#f87171',c.i]]
+            .map(([lbl,col,txt]) => `<div><div style="font-size:9px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">${lbl}</div><div style="font-size:12px;color:#e2e8f5;line-height:1.6">${txt}</div></div>`)
+            .join('')}
+        </div>
+      </div>`).join('');
+
+    const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<title>Стратегия · ${product} · Neurovia Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0e1a;color:#e2e8f5;font-family:'Inter',sans-serif;padding:48px;max-width:880px;margin:0 auto}
+@media print{body{background:#fff;color:#111}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+</head><body>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid #1e2d4a">
+  <div>
+    <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:#d4a843;text-transform:uppercase;margin-bottom:5px">NEUROVIA LABS · СТРАТЕГИЧЕСКИЙ ДОКУМЕНТ</div>
+    <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#e2e8f5">${product}</div>
+    <div style="font-size:12px;color:#5b6b8a;margin-top:3px">Персональная стратегия роста · Согласовано с Новой</div>
+  </div>
+  <div style="text-align:right;font-size:11px;color:#5b6b8a">
+    <div>${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</div>
+    <div style="margin-top:3px">Конфиденциально</div>
+  </div>
+</div>
+<div style="margin-bottom:28px">
+  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#5b6b8a;text-transform:uppercase;margin-bottom:11px">ПАРАМЕТРЫ СЕССИИ</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+    ${params.map(([l,v]) => `<div style="background:#0f1628;border:1px solid #1e2d4a;border-radius:8px;padding:11px"><div style="font-size:9px;color:#5b6b8a;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${l}</div><div style="font-size:12px;font-weight:600;color:#e2e8f5">${v}</div></div>`).join('')}
+  </div>
+</div>
+<div style="margin-bottom:28px">
+  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#5b6b8a;text-transform:uppercase;margin-bottom:11px">КЛЮЧЕВЫЕ ИНСАЙТЫ ПО КОНКУРЕНТАМ</div>
+  ${['Monday.com тратит $300M+ на paid — конкурировать в этом канале нецелесообразно на старте',
+     'Главная боль рынка — продукты дорожают при масштабировании. Это пространство для дифференциации',
+     'Notion вырос через community и шаблоны органически — этот путь воспроизводим с небольшим бюджетом']
+    .map(t => `<div style="display:flex;gap:10px;margin-bottom:7px;font-size:12px;color:#a8b4cc;line-height:1.6"><span style="color:#d4a843;flex-shrink:0">·</span>${t}</div>`).join('')}
+</div>
+<div>
+  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#5b6b8a;text-transform:uppercase;margin-bottom:14px">HADI-ЦИКЛЫ · ПЛАН ДЕЙСТВИЙ</div>
+  ${hadiHtml}
+</div>
+<div style="margin-top:36px;padding-top:18px;border-top:1px solid #1e2d4a;display:flex;justify-content:space-between;font-size:10px;color:#5b6b8a">
+  <div>Neurovia Labs · AI-анализ конкурентов</div>
+  <div>Сформировано на основе стратегической сессии с Новой</div>
+</div>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
   }
 
   // Init
