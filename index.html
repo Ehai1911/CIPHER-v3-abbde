@@ -195,11 +195,11 @@ textarea.fi{resize:vertical;min-height:100px;line-height:1.5;max-width:600px}
 .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* Tables */
-.table-wrapper{overflow-x:auto;margin-bottom:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:12px}
+.table-wrapper{overflow-x:auto;margin-bottom:16px;border:1px solid var(--border);border-radius:10px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
 thead{background:var(--surface)}
-th{padding:11px 13px;text-align:left;font-weight:600;color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border2)}
-td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12px}
+th{padding:11px 13px;text-align:left;font-weight:600;color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border2);white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12px;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--surface2)}
 td:first-child{color:var(--text);font-weight:500}
