@@ -1200,8 +1200,12 @@ td:first-child{color:var(--text);font-weight:500}
 <title>Стратегия · ${product} · Neurovia Labs</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0e1a;color:#e2e8f5;font-family:'Inter',sans-serif;padding:48px;max-width:880px;margin:0 auto}
-@media print{body{background:#fff;color:#111}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+@media print{body{background:#fff;color:#111}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}</style>
 </head><body>
+<div class="no-print" style="position:sticky;top:0;z-index:10;background:rgba(10,14,26,.95);backdrop-filter:blur(8px);border-bottom:1px solid #1e2d4a;padding:12px 48px;display:flex;align-items:center;justify-content:space-between;margin:-48px -48px 36px -48px">
+  <div style="font-size:11px;color:#5b6b8a">Neurovia Labs · Стратегический документ</div>
+  <button onclick="window.print()" style="padding:9px 22px;background:linear-gradient(135deg,#b08830,#d4a843);color:#0a0e1a;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.04em">↓ Сохранить как PDF</button>
+</div>
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid #1e2d4a">
   <div>
     <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:#d4a843;text-transform:uppercase;margin-bottom:5px">NEUROVIA LABS · СТРАТЕГИЧЕСКИЙ ДОКУМЕНТ</div>
