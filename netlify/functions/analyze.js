@@ -65,11 +65,13 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { area, segment, product, description, geography, competitors, price, tab, competitorNames } = JSON.parse(event.body);
-    const apiKey = process.env.OPENAI_API_KEY;
+    const { area, segment, product, description, geography, competitors, price, tab, competitorNames, apiKey: clientKey } = JSON.parse(event.body);
+    const apiKey = (clientKey && clientKey.startsWith('sk-') && clientKey.length > 20)
+      ? clientKey
+      : process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      return { statusCode: 500, body: JSON.stringify({ error: 'OPENAI_API_KEY not configured' }) };
+      return { statusCode: 500, body: JSON.stringify({ error: 'Нет ключа OpenAI. Вставь свой ключ в поле вверху страницы или обратись к администратору.' }) };
     }
 
     const geo = Array.isArray(geography) ? geography.join(', ') : (geography || 'глобально');
