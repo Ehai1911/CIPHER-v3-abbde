@@ -73,6 +73,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method Not Allowed' }); return; }
 
   try {
+    if (!req.body) {
+      res.status(400).json({ error: 'Пустой запрос — тело не получено' });
+      return;
+    }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { area, segment, product, description, geography, competitors, price, tab, competitorNames, apiKey: clientKey } = body;
     const apiKey = (clientKey && clientKey.startsWith('sk-') && clientKey.length > 20)
@@ -92,6 +96,7 @@ module.exports = async (req, res) => {
     res.status(200).json(data);
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('analyze error:', error.message, error.stack);
+    res.status(500).json({ error: error.message, stack: error.stack ? error.stack.split('\n')[0] : '' });
   }
 };
