@@ -55,7 +55,8 @@ ${compLine}Заполни JSON реальными данными для разд
     }
   );
 
-  if (!resp.choices || !resp.choices[0]) throw new Error('No response from OpenAI');
+  if (resp.error) throw new Error('OpenAI: ' + resp.error.message);
+  if (!resp.choices || !resp.choices[0]) throw new Error('OpenAI вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
   return JSON.parse(resp.choices[0].message.content);
 }
 
