@@ -907,7 +907,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || []})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -958,6 +958,30 @@ td:first-child{color:var(--text);font-weight:500}
         ${actions}
         <div class="q-metrics"><span>Как понять что план выполнен:</span> ${data.metrics || '—'}</div>
       </div>`;
+  }
+
+  function buildAnalysisContext() {
+    const ai = state.aiData;
+    if (!ai) return '';
+    const parts = [];
+    if (ai.market && ai.market.summary) parts.push('РЫНОК: ' + ai.market.summary.join('. '));
+    if (ai.market && ai.market.bestAdvice) parts.push('Лучший в рынке: ' + ai.market.bestCompany + ' — ' + ai.market.bestAdvice);
+    if (ai.audience && ai.audience.summary) parts.push('АУДИТОРИЯ: ' + ai.audience.summary.join('. '));
+    if (ai.swot) {
+      if (ai.swot.strengths) parts.push('СИЛЬНЫЕ СТОРОНЫ: ' + ai.swot.strengths.slice(0,2).join('. '));
+      if (ai.swot.weaknesses) parts.push('СЛАБЫЕ СТОРОНЫ: ' + ai.swot.weaknesses.slice(0,2).join('. '));
+      if (ai.swot.opportunities) parts.push('ВОЗМОЖНОСТИ: ' + ai.swot.opportunities.slice(0,2).join('. '));
+      if (ai.swot.threats) parts.push('УГРОЗЫ: ' + ai.swot.threats.slice(0,2).join('. '));
+    }
+    if (ai.pricing && ai.pricing.summary) parts.push('ЦЕНЫ: ' + ai.pricing.summary.join('. '));
+    if (ai.pricing && ai.pricing.recommendation) parts.push('Рекомендация по цене: ' + ai.pricing.recommendation.why);
+    if (ai.product && ai.product.summary) parts.push('ПРОДУКТ: ' + ai.product.summary.join('. '));
+    if (ai.channels && ai.channels.summary) parts.push('МАРКЕТИНГ: ' + ai.channels.summary.join('. '));
+    if (ai.reputation && ai.reputation.summary) parts.push('РЕПУТАЦИЯ: ' + ai.reputation.summary.join('. '));
+    if (ai.offers && ai.offers.summary) parts.push('ОФФЕРЫ: ' + ai.offers.summary.join('. '));
+    if (ai.gaps) parts.push('ПРОБЕЛЫ РЫНКА: ' + ai.gaps.map(g => g.title + ' — ' + g.description).join('. '));
+    if (ai.positioning && ai.positioning.insight) parts.push('ПОЗИЦИОНИРОВАНИЕ: ' + ai.positioning.insight);
+    return parts.join('\n');
   }
 
   function getCompetitorUrlMap() {

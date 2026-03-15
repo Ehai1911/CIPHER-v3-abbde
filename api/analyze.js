@@ -105,7 +105,7 @@ const TAB_SCHEMAS = {
   gaps: `{"gaps":[{"emoji":"💰","title":"Название пробела рынка","description":"Детальное описание пробела: что не делают конкуренты и почему это проблема","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🤖","title":"Название пробела рынка","description":"Детальное описание пробела с конкретными данными","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🌍","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"},{"emoji":"🎯","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"}]}`
 };
 
-async function fetchTab(tab, area, segment, product, description, geo, competitors, price, apiKey, urls) {
+async function fetchTab(tab, area, segment, product, description, geo, competitors, price, apiKey, urls, analysisContext) {
   const compLine = competitors && competitors.length
     ? `Конкуренты: ${competitors.join(', ')}\n`
     : '';
@@ -119,7 +119,11 @@ async function fetchTab(tab, area, segment, product, description, geo, competito
 Поле "action": простым языком как другу — что именно открыть, написать, запустить. Пример: "Создай страницу /vs/[конкурент] с честной таблицей сравнения по цене и функциям — люди которые ищут замену [конкуренту] сами на неё придут".
 Поле "why": одна конкретная цифра или факт почему это работает именно для этого продукта и ниши.` : '';
 
-  const strategyExtra = tab === 'strategy' ? `
+  const strategyExtra = (tab === 'strategy' || tab === 'quickwins') && analysisContext ? `
+ДАННЫЕ ИЗ АНАЛИЗА КОНКУРЕНТОВ (используй их как основу — не выдумывай, опирайся на эти факты):
+${analysisContext}` : '';
+
+  const strategyRules = tab === 'strategy' ? `
 ВАЖНО для strategy: давай конкретные действия, не абстрактные ("улучшение продукта", "агрессивный маркетинг" — не подходят).
 Поле "goal" каждого квартала — измеримая цель с числом (например "50 платящих клиентов", "выручка $10K/мес").
 Поле "detail" каждого действия — конкретно что делать: какую страницу создать, кому написать, что запустить.
@@ -154,7 +158,7 @@ ${tabHint}
 - Максимум 5-7 слов в ячейке таблицы.
 - summary — конкретные выводы с именами компаний и цифрами, не общие фразы.
 - bestAdvice — одно конкретное действие для ${product} прямо сейчас.
-${quickwinsExtra}${strategyExtra}${scrapedContext}
+${strategyExtra}${quickwinsExtra}${strategyRules}${scrapedContext}
 Шаблон: ${TAB_SCHEMAS[tab]}`;
 
   const maxTokens = tab === 'pricing' ? (scrapedContext ? 1600 : 1100) : (scrapedContext ? 1400 : 900);
@@ -217,7 +221,7 @@ module.exports = async (req, res) => {
       return;
     }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, apiKey: clientKey } = body;
+    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, analysisContext, apiKey: clientKey } = body;
     const apiKey = (clientKey && (clientKey.startsWith('sk-ant-') || clientKey.startsWith('sk-')) && clientKey.length > 20)
       ? clientKey
       : process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
@@ -234,7 +238,7 @@ module.exports = async (req, res) => {
       ? competitorUrls
       : (typeof competitorUrls === 'string' ? competitorUrls.split(/[\n,]+/).map(u => u.trim()).filter(Boolean) : []);
 
-    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, apiKey, urlList);
+    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, apiKey, urlList, analysisContext);
     res.status(200).json(data);
 
   } catch (error) {
