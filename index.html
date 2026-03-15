@@ -569,7 +569,7 @@ td:first-child{color:var(--text);font-weight:500}
     <div class="ri">
       <div class="api-banner">
         <div class="api-banner-icon">🔑</div>
-        <div class="api-banner-text"><strong>Хочешь получить реальный анализ?</strong><br>Вставь свой ключ OpenAI — анализ будет сгенерирован специально под твой продукт</div>
+        <div class="api-banner-text"><strong>Хочешь получить реальный анализ?</strong><br>Вставь свой ключ Claude (sk-ant-...) или OpenAI (sk-...) — анализ будет сгенерирован специально под твой продукт</div>
         <div class="api-key-wrap">
           <input class="api-key-input" id="apiKeyInput" type="password" placeholder="sk-..." oninput="handleApiKeyInput(this.value)" autocomplete="off" spellcheck="false">
           <span class="api-key-status" id="apiKeyStatus" style="display:none"></span>
@@ -712,7 +712,7 @@ td:first-child{color:var(--text);font-weight:500}
     const status = document.getElementById('apiKeyStatus');
     if (!val.trim()) { status.style.display = 'none'; return; }
     status.style.display = 'inline';
-    if (val.trim().startsWith('sk-') && val.trim().length > 20) {
+    if ((val.trim().startsWith('sk-ant-') || val.trim().startsWith('sk-')) && val.trim().length > 20) {
       status.textContent = '✓ Ключ готов';
       status.style.background = 'rgba(52,211,153,.12)';
       status.style.color = '#34d399';

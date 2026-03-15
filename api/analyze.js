@@ -41,23 +41,41 @@ async function fetchTab(tab, area, segment, product, description, geo, competito
 ${compLine}Заполни JSON реальными данными для раздела "${tab}". Максимум 5 слов в ячейке.
 Шаблон: ${TAB_SCHEMAS[tab]}`;
 
-  const resp = await httpPost('api.openai.com', '/v1/chat/completions',
-    { 'Authorization': `Bearer ${apiKey}` },
-    {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Верни ТОЛЬКО валидный JSON без markdown. Заполни реальными данными.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.3,
-      max_tokens: 700,
-      response_format: { type: 'json_object' }
-    }
-  );
+  const isAnthropic = apiKey.startsWith('sk-ant-');
 
-  if (resp.error) throw new Error('OpenAI: ' + resp.error.message);
-  if (!resp.choices || !resp.choices[0]) throw new Error('OpenAI вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
-  return JSON.parse(resp.choices[0].message.content);
+  if (isAnthropic) {
+    // Anthropic Claude API
+    const resp = await httpPost('api.anthropic.com', '/v1/messages',
+      { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      {
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 700,
+        system: 'Верни ТОЛЬКО валидный JSON без markdown. Заполни реальными данными.',
+        messages: [{ role: 'user', content: prompt }]
+      }
+    );
+    if (resp.error) throw new Error('Anthropic: ' + (resp.error.message || JSON.stringify(resp.error)));
+    if (!resp.content || !resp.content[0]) throw new Error('Anthropic вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
+    return JSON.parse(resp.content[0].text);
+  } else {
+    // OpenAI API
+    const resp = await httpPost('api.openai.com', '/v1/chat/completions',
+      { 'Authorization': `Bearer ${apiKey}` },
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'Верни ТОЛЬКО валидный JSON без markdown. Заполни реальными данными.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 700,
+        response_format: { type: 'json_object' }
+      }
+    );
+    if (resp.error) throw new Error('OpenAI: ' + resp.error.message);
+    if (!resp.choices || !resp.choices[0]) throw new Error('OpenAI вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
+    return JSON.parse(resp.choices[0].message.content);
+  }
 }
 
 // Vercel serverless function format
@@ -80,9 +98,9 @@ module.exports = async (req, res) => {
     }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { area, segment, product, description, geography, competitors, price, tab, competitorNames, apiKey: clientKey } = body;
-    const apiKey = (clientKey && clientKey.startsWith('sk-') && clientKey.length > 20)
+    const apiKey = (clientKey && (clientKey.startsWith('sk-ant-') || clientKey.startsWith('sk-')) && clientKey.length > 20)
       ? clientKey
-      : process.env.OPENAI_API_KEY;
+      : process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
       res.status(500).json({ error: 'Нет ключа OpenAI. Вставь свой ключ в поле вверху страницы.' });
