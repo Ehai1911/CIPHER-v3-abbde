@@ -844,7 +844,7 @@ td:first-child{color:var(--text);font-weight:500}
     const t2 = setTimeout(() => setLoadingStep(2, 'active'), 5000);
 
     try {
-      const response = await fetch('/.netlify/functions/analyze', {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({...state.data, tab: 'market'})
@@ -885,7 +885,7 @@ td:first-child{color:var(--text);font-weight:500}
         <div style="font-size:12px;color:var(--muted)">Загружаю данные...</div>
       </div>`;
     try {
-      const response = await fetch('/.netlify/functions/analyze', {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], apiKey: state.apiKey || undefined})
