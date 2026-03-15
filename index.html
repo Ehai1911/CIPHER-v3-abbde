@@ -187,10 +187,9 @@ textarea.fi{resize:vertical;min-height:100px;line-height:1.5;max-width:600px}
 .an-brand-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--gold)}
 .an-product{font-size:12px;color:var(--muted);margin-left:auto}
 
-.tabs-wrap{display:flex;overflow-x:auto;gap:0}
-.tabs-wrap::-webkit-scrollbar{height:0}
+.tabs-wrap{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--border)}
 .tab{
-  padding:10px 16px;border:none;background:none;color:var(--muted);
+  padding:9px 14px;border:none;background:none;color:var(--muted);
   font-size:12px;font-weight:500;cursor:pointer;
   border-bottom:2px solid transparent;margin-bottom:-1px;
   transition:all .2s;display:flex;align-items:center;gap:5px;
