@@ -550,28 +550,6 @@ td:first-child{color:var(--text);font-weight:500}
 }
 .btn-export:hover{border-color:var(--gold-border);color:var(--gold)}
 
-/* ===== API KEY BANNER ===== */
-.api-banner{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.2);
-  border-radius:10px;padding:11px 14px;margin-bottom:20px;flex-wrap:wrap
-}
-.api-banner-icon{font-size:16px;flex-shrink:0}
-.api-banner-text{font-size:11px;color:var(--muted);flex:1;min-width:160px;line-height:1.5}
-.api-banner-text strong{color:var(--text2)}
-.api-key-wrap{display:flex;gap:8px;align-items:center;flex:2;min-width:200px}
-.api-key-input{
-  flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;
-  padding:8px 12px;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;
-  outline:none;transition:border .2s
-}
-.api-key-input:focus{border-color:var(--gold-border)}
-.api-key-input::placeholder{color:var(--muted);opacity:.7}
-.api-key-status{font-size:10px;white-space:nowrap;padding:4px 8px;border-radius:5px;font-weight:600}
-@media(max-width:600px){
-  .api-banner{flex-direction:column;align-items:flex-start}
-  .api-key-wrap{width:100%}
-}
 </style>
 </head>
 <body>
@@ -599,14 +577,6 @@ td:first-child{color:var(--text);font-weight:500}
 
   <div class="rp">
     <div class="ri">
-      <div class="api-banner">
-        <div class="api-banner-icon">🔑</div>
-        <div class="api-banner-text"><strong>Хочешь получить реальный анализ?</strong><br>Вставь свой ключ Claude (sk-ant-...) или OpenAI (sk-...) — анализ будет сгенерирован специально под твой продукт</div>
-        <div class="api-key-wrap">
-          <input class="api-key-input" id="apiKeyInput" type="password" placeholder="sk-..." oninput="handleApiKeyInput(this.value)" autocomplete="off" spellcheck="false">
-          <span class="api-key-status" id="apiKeyStatus" style="display:none"></span>
-        </div>
-      </div>
       <div class="step-badge" id="stepBadge">Шаг 1 из 7</div>
       <div class="q-title" id="qTitle"></div>
       <div class="q-hint" id="qHintText"></div>
@@ -750,23 +720,7 @@ td:first-child{color:var(--text);font-weight:500}
     {id:'gaps',emoji:'🔍',title:'Пробелы рынка'}
   ];
 
-  let state = {step:0, data:{}, apiKey:''};
-
-  function handleApiKeyInput(val) {
-    state.apiKey = val.trim();
-    const status = document.getElementById('apiKeyStatus');
-    if (!val.trim()) { status.style.display = 'none'; return; }
-    status.style.display = 'inline';
-    if ((val.trim().startsWith('sk-ant-') || val.trim().startsWith('sk-')) && val.trim().length > 20) {
-      status.textContent = '✓ Ключ готов';
-      status.style.background = 'rgba(52,211,153,.12)';
-      status.style.color = '#34d399';
-    } else {
-      status.textContent = '⚠ Проверь ключ';
-      status.style.background = 'rgba(248,113,113,.12)';
-      status.style.color = '#f87171';
-    }
-  }
+  let state = {step:0, data:{}};
 
   function renderStepList() {
     const html = QUESTIONS.map((q,i) => {
@@ -914,7 +868,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'market', apiKey: state.apiKey || undefined})
+        body: JSON.stringify({...state.data, tab: 'market'})
       });
       clearTimeout(t1); clearTimeout(t2);
       setLoadingStep(0, 'done'); setLoadingStep(1, 'done');
@@ -957,7 +911,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], apiKey: state.apiKey || undefined})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || []})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1403,10 +1357,9 @@ td:first-child{color:var(--text);font-weight:500}
       }
     }
 
-    const apiKey = state.apiKey || '';
     const isGitHubPages = window.location.hostname.includes('github.io');
 
-    if (!isGitHubPages && apiKey) {
+    if (!isGitHubPages) {
       try {
         const resp = await fetch('/api/nova', {
           method: 'POST',
@@ -1418,8 +1371,7 @@ td:first-child{color:var(--text);font-weight:500}
             segment: d.segment,
             geography: d.geography,
             competitors: d.competitors,
-            context: contextParts.join('\n'),
-            apiKey
+            context: contextParts.join('\n')
           })
         });
         const data = await resp.json();
@@ -2033,7 +1985,6 @@ ${sectionsHtml}
         data: state.data,
         aiData: state.aiData,
         competitorNames: state.competitorNames,
-        apiKey: state.apiKey,
         savedAt: Date.now()
       }));
     } catch(e) {}
@@ -2067,7 +2018,6 @@ ${sectionsHtml}
       state.data = saved.data || {};
       state.aiData = saved.aiData || {};
       state.competitorNames = saved.competitorNames || [];
-      if (saved.apiKey) state.apiKey = saved.apiKey;
       document.getElementById('restoreBanner').style.display = 'none';
       document.getElementById('questionsScreen').classList.remove('active');
       document.getElementById('analysisScreen').classList.add('active');
