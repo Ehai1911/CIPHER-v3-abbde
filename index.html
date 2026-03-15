@@ -1321,7 +1321,7 @@ td:first-child{color:var(--text);font-weight:500}
     document.getElementById('novaTrigger').classList.add('visible');
   }
 
-  // ===== NOVA SUB-AGENT (DEMO) =====
+  // ===== NOVA SUB-AGENT =====
   const novaState = {notes: {}};
 
   const NOVA_FLOW = {
@@ -1333,9 +1333,9 @@ td:first-child{color:var(--text);font-weight:500}
         {label:'💎 $30K+', value:'high'}
       ],
       responses: {
-        low: 'Понял — небольшой бюджет означает нужно быть хирургически точным. Поисковое продвижение и бесплатный тариф — твои лучшие инструменты: работают без постоянных вложений и дают долгосрочный эффект.',
-        mid: 'Хороший старт. С таким бюджетом можно одновременно запустить контент для поиска и немного платной рекламы, плюс вложиться в онбординг — сбалансированный подход.',
-        high: 'Отлично — можно действовать агрессивно: платная реклама + поисковое продвижение + партнёрки параллельно. Главное мерить каждый канал и не распыляться.'
+        low: 'Понял — небольшой бюджет означает нужно быть хирургически точным. Партнёрства и органический контент работают без постоянных вложений.',
+        mid: 'Хороший старт. Можно одновременно запустить контент и немного платной рекламы — сбалансированный подход.',
+        high: 'Отлично — можно действовать агрессивно: реклама + органика + партнёрки параллельно. Главное мерить каждый канал.'
       },
       agreement: {low:'💰 Бюджет: до $10K', mid:'💰 Бюджет: $10K–30K', high:'💰 Бюджет: $30K+'}
     },
@@ -1347,9 +1347,9 @@ td:first-child{color:var(--text);font-weight:500}
         {label:'🏢 Команда 5+', value:'big'}
       ],
       responses: {
-        solo: 'Один — значит фокус критичен. Выберем 1–2 канала и пойдём в них глубоко, не распыляясь на всё сразу.',
-        small: 'Маленькая команда — сила гибкости. Можно распределить роли: контент, продукт, продажи. Двигаться быстрее крупных конкурентов.',
-        big: 'С командой 5+ можно параллелить несколько направлений и опережать конкурентов по скорости итераций.'
+        solo: 'Один — фокус критичен. Выберем 1–2 канала и пойдём глубоко, не распыляясь.',
+        small: 'Маленькая команда — сила гибкости. Можно распределить роли и двигаться быстрее крупных конкурентов.',
+        big: 'С командой 5+ можно параллелить несколько направлений и опережать по скорости итераций.'
       },
       agreement: {solo:'👥 Команда: самостоятельно', small:'👥 Команда: 2–5 человек', big:'👥 Команда: 5+ человек'}
     },
@@ -1361,14 +1361,14 @@ td:first-child{color:var(--text);font-weight:500}
         {label:'📈 Привлечь инвестиции', value:'invest'}
       ],
       responses: {
-        clients: 'Фокус на клиентах — правильный приоритет. Стратегия: бесплатный тариф + прямые продажи через LinkedIn и тематические комьюнити.',
-        brand: 'Бренд строится через контент и присутствие. Notion сделал это через библиотеку шаблонов — этот путь открыт для тебя.',
-        invest: 'Для инвесторов нужны метрики роста. Главное — показать динамику выручки и удержание клиентов. Сфокусируемся на этом в HADI-циклах.'
+        clients: 'Фокус на клиентах — правильный приоритет. Бесплатный тариф + прямые продажи дадут первые оплаты быстрее рекламы.',
+        brand: 'Бренд строится через контент. Посмотри как Notion вырос через шаблоны — этот путь доступен с минимальным бюджетом.',
+        invest: 'Для инвесторов важна динамика. Публичные метрики роста убеждают лучше любой презентации.'
       },
       agreement: {clients:'🎯 Приоритет: первые клиенты', brand:'🎯 Приоритет: узнаваемость', invest:'🎯 Приоритет: инвестиции'}
     },
     disagree: {
-      question: 'Есть что-то в стратегии с чем ты не согласен?',
+      question: 'Есть что-то с чем ты не согласен?',
       options: [
         {label:'✅ Всё выглядит реалистично', value:'ok'},
         {label:'💰 Бюджеты кажутся высокими', value:'budget'},
@@ -1376,58 +1376,131 @@ td:first-child{color:var(--text);font-weight:500}
         {label:'🌍 Хочу другую географию', value:'market'}
       ],
       responses: {
-        ok: 'Отлично! Стратегия согласована. Сейчас сформирую персональный план с HADI-циклами.',
-        budget: 'Понял. Урежем бюджеты на 40% и сместим акцент на органику — поисковое продвижение и комьюнити работают медленнее, но требуют меньше вложений.',
-        time: 'Хорошо. Растянем план с 12 до 18 месяцев — меньше давления, более устойчивый рост.',
-        market: 'Принято. Скорректируем географию и конкурентное позиционирование под твой рынок в итоговом документе.'
+        ok: 'Отлично! Стратегия согласована. Формирую персональный план с HADI-циклами.',
+        budget: 'Понял. Урезаем бюджеты на 40% и смещаем акцент на органику — дольше, но без вложений.',
+        time: 'Хорошо. Растянем план до 18 месяцев — меньше давления, более устойчивый рост.',
+        market: 'Принято. Скорректируем географию под твой рынок в итоговом документе.'
       },
       agreement: {ok:'✏️ Стратегия принята без изменений', budget:'✏️ Бюджеты снижены на 40%', time:'✏️ Сроки растянуты до 18 мес', market:'✏️ География скорректирована'}
     }
   };
 
+  // Улучшение 1: инсайты из реального анализа клиента
+  function buildNovaInsights() {
+    const d = state.data || {};
+    const ai = state.aiData || {};
+    const product = d.product || 'продукта';
+    const insights = [];
+    if (ai.market) {
+      if (ai.market.bestAdvice) insights.push(`📊 <strong>Рынок:</strong> ${ai.market.bestAdvice}`);
+      else if (ai.market.summary && ai.market.summary[0]) insights.push(`📊 <strong>Рынок:</strong> ${ai.market.summary[0]}`);
+    }
+    if (ai.swot) {
+      if (ai.swot.opportunities && ai.swot.opportunities[0])
+        insights.push(`🚀 <strong>Главная возможность (SWOT):</strong> ${ai.swot.opportunities[0]}`);
+      else if (ai.swot.strengths && ai.swot.strengths[0])
+        insights.push(`💪 <strong>Твоё преимущество:</strong> ${ai.swot.strengths[0]}`);
+    }
+    if (ai.strategy && ai.strategy.criticalRec)
+      insights.push(`⚡ <strong>Ключевое действие (Стратегия):</strong> ${ai.strategy.criticalRec}`);
+    else if (ai.gaps && ai.gaps[0])
+      insights.push(`🔍 <strong>Пробел рынка:</strong> ${ai.gaps[0].title}`);
+    if (insights.length === 0) {
+      const comps = (state.competitorNames || []).slice(0,2).join(' и ');
+      if (comps) insights.push(`📊 Изучила конкурентов: <strong>${comps}</strong> и других игроков рынка`);
+      insights.push(`🎯 Готова настроить стратегию под твои конкретные возможности`);
+    }
+    return `Привет! Я изучила анализ <strong>${product}</strong>. Вот что важно:<br><br>${insights.slice(0,3).join('<br>')}<br><br>Давай настроим стратегию под твои реальные возможности.`;
+  }
+
+  // Улучшение 3: показать стратегию перед вопросом о несогласии
+  function showStrategyThenDisagree() {
+    const ai = state.aiData || {};
+    const strategy = ai.strategy;
+    const opts = document.getElementById('novaOpts');
+    let previewHtml = '';
+    if (strategy) {
+      const q1goal = strategy.q1 && strategy.q1.goal;
+      const critRec = strategy.criticalRec;
+      const finance = strategy.finance;
+      previewHtml = `<div style="background:var(--surface2);border:1px solid var(--gold-border);border-radius:10px;padding:14px 16px;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">📋 Стратегия по вкладке "Стратегия"</div>
+        ${q1goal ? `<div style="font-size:12px;color:var(--text2);margin-bottom:6px"><strong style="color:var(--text)">Квартал 1:</strong> ${q1goal}</div>` : ''}
+        ${critRec ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border2)">⚡ ${critRec}</div>` : ''}
+        ${finance ? `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border2)">
+          <span style="font-size:11px;color:var(--muted)">Инвестиции: <strong style="color:var(--text)">${finance.totalInvest||'—'}</strong></span>
+          <span style="font-size:11px;color:var(--muted)">Окупаемость: <strong style="color:var(--text)">${finance.payback||'—'}</strong></span>
+          <span style="font-size:11px;color:var(--muted)">Доходность: <strong style="color:var(--gold)">${finance.roi||'—'}</strong></span>
+        </div>` : ''}
+      </div>`;
+    }
+    opts.innerHTML = previewHtml + `<div class="nova-q">${NOVA_FLOW.disagree.question}</div>`;
+    NOVA_FLOW.disagree.options.forEach(o => {
+      const btn = document.createElement('button');
+      btn.className = 'nova-opt';
+      btn.textContent = o.label;
+      btn.onclick = () => handleNovaAnswer('disagree', o.value, o.label);
+      opts.appendChild(btn);
+    });
+  }
+
+  // Улучшение 4: разные HADI под бюджет+команда+приоритет
   function getHadiCycles() {
-    const p = novaState.priority;
-    return [
-      {
-        h: 'Бесплатный тариф снизит барьер входа и создаст поток пользователей для конверсии в платный план',
-        a: 'Запустить бесплатный тариф с ограничением по проектам в течение 2 недель',
-        d: 'Считать: регистрации, конверсия из пробного в платный, стоимость привлечения клиента',
-        i: 'Если конверсия меньше 5% через 30 дней — пересмотреть ограничения бесплатного тарифа'
-      },
-      p === 'clients' ? {
-        h: 'Прямые продажи через LinkedIn дадут первых клиентов быстрее любой рекламы',
-        a: 'Написать 50 целевым компаниям с персонализированным предложением за 2 недели',
-        d: 'Считать: процент ответов, процент демо-встреч, процент закрытых сделок',
-        i: 'Если ответов меньше 10% — улучшить предложение или сменить целевой сегмент'
-      } : p === 'brand' ? {
-        h: 'Поисковый контент и шаблоны под боли малого бизнеса дадут органический трафик без рекламного бюджета',
-        a: 'Опубликовать 10 статей по запросам "альтернатива [конкурент]" и создать 20+ шаблонов',
-        d: 'Считать: органический трафик, время на сайте, конверсия в регистрацию',
-        i: 'Если трафик не растёт через 60 дней — менять темы или добавить гостевые публикации'
-      } : {
-        h: 'Публичные метрики роста привлекают инвесторов лучше любой презентации',
-        a: 'Запустить публичный дашборд с выручкой и ростом, делиться в соцсетях еженедельно',
-        d: 'Считать: динамику выручки, удержание за 30 дней, индекс лояльности',
-        i: 'Если выручка не растёт 2 месяца подряд — переработать ценообразование или портрет клиента'
-      },
-      {
-        h: 'За 90 дней можно проверить гипотезу о соответствии продукта рынку и скорректировать курс',
-        a: 'Провести 10 глубоких интервью с клиентами через 90 дней после запуска',
-        d: 'Фиксировать: что работает, что просят чаще всего, почему не покупают',
-        i: 'Результаты интервью — основа для приоритетов следующего квартала'
-      }
-    ];
+    const budget = novaState.budget;
+    const team = novaState.team;
+    const priority = novaState.priority;
+    const cycle1 = {
+      h: 'Бесплатный тариф снизит барьер входа и создаст поток для конверсии в платный',
+      a: 'Запустить бесплатный тариф с ограничением по проектам за 2 недели',
+      d: 'Считать: регистрации, конверсия из бесплатного в платный, стоимость привлечения',
+      i: 'Если конверсия < 5% через 30 дней — пересмотреть ограничения тарифа'
+    };
+    let cycle2;
+    if (priority === 'invest') {
+      cycle2 = {h:'Публичные метрики роста убеждают инвесторов лучше любой презентации',a:'Запустить публичный дашборд выручки, делиться в соцсетях еженедельно',d:'Динамика выручки, удержание за 30 дней, индекс лояльности',i:'Если выручка не растёт 2 месяца — переработать ценообразование или портрет клиента'};
+    } else if (priority === 'brand') {
+      cycle2 = {h:'Контент под запросы "альтернатива [конкурент]" даёт органический трафик без бюджета',a:'Опубликовать 10 статей по запросам альтернатив + создать 20 шаблонов',d:'Органический трафик, время на сайте, конверсия в регистрацию',i:'Если трафик не растёт 60 дней — сменить темы или добавить гостевые публикации'};
+    } else if (budget === 'high') {
+      cycle2 = {h:'При высоком бюджете реклама + органика параллельно ускоряет рост вдвое',a:'Запустить рекламу в 3 каналах с бюджетом $3–5K, мерить стоимость клиента по каждому',d:'Стоимость привлечения и конверсия в платный по каждому каналу отдельно',i:'Отключить каналы со стоимостью клиента > $150 через 30 дней, удвоить бюджет лучшего'};
+    } else if (budget === 'mid') {
+      cycle2 = {h:'Прямые продажи через LinkedIn дадут первых клиентов быстрее любой рекламы',a:'Написать 50 целевым компаниям с персонализированным предложением за 2 недели',d:'Процент ответов, процент встреч, процент закрытых сделок',i:'Если ответов < 10% — улучшить предложение или сменить сегмент'};
+    } else {
+      cycle2 = {h:'При ограниченном бюджете партнёрская программа даёт клиентов без прямых затрат',a:'Договориться с 5–10 агентствами о партнёрстве за 20% комиссию',d:'Количество партнёров, клиентов через партнёрку, выручка от канала',i:'Если нет продаж через 60 дней — пересмотреть размер комиссии или условия'};
+    }
+    let cycle3;
+    if (team === 'solo') {
+      cycle3 = {h:'Solo-основателю критически важно автоматизировать повторяющиеся задачи с первого дня',a:'Настроить автоматический онбординг: письма, подсказки, шаблоны за неделю',d:'Время до первого результата в продукте, отток в первые 7 дней, запросы в поддержку',i:'Если отток в первые 7 дней > 60% — упростить онбординг и добавить обучающее видео'};
+    } else if (team === 'small') {
+      cycle3 = {h:'Команда 2–5: разделение ролей позволит двигаться быстрее крупных конкурентов',a:'Провести 10 глубоких интервью с клиентами через 60 дней после запуска',d:'Что работает, что просят чаще всего, почему не покупают',i:'Результаты интервью — основа приоритетов следующего квартала'};
+    } else {
+      cycle3 = {h:'С командой 5+ можно параллельно тестировать несколько каналов роста',a:'Провести спринт по 3 каналам одновременно: SEO, партнёрки, прямые продажи',d:'Стоимость клиента и конверсия по каждому каналу, скорость закрытия сделки',i:'Через 45 дней выбрать 1 лучший канал и сконцентрировать 70% ресурсов'};
+    }
+    return [cycle1, cycle2, cycle3];
+  }
+
+  // Улучшение 5: финальный синтез
+  function buildSynthesis() {
+    const ai = state.aiData || {};
+    const d = state.data || {};
+    const product = d.product || 'Продукт';
+    const budgetLabel = {low:'с ограниченным бюджетом', mid:'со средним бюджетом', high:'с сильным бюджетом'}[novaState.budget] || '';
+    const strength = (ai.swot && ai.swot.strengths && ai.swot.strengths[0]) || (ai.market && ai.market.bestAdvice) || '';
+    const opportunity = (ai.swot && ai.swot.opportunities && ai.swot.opportunities[0]) || (ai.gaps && ai.gaps[0] && ai.gaps[0].title) || '';
+    const firstStep = (ai.strategy && ai.strategy.criticalRec) || (ai.quickwins && ai.quickwins[0] && ai.quickwins[0].title) || '';
+    if (!strength && !opportunity && !firstStep) return null;
+    return `${product} ${budgetLabel} — ${strength ? `сила в том что <em>${strength.toLowerCase()}</em>` : ''}${opportunity ? `, окно входа: "${opportunity.toLowerCase()}"` : ''}${firstStep ? `, и первый шаг: <strong>${firstStep}</strong>` : ''}.`;
   }
 
   function openNova() {
     Object.assign(novaState, {budget:null, team:null, priority:null, disagree:null, notes:{}});
     const d = state.data || {};
+    const comps = (state.competitorNames || []).join(', ') || (d.competitors || '—');
     document.getElementById('novaCtx').innerHTML = [
-      ['Продукт', d.product || 'FlowDesk'],
-      ['Рынок', d.area || 'SaaS'],
-      ['Сегмент', d.segment || 'SMB'],
-      ['Цена', d.price || '$50-200/мес'],
-      ['Конкуренты', 'Asana, Monday, Notion, Trello, ClickUp']
+      ['Продукт', d.product || '—'],
+      ['Рынок', d.area || '—'],
+      ['Сегмент', d.segment || '—'],
+      ['Цена', d.price || '—'],
+      ['Конкуренты', comps]
     ].map(([k,v]) => `<div class="nova-ctx-row"><strong>${k}:</strong> ${v}</div>`).join('');
     document.getElementById('novaAgr').innerHTML = '<div class="nova-agr pending"><div class="nova-agr-check">○</div><div>Заполняется в ходе беседы...</div></div>';
     document.getElementById('novaHadiBox').style.display = 'none';
@@ -1436,7 +1509,7 @@ td:first-child{color:var(--text);font-weight:500}
     document.getElementById('novaOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
     setTimeout(() => {
-      addNovaBubble(`Привет! Я изучила анализ <strong>${d.product || 'FlowDesk'}</strong> и хочу поделиться тремя ключевыми выводами:<br><br>📊 <strong>Monday.com</strong> тратит $300M+ на рекламу — конкурировать в платных каналах на старте слишком дорого<br>🎯 <strong>Главная боль рынка</strong> — продукты дорожают при росте. Это твоё окно для дифференциации<br>⚡ <strong>Notion вырос органически</strong> через комьюнити и шаблоны — этот путь воспроизводим<br><br>Давай настроим стратегию под твои реальные возможности.`);
+      addNovaBubble(buildNovaInsights());
       setTimeout(() => showNovaStep('budget'), 700);
     }, 350);
   }
@@ -1486,7 +1559,7 @@ td:first-child{color:var(--text);font-weight:500}
 
     setTimeout(() => {
       addNovaBubble(step.responses[value]);
-      const nextMap = {budget:'team', team:'priority', priority:'disagree', disagree:null};
+      const nextMap = {budget:'team', team:'priority', priority:'_strategy', disagree:null};
       const next = nextMap[stepKey];
       setTimeout(() => showNovaNoteInput(stepKey, next), 800);
     }, 450);
@@ -1529,7 +1602,13 @@ td:first-child{color:var(--text);font-weight:500}
   }
 
   function proceedNovaNext(nextStep) {
-    if (nextStep && nextStep !== 'null') {
+    if (nextStep === '_strategy') {
+      // Улучшение 3: сначала показываем стратегию, потом несогласие
+      setTimeout(() => {
+        addNovaBubble('Отлично. Вот стратегия на основе анализа твоих конкурентов:');
+        setTimeout(() => showStrategyThenDisagree(), 600);
+      }, 300);
+    } else if (nextStep && nextStep !== 'null') {
       showNovaStep(nextStep);
     } else {
       const cycles = getHadiCycles();
@@ -1539,7 +1618,10 @@ td:first-child{color:var(--text);font-weight:500}
       ].map(([k,v]) => `<div class="nova-hadi-row"><strong>${k}:</strong> ${v}</div>`).join('');
       document.getElementById('novaHadiBox').style.display = 'block';
       setTimeout(() => {
-        addNovaBubble('Сессия завершена. Я зафиксировала все договорённости и подготовила персональный план с HADI-циклами.<br><br>Нажми кнопку ниже чтобы получить итоговый документ — его можно сохранить как PDF.');
+        // Улучшение 5: финальный синтез
+        const synthesis = buildSynthesis();
+        const synthHtml = synthesis ? `<br><br>💡 <em>${synthesis}</em>` : '';
+        addNovaBubble(`Сессия завершена. Зафиксировала все договорённости и подготовила персональный план с HADI-циклами.${synthHtml}<br><br>Нажми кнопку ниже чтобы получить итоговый документ — его можно сохранить как PDF.`);
         const opts = document.getElementById('novaOpts');
         opts.innerHTML = '';
         const btn = document.createElement('button');
@@ -1604,12 +1686,10 @@ td:first-child{color:var(--text);font-weight:500}
     ${params.map(([l,v]) => `<div style="background:#0f1628;border:1px solid #1e2d4a;border-radius:8px;padding:11px"><div style="font-size:9px;color:#5b6b8a;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${l}</div><div style="font-size:12px;font-weight:600;color:#e2e8f5">${v}</div></div>`).join('')}
   </div>
 </div>
+${(() => { const syn = buildSynthesis(); return syn ? `<div style="margin-bottom:28px;padding:16px 20px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.25);border-radius:10px"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#d4a843;text-transform:uppercase;margin-bottom:8px">СТРАТЕГИЧЕСКИЙ СИНТЕЗ</div><div style="font-size:13px;color:#e2e8f5;line-height:1.7">${syn}</div></div>` : ''; })()}
 <div style="margin-bottom:28px">
   <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#5b6b8a;text-transform:uppercase;margin-bottom:11px">КЛЮЧЕВЫЕ ИНСАЙТЫ ПО КОНКУРЕНТАМ</div>
-  ${['Monday.com тратит $300M+ на paid — конкурировать в этом канале нецелесообразно на старте',
-     'Главная боль рынка — продукты дорожают при масштабировании. Это пространство для дифференциации',
-     'Notion вырос через community и шаблоны органически — этот путь воспроизводим с небольшим бюджетом']
-    .map(t => `<div style="display:flex;gap:10px;margin-bottom:7px;font-size:12px;color:#a8b4cc;line-height:1.6"><span style="color:#d4a843;flex-shrink:0">·</span>${t}</div>`).join('')}
+  ${(() => { const ai = state.aiData || {}; const lines = []; if (ai.market && ai.market.bestAdvice) lines.push(ai.market.bestAdvice); if (ai.market && ai.market.summary) lines.push(...(ai.market.summary||[]).slice(0,2)); if (ai.swot && ai.swot.opportunities && ai.swot.opportunities[0]) lines.push(ai.swot.opportunities[0]); if (!lines.length) lines.push('Конкурентная среда проанализирована — детали в соответствующих вкладках'); return lines.slice(0,3).map(t => `<div style="display:flex;gap:10px;margin-bottom:7px;font-size:12px;color:#a8b4cc;line-height:1.6"><span style="color:#d4a843;flex-shrink:0">·</span>${t}</div>`).join(''); })()}
 </div>
 ${Object.keys(novaState.notes).length > 0 ? `
 <div style="margin-bottom:28px">
