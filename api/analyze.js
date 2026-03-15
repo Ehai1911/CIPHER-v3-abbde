@@ -61,15 +61,20 @@ ${compLine}Заполни JSON реальными данными для разд
 
 // Vercel serverless function format
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  };
+  Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
 
-  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+  if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method Not Allowed' }); return; }
 
   try {
-    const { area, segment, product, description, geography, competitors, price, tab, competitorNames, apiKey: clientKey } = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { area, segment, product, description, geography, competitors, price, tab, competitorNames, apiKey: clientKey } = body;
     const apiKey = (clientKey && clientKey.startsWith('sk-') && clientKey.length > 20)
       ? clientKey
       : process.env.OPENAI_API_KEY;
