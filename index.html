@@ -286,6 +286,24 @@ td:first-child{color:var(--text);font-weight:500}
   cursor:pointer;animation:pulse-ring 2.5s ease-out infinite;transition:.25s;z-index:99
 }
 .helper-btn:hover{transform:scale(1.07)}
+.nova-hint{
+  position:fixed;bottom:32px;right:92px;
+  background:var(--surface2);border:1px solid var(--gold-border);
+  color:var(--text);font-size:12px;font-family:'Inter',sans-serif;
+  padding:8px 13px;border-radius:20px;white-space:nowrap;z-index:98;
+  pointer-events:none;
+  animation:nova-hint-blink 6s ease-in-out infinite;
+}
+.nova-hint::after{
+  content:'';position:absolute;right:-7px;top:50%;transform:translateY(-50%);
+  border:6px solid transparent;border-left-color:var(--gold-border);
+  border-right:none;margin-right:1px
+}
+@keyframes nova-hint-blink{
+  0%,15%{opacity:0;transform:translateX(6px)}
+  25%,65%{opacity:1;transform:translateX(0)}
+  80%,100%{opacity:0;transform:translateX(6px)}
+}
 
 .helper-chat{
   display:none;position:fixed;bottom:92px;right:20px;width:340px;height:480px;
@@ -676,7 +694,8 @@ td:first-child{color:var(--text);font-weight:500}
 <button class="nova-trigger" id="novaTrigger" onclick="openNova()">✦ Стратегическая сессия с Новой</button>
 
 <!-- HELPER -->
-<button class="helper-btn" onclick="toggleHelper()" title="NOVA — Ассистент">N</button>
+<div class="nova-hint" id="novaHint">💬 Задай вопрос ИИ-аналитику</div>
+<button class="helper-btn" onclick="toggleHelper();document.getElementById('novaHint').style.display='none'" title="NOVA — Ассистент">N</button>
 <div class="helper-chat" id="helperChat">
   <div class="helper-header">
     <span class="helper-title">NOVA · Ассистент</span>
@@ -711,7 +730,7 @@ td:first-child{color:var(--text);font-weight:500}
   const TABS = [
     {id:'market',emoji:'📊',title:'Рынок'},
     {id:'positioning',emoji:'🗺️',title:'Позиционирование'},
-    {id:'swot',emoji:'🎲',title:'SWOT'},
+    {id:'swot',emoji:'🎲',title:'Позиции продукта'},
     {id:'audience',emoji:'👤',title:'Аудитория'},
     {id:'pricing',emoji:'💰',title:'Цены и модели'},
     {id:'product',emoji:'🔧',title:'Продукт'},
