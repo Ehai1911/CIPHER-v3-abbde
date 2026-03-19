@@ -1,0 +1,18 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/margo-scrape"
+  to = "/.netlify/functions/margo-scrape"
+  status = 200
+
+[[redirects]]
+  from = "/api/margo-ads"
+  to = "/.netlify/functions/margo-ads"
+  status = 200
+
+[[redirects]]
+  from = "/api/margo-chat"
+  to = "/.netlify/functions/margo-chat"
+  status = 200

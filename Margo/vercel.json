@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/margo-scrape.js": { "maxDuration": 30 },
+    "api/margo-ads.js":    { "maxDuration": 30 },
+    "api/margo-chat.js":   { "maxDuration": 15 }
+  },
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

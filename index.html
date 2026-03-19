@@ -719,7 +719,7 @@ td:first-child{color:var(--text);font-weight:500}
     {id:'segment',title:'Кто твой целевой клиент?',hint:'Выбери кому ты продаёшь — это влияет на выбор конкурентов и стратегию.',type:'radio',options:['Частные лица','Малый и средний бизнес','Крупный бизнес']},
     {id:'product',title:'Как называется твой продукт?',hint:'Рабочее или официальное название — оно появится в заголовке отчёта.',type:'input',placeholder:'Например: FlowDesk',examples:[]},
     {id:'description',title:'Кратко опиши что делает продукт',hint:'1-2 предложения: что это, для кого и какую проблему решает.',type:'textarea',placeholder:'Например: платформа для управления задачами с AI-автоматизацией для маркетинговых команд',examples:['[Название] — платформа для [кого], которая помогает [что делать]. В отличие от конкурентов — [главное преимущество].']},
-    {id:'geography',title:'На каких рынках работаешь?',hint:'Выбери один или несколько — анализ и конкуренты будут адаптированы под регион.',type:'multi',options:['Казахстан','СНГ','Европа','США','Азия','Глобально']},
+    {id:'geography',title:'На каких рынках работаешь?',hint:'Напиши страну или регион — или выбери из популярных. AI сам разберётся с локальными конкурентами.',type:'geo',options:['🇰🇿 Казахстан','🇷🇺 СНГ','🇪🇺 Европа','🇺🇸 США','🇦🇪 Ближний Восток','🇮🇳 Индия','🇨🇳 Китай','🌍 Весь мир']},
     {id:'competitors',title:'Кого ты уже считаешь своим конкурентом?',hint:'Необязательно, но повышает точность. Оставь пустым — AI найдёт сам.',type:'textarea',placeholder:'Например: Notion, Confluence, GitBook...',examples:['Notion, Confluence, GitBook','Asana, Monday.com, Trello','Figma, Sketch, Canva','Slack, Teams, Discord','Shopify, WooCommerce, Tilda']},
     {id:'competitorUrls',title:'Добавь сайты конкурентов для точного анализа',hint:'Необязательно. Мы прочитаем их сайты напрямую — цены, функции, позиционирование. По одному URL на строку.',type:'textarea',placeholder:'https://notion.so\nhttps://asana.com\nhttps://monday.com',examples:[]},
     {id:'price',title:'Какой ценовой диапазон?',hint:'Укажи стартовую цену — это влияет на сравнение с конкурентами в том же сегменте.',type:'radio',options:['Бесплатно','Есть бесплатный план','До $50/мес','$50-200/мес','$200-1000/мес','Корпоративная (договорная)']}
@@ -786,6 +786,16 @@ td:first-child{color:var(--text);font-weight:500}
       html = `<div class="q-multi-grid">${q.options.map(o =>
         `<button class="tbtn ${selected.includes(o) ? 'selected' : ''}" onclick="toggleMulti('${q.id}', '${o}')">${o}</button>`
       ).join('')}</div>`;
+    } else if(q.type === 'geo') {
+      const cur = state.data[q.id] || '';
+      html = `
+        <input type="text" class="fi" id="fi_${q.id}" placeholder="Например: ОАЭ, Казахстан или Латинская Америка..." value="${cur}" oninput="updateText('${q.id}', this.value)" style="max-width:600px">
+        <div style="margin-top:12px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Быстрый выбор:</div>
+        <div class="q-multi-grid">${q.options.map(o => {
+          const clean = o.replace(/^[\p{Emoji}\s]+/u, '').trim();
+          const isActive = cur.toLowerCase().includes(clean.toLowerCase());
+          return `<button class="tbtn ${isActive ? 'selected' : ''}" onclick="geoQuickPick('${q.id}','${clean}')">${o}</button>`;
+        }).join('')}</div>`;
     }
     // Example chips under input/textarea
     if (q.examples && q.examples.length) {
@@ -819,6 +829,17 @@ td:first-child{color:var(--text);font-weight:500}
     const arr = state.data[id];
     if(arr.includes(val)) {state.data[id] = arr.filter(v => v !== val);} else {state.data[id].push(val);}
     renderQuestion();
+  }
+
+  function geoQuickPick(id, val) {
+    const cur = (state.data[id] || '').trim();
+    const parts = cur ? cur.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const idx = parts.findIndex(p => p.toLowerCase() === val.toLowerCase());
+    if(idx >= 0) { parts.splice(idx, 1); } else { parts.push(val); }
+    state.data[id] = parts.join(', ');
+    renderQuestion();
+    const el = document.getElementById('fi_' + id);
+    if(el) el.value = state.data[id];
   }
 
   function nextStep() {
