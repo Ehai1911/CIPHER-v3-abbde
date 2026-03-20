@@ -571,51 +571,6 @@ td:first-child{color:var(--text);font-weight:500}
 }
 .btn-export:hover{border-color:var(--gold-border);color:var(--gold)}
 
-/* ===== MARGO BANNER ===== */
-/* MARGO — плавающая кнопка */
-#margoBanner{
-  display:none;
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
-  z-index:300;
-  background:linear-gradient(135deg,rgba(15,22,40,.97),rgba(20,29,53,.97));
-  border:1px solid rgba(167,139,250,.35);
-  border-radius:16px;padding:14px 20px;
-  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(167,139,250,.1);
-  backdrop-filter:blur(12px);
-  white-space:nowrap;
-}
-.margo-banner-inner{display:flex;align-items:center;gap:14px}
-.margo-banner-icon{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(212,168,67,.15));
-  border:1px solid rgba(167,139,250,.4);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#a78bfa
-}
-.margo-banner-text{flex:1}
-.margo-banner-title{
-  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#e2e8f5
-}
-.margo-banner-sub{font-size:11px;color:#a8b4cc;margin-top:1px}
-.margo-banner-btn{
-  flex-shrink:0;padding:9px 16px;border-radius:9px;
-  background:linear-gradient(135deg,#a78bfa,rgba(167,139,250,.8));
-  border:none;color:#fff;font-size:12px;font-weight:700;
-  font-family:'Syne',sans-serif;cursor:pointer;
-  transition:opacity .15s;letter-spacing:.02em
-}
-.margo-banner-btn:hover{opacity:.85}
-.margo-banner-close{
-  background:none;border:none;color:#5b6b8a;
-  font-size:16px;cursor:pointer;padding:2px 6px;
-  flex-shrink:0;transition:color .15s
-}
-.margo-banner-close:hover{color:#a8b4cc}
-@media(max-width:768px){
-  #margoBanner{width:calc(100vw - 32px);bottom:16px;white-space:normal}
-  .margo-banner-sub{display:none}
-}
-
 </style>
 </head>
 <body>
@@ -764,7 +719,7 @@ td:first-child{color:var(--text);font-weight:500}
     {id:'segment',title:'Кто твой целевой клиент?',hint:'Выбери кому ты продаёшь — это влияет на выбор конкурентов и стратегию.',type:'radio',options:['Частные лица','Малый и средний бизнес','Крупный бизнес']},
     {id:'product',title:'Как называется твой продукт?',hint:'Рабочее или официальное название — оно появится в заголовке отчёта.',type:'input',placeholder:'Например: FlowDesk',examples:[]},
     {id:'description',title:'Кратко опиши что делает продукт',hint:'1-2 предложения: что это, для кого и какую проблему решает.',type:'textarea',placeholder:'Например: платформа для управления задачами с AI-автоматизацией для маркетинговых команд',examples:['[Название] — платформа для [кого], которая помогает [что делать]. В отличие от конкурентов — [главное преимущество].']},
-    {id:'geography',title:'На каких рынках работаешь?',hint:'Напиши страну или регион — или выбери из популярных. AI сам разберётся с локальными конкурентами.',type:'geo',options:['🇰🇿 Казахстан','🇷🇺 СНГ','🇪🇺 Европа','🇺🇸 США','🇦🇪 Ближний Восток','🇮🇳 Индия','🇨🇳 Китай','🌍 Весь мир']},
+    {id:'geography',title:'На каких рынках работаешь?',hint:'Выбери один или несколько — анализ и конкуренты будут адаптированы под регион.',type:'multi',options:['Казахстан','СНГ','Европа','США','Азия','Глобально']},
     {id:'competitors',title:'Кого ты уже считаешь своим конкурентом?',hint:'Необязательно, но повышает точность. Оставь пустым — AI найдёт сам.',type:'textarea',placeholder:'Например: Notion, Confluence, GitBook...',examples:['Notion, Confluence, GitBook','Asana, Monday.com, Trello','Figma, Sketch, Canva','Slack, Teams, Discord','Shopify, WooCommerce, Tilda']},
     {id:'competitorUrls',title:'Добавь сайты конкурентов для точного анализа',hint:'Необязательно. Мы прочитаем их сайты напрямую — цены, функции, позиционирование. По одному URL на строку.',type:'textarea',placeholder:'https://notion.so\nhttps://asana.com\nhttps://monday.com',examples:[]},
     {id:'price',title:'Какой ценовой диапазон?',hint:'Укажи стартовую цену — это влияет на сравнение с конкурентами в том же сегменте.',type:'radio',options:['Бесплатно','Есть бесплатный план','До $50/мес','$50-200/мес','$200-1000/мес','Корпоративная (договорная)']}
@@ -831,16 +786,6 @@ td:first-child{color:var(--text);font-weight:500}
       html = `<div class="q-multi-grid">${q.options.map(o =>
         `<button class="tbtn ${selected.includes(o) ? 'selected' : ''}" onclick="toggleMulti('${q.id}', '${o}')">${o}</button>`
       ).join('')}</div>`;
-    } else if(q.type === 'geo') {
-      const cur = state.data[q.id] || '';
-      html = `
-        <input type="text" class="fi" id="fi_${q.id}" placeholder="Например: ОАЭ, Казахстан или Латинская Америка..." value="${cur}" oninput="updateText('${q.id}', this.value)" style="max-width:600px">
-        <div style="margin-top:12px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Быстрый выбор:</div>
-        <div class="q-multi-grid">${q.options.map(o => {
-          const clean = o.replace(/^[\p{Emoji}\s]+/u, '').trim();
-          const isActive = cur.toLowerCase().includes(clean.toLowerCase());
-          return `<button class="tbtn ${isActive ? 'selected' : ''}" onclick="geoQuickPick('${q.id}','${clean}')">${o}</button>`;
-        }).join('')}</div>`;
     }
     // Example chips under input/textarea
     if (q.examples && q.examples.length) {
@@ -874,17 +819,6 @@ td:first-child{color:var(--text);font-weight:500}
     const arr = state.data[id];
     if(arr.includes(val)) {state.data[id] = arr.filter(v => v !== val);} else {state.data[id].push(val);}
     renderQuestion();
-  }
-
-  function geoQuickPick(id, val) {
-    const cur = (state.data[id] || '').trim();
-    const parts = cur ? cur.split(',').map(s => s.trim()).filter(Boolean) : [];
-    const idx = parts.findIndex(p => p.toLowerCase() === val.toLowerCase());
-    if(idx >= 0) { parts.splice(idx, 1); } else { parts.push(val); }
-    state.data[id] = parts.join(', ');
-    renderQuestion();
-    const el = document.getElementById('fi_' + id);
-    if(el) el.value = state.data[id];
   }
 
   function nextStep() {
@@ -1004,30 +938,11 @@ td:first-child{color:var(--text);font-weight:500}
         if (!state.aiData) state.aiData = {};
         state.aiData[tabId] = data[tabId];
         saveToStorage();
-        checkMargoBanner();
       }
     } catch (e) {
       state.lastError = e.message;
     }
     switchTab(TABS.findIndex(t => t.id === tabId));
-  }
-
-  function checkMargoBanner() {
-    const banner = document.getElementById('margoBanner');
-    if (!banner || banner.dataset.closed === '1') return;
-    const loaded = state.aiData ? Object.keys(state.aiData).length : 0;
-    if (loaded >= 3) banner.style.display = 'block';
-  }
-
-  function openMargo() {
-    const d = state.data || {};
-    const urls = Array.isArray(d.competitorUrls)
-      ? d.competitorUrls
-      : (d.competitorUrls || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-    const params = new URLSearchParams();
-    if (urls.length) params.set('urls', urls.join(','));
-    if (d.product) params.set('product', d.product);
-    window.open('Margo/index.html?' + params.toString(), '_blank');
   }
 
   function noDataHtml(tab) {
@@ -2237,19 +2152,5 @@ ${sectionsHtml}
     if (btn) btn.style.display = '';
   }
 </script>
-
-<!-- MARGO FLOATING BANNER -->
-<div id="margoBanner">
-  <div class="margo-banner-inner">
-    <div class="margo-banner-icon">М</div>
-    <div class="margo-banner-text">
-      <div class="margo-banner-title">🎯 Маркетинг-разведка с МАРГО</div>
-      <div class="margo-banner-sub">Реклама, отзывы и сайты конкурентов — для маркетолога</div>
-    </div>
-    <button class="margo-banner-btn" onclick="openMargo()">Открыть →</button>
-    <button class="margo-banner-close" onclick="const b=document.getElementById('margoBanner');b.style.display='none';b.dataset.closed='1'">✕</button>
-  </div>
-</div>
-
 </body>
 </html>
