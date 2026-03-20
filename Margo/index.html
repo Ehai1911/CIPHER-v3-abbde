@@ -734,15 +734,26 @@ function loadApiKey() {
 }
 
 function loadFromCipher() {
-  // Импортируем конкурентов из Cipher
+  // 1. Сначала пробуем URL-параметры (если открыто из Cipher)
+  const params = new URLSearchParams(window.location.search);
+  const urlsParam = params.get('urls');
+  if (urlsParam) {
+    const found = urlsParam.split(',').map(u => u.trim()).filter(Boolean).map(u => u.startsWith('http') ? u : 'https://' + u);
+    if (found.length > 0) {
+      state.urls = [...new Set([...state.urls, ...found])];
+      renderUrlList();
+      showToast('Импортировано из Cipher: ' + found.length + ' конкурентов');
+      return;
+    }
+  }
+
+  // 2. Fallback — localStorage
   try {
     const cipherData = localStorage.getItem('cipherProductData');
     if (cipherData) {
       const d = JSON.parse(cipherData);
-      // Cipher хранит конкурентов как строку через запятую
       const comps = d.competitors || d.q3 || '';
       if (comps) {
-        // Парсим URL-ы из текста (ищем домены)
         const urlRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/g;
         const found = [...comps.matchAll(urlRegex)].map(m => {
           const raw = m[0];
