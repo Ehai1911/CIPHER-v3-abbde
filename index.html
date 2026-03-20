@@ -572,50 +572,48 @@ td:first-child{color:var(--text);font-weight:500}
 .btn-export:hover{border-color:var(--gold-border);color:var(--gold)}
 
 /* ===== MARGO BANNER ===== */
+/* MARGO — плавающая кнопка */
 #margoBanner{
-  display:none;margin:0 24px 0;
-  padding:18px 22px;border-radius:13px;
-  background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(212,168,67,.06));
-  border:1px solid rgba(167,139,250,.25);
-  position:relative;overflow:hidden
-}
-#margoBanner::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(167,139,250,.5),transparent)
-}
-.margo-banner-inner{display:flex;align-items:center;gap:16px}
-.margo-banner-icon{
-  width:44px;height:44px;border-radius:12px;flex-shrink:0;
-  background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(212,168,67,.15));
+  display:none;
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  z-index:300;
+  background:linear-gradient(135deg,rgba(15,22,40,.97),rgba(20,29,53,.97));
   border:1px solid rgba(167,139,250,.35);
+  border-radius:16px;padding:14px 20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(167,139,250,.1);
+  backdrop-filter:blur(12px);
+  white-space:nowrap;
+}
+.margo-banner-inner{display:flex;align-items:center;gap:14px}
+.margo-banner-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(212,168,67,.15));
+  border:1px solid rgba(167,139,250,.4);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#a78bfa
+  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#a78bfa
 }
 .margo-banner-text{flex:1}
 .margo-banner-title{
-  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
-  color:#e2e8f5;margin-bottom:3px
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#e2e8f5
 }
-.margo-banner-sub{font-size:12px;color:#a8b4cc;line-height:1.5}
+.margo-banner-sub{font-size:11px;color:#a8b4cc;margin-top:1px}
 .margo-banner-btn{
-  flex-shrink:0;padding:10px 18px;border-radius:9px;
-  background:linear-gradient(135deg,#a78bfa,rgba(167,139,250,.7));
+  flex-shrink:0;padding:9px 16px;border-radius:9px;
+  background:linear-gradient(135deg,#a78bfa,rgba(167,139,250,.8));
   border:none;color:#fff;font-size:12px;font-weight:700;
-  font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;
+  font-family:'Syne',sans-serif;cursor:pointer;
   transition:opacity .15s;letter-spacing:.02em
 }
 .margo-banner-btn:hover{opacity:.85}
 .margo-banner-close{
-  position:absolute;top:10px;right:12px;
   background:none;border:none;color:#5b6b8a;
-  font-size:16px;cursor:pointer;padding:2px 6px;border-radius:5px;
-  transition:color .15s
+  font-size:16px;cursor:pointer;padding:2px 6px;
+  flex-shrink:0;transition:color .15s
 }
 .margo-banner-close:hover{color:#a8b4cc}
 @media(max-width:768px){
-  #margoBanner{margin:0 14px 0}
-  .margo-banner-inner{flex-wrap:wrap}
-  .margo-banner-btn{width:100%}
+  #margoBanner{width:calc(100vw - 32px);bottom:16px;white-space:normal}
+  .margo-banner-sub{display:none}
 }
 
 </style>
@@ -693,17 +691,6 @@ td:first-child{color:var(--text);font-weight:500}
       <button class="btn-export" onclick="generateFullReport()" title="Скачать полный PDF всех разделов">↓ Полный PDF</button>
     </div>
     <div class="tabs-wrap" id="tabsBar"></div>
-  </div>
-  <div id="margoBanner">
-    <button class="margo-banner-close" onclick="const b=document.getElementById('margoBanner');b.style.display='none';b.dataset.closed='1'">✕</button>
-    <div class="margo-banner-inner">
-      <div class="margo-banner-icon">М</div>
-      <div class="margo-banner-text">
-        <div class="margo-banner-title">Хочешь углублённый маркетинг-анализ?</div>
-        <div class="margo-banner-sub">МАРГО изучит рекламу, отзывы клиентов и сайты конкурентов — специально для маркетолога</div>
-      </div>
-      <button class="margo-banner-btn" onclick="openMargo()">Открыть МАРГО →</button>
-    </div>
   </div>
   <div class="content" id="content"></div>
 </div>
@@ -2250,5 +2237,19 @@ ${sectionsHtml}
     if (btn) btn.style.display = '';
   }
 </script>
+
+<!-- MARGO FLOATING BANNER -->
+<div id="margoBanner">
+  <div class="margo-banner-inner">
+    <div class="margo-banner-icon">М</div>
+    <div class="margo-banner-text">
+      <div class="margo-banner-title">🎯 Маркетинг-разведка с МАРГО</div>
+      <div class="margo-banner-sub">Реклама, отзывы и сайты конкурентов — для маркетолога</div>
+    </div>
+    <button class="margo-banner-btn" onclick="openMargo()">Открыть →</button>
+    <button class="margo-banner-close" onclick="const b=document.getElementById('margoBanner');b.style.display='none';b.dataset.closed='1'">✕</button>
+  </div>
+</div>
+
 </body>
 </html>
