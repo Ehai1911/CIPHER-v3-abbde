@@ -573,7 +573,7 @@ td:first-child{color:var(--text);font-weight:500}
 
 /* ===== MARGO BANNER ===== */
 #margoBanner{
-  display:none;margin:0 0 20px;
+  display:none;margin:0 24px 0;
   padding:18px 22px;border-radius:13px;
   background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(212,168,67,.06));
   border:1px solid rgba(167,139,250,.25);
@@ -613,6 +613,7 @@ td:first-child{color:var(--text);font-weight:500}
 }
 .margo-banner-close:hover{color:#a8b4cc}
 @media(max-width:768px){
+  #margoBanner{margin:0 14px 0}
   .margo-banner-inner{flex-wrap:wrap}
   .margo-banner-btn{width:100%}
 }
@@ -693,19 +694,18 @@ td:first-child{color:var(--text);font-weight:500}
     </div>
     <div class="tabs-wrap" id="tabsBar"></div>
   </div>
-  <div class="content" id="content">
-    <div id="margoBanner">
-      <button class="margo-banner-close" onclick="document.getElementById('margoBanner').style.display='none'">✕</button>
-      <div class="margo-banner-inner">
-        <div class="margo-banner-icon">М</div>
-        <div class="margo-banner-text">
-          <div class="margo-banner-title">Хочешь углублённый маркетинг-анализ?</div>
-          <div class="margo-banner-sub">МАРГО изучит рекламу, отзывы клиентов и сайты конкурентов — специально для маркетолога</div>
-        </div>
-        <button class="margo-banner-btn" onclick="openMargo()">Открыть МАРГО →</button>
+  <div id="margoBanner">
+    <button class="margo-banner-close" onclick="const b=document.getElementById('margoBanner');b.style.display='none';b.dataset.closed='1'">✕</button>
+    <div class="margo-banner-inner">
+      <div class="margo-banner-icon">М</div>
+      <div class="margo-banner-text">
+        <div class="margo-banner-title">Хочешь углублённый маркетинг-анализ?</div>
+        <div class="margo-banner-sub">МАРГО изучит рекламу, отзывы клиентов и сайты конкурентов — специально для маркетолога</div>
       </div>
+      <button class="margo-banner-btn" onclick="openMargo()">Открыть МАРГО →</button>
     </div>
   </div>
+  <div class="content" id="content"></div>
 </div>
 
 <!-- MODAL -->
@@ -1027,7 +1027,7 @@ td:first-child{color:var(--text);font-weight:500}
 
   function checkMargoBanner() {
     const banner = document.getElementById('margoBanner');
-    if (!banner || banner.style.display === 'none') return;
+    if (!banner || banner.dataset.closed === '1') return;
     const loaded = state.aiData ? Object.keys(state.aiData).length : 0;
     if (loaded >= 3) banner.style.display = 'block';
   }
