@@ -509,7 +509,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
   </div>
   <div class="header-right">
-    <a href="../index.html" class="back-btn">← Cipher</a>
+    <a href="/cipher" class="back-btn">← Cipher</a>
     <button class="export-btn" onclick="exportPDF()">⬇ Экспорт PDF</button>
   </div>
 </header>
@@ -711,8 +711,22 @@ const state = {
   running: false,
   chatOpen: false,
   chatHistory: [],
-  apiKey: ''
+  apiKey: '',
+  _siteData: null,
+  _reviewsData: null,
+  _adsData: null
 };
+
+// Сохраняем результаты Margo в localStorage для CIPHER
+function saveMargoData(module, data) {
+  try {
+    const existing = JSON.parse(localStorage.getItem('margoAnalysis') || '{}');
+    existing[module] = data;
+    existing._timestamp = Date.now();
+    existing._urls = state.urls;
+    localStorage.setItem('margoAnalysis', JSON.stringify(existing));
+  } catch(e) {}
+}
 
 // ===== INIT =====
 function init() {
@@ -747,7 +761,25 @@ function loadFromCipher() {
     }
   }
 
-  // 2. Fallback — localStorage
+  // 2. Читаем из neurovia_state (основное хранилище Cipher)
+  try {
+    const raw = localStorage.getItem('neurovia_state');
+    if (raw) {
+      const saved = JSON.parse(raw);
+      const urlsText = (saved.data && saved.data.competitorUrls) || '';
+      if (urlsText) {
+        const found = urlsText.split('\n').map(u => u.trim()).filter(u => u.startsWith('http'));
+        if (found.length > 0) {
+          state.urls = [...new Set([...state.urls, ...found])];
+          renderUrlList();
+          showToast('Импортировано из Cipher: ' + found.length + ' конкурентов');
+          return;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 3. Fallback — cipherProductData (старый формат)
   try {
     const cipherData = localStorage.getItem('cipherProductData');
     if (cipherData) {
@@ -909,6 +941,8 @@ async function runSiteAnalysis() {
 }
 
 function renderSiteData(data) {
+  state._siteData = data;
+  saveMargoData('site', data);
   const el = document.getElementById('siteContent');
   if (!data || !data.competitors) { el.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>Нет данных</div>'; return; }
 
@@ -922,25 +956,35 @@ function renderSiteData(data) {
             <th>CTA</th>
             <th>Соц. доказательства</th>
             <th>Воронка</th>
+            <th>Захват лидов</th>
             <th>Сила сайта</th>
           </tr>
         </thead>
         <tbody>
-          ${data.competitors.map(c => `
+          ${data.competitors.map(c => {
+            const lc = c.leadCapture || {};
+            const frictionColor = lc.friction === 'низкий' ? 'tag-green' : lc.friction === 'высокий' ? 'tag-red' : 'tag-gold';
+            const methods = Array.isArray(lc.methods) ? lc.methods : [];
+            return `
             <tr>
               <td><span class="comp-name">${c.name}</span></td>
               <td>${c.uvp}</td>
               <td><span class="card-tag tag-purple">${c.cta}</span></td>
               <td style="font-size:11px">${c.socialProof}</td>
               <td style="font-size:11px">${c.funnel}</td>
+              <td style="font-size:11px">
+                ${lc.mainMethod ? `<div style="font-weight:600;margin-bottom:4px">${lc.mainMethod}</div>` : ''}
+                ${methods.slice(0,3).map(m => `<span class="card-tag tag-purple" style="font-size:10px;margin:1px 2px 1px 0;display:inline-block">${m}</span>`).join('')}
+                ${lc.friction ? `<div style="margin-top:4px"><span class="card-tag ${frictionColor}" style="font-size:10px">friction: ${lc.friction}</span></div>` : ''}
+              </td>
               <td>
                 <div class="score-bar">
                   <div class="score-track"><div class="score-fill fill-green" style="width:${c.score}%"></div></div>
                   <span class="score-num">${c.score}</span>
                 </div>
               </td>
-            </tr>
-          `).join('')}
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -983,6 +1027,8 @@ async function runReviewsAnalysis() {
 }
 
 function renderReviewsData(data) {
+  state._reviewsData = data;
+  saveMargoData('reviews', data);
   const el = document.getElementById('reviewsContent');
   if (!data || !data.competitors) { el.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>Нет данных</div>'; return; }
 
@@ -1044,6 +1090,8 @@ async function runAdsAnalysis() {
 }
 
 function renderAdsData(data) {
+  state._adsData = data;
+  saveMargoData('ads', data);
   const el = document.getElementById('adsContent');
   if (!data || !data.ads) { el.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>Нет данных</div>'; return; }
 
@@ -1134,6 +1182,11 @@ function generateMockSiteData() {
       cta: ['Попробовать бесплатно', 'Начать сейчас', 'Запросить демо'][i % 3],
       socialProof: ['15 000+ компаний', '★ 4.8 на G2', 'Топ-10 Forbes 2024'][i % 3],
       funnel: ['Free → Paid', 'Demo → Trial', 'Freemium'][i % 3],
+      leadCapture: [
+        { methods: ['форма заявки', 'бесплатный пробный период'], mainMethod: 'Бесплатный триал 14 дней', friction: 'низкий' },
+        { methods: ['демо-звонок', 'лид-магнит'], mainMethod: 'Запрос демо', friction: 'средний' },
+        { methods: ['вебинар', 'чат'], mainMethod: 'Живой чат + вебинар', friction: 'низкий' }
+      ][i % 3],
       score: [78, 65, 82, 59, 71][i % 5]
     })),
     insights: [

@@ -32,13 +32,13 @@
 
 ## 🔗 БЛОК 2 — Связать Margo и CIPHER
 
-- ⬜ **2.1** Проанализировать текущую кнопку "импорт из Cipher" в Margo — понять как она работает технически.
+- ✅ **2.1** Проанализировали "импорт из Cipher" в Margo — читает из `localStorage['neurovia_state']` competitor URLs (одностороннее, CIPHER → Margo).
 
-- ⬜ **2.2** Сделать обратную передачу данных: после того как Margo собрала данные по конкуренту (UVP, отзывы, реклама) — эти данные должны попадать в контекст CIPHER при анализе табов.
+- ✅ **2.2** Обратная передача данных Margo → CIPHER: `renderSiteData/Reviews/AdsData()` теперь вызывают `saveMargoData()` → сохраняют в `localStorage['margoAnalysis']`. CIPHER читает через `getMargoContext()` и передаёт в API как `margoContext`.
 
-- ⬜ **2.3** В discover mode добавить автозапуск лёгкого Margo-скрапа для каждого найденного конкурента (сайт + G2). Результат складывать в `searchContext` который передаётся в табы.
+- ⬜ **2.3** Автозапуск Margo-скрапа из discover mode — пока пропускаем, достаточно что пользователь запускает Margo вручную перед анализом.
 
-- ⬜ **2.4** Обновить промпты табов (market, reputation, pricing) чтобы явно использовали данные из Margo-скрапа.
+- ✅ **2.4** `margoContext` добавлен в промпты табов: reputation, offers, channels, market, gaps, swot, strategy, quickwins — помечен как "приоритетный источник данных".
 
 ---
 

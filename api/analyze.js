@@ -267,7 +267,7 @@ const TAB_SCHEMAS = {
   gaps: `{"gaps":[{"emoji":"💰","title":"Название пробела рынка","description":"Детальное описание пробела: что не делают конкуренты и почему это проблема","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🤖","title":"Название пробела рынка","description":"Детальное описание пробела с конкретными данными","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🌍","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"},{"emoji":"🎯","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"}]}`
 };
 
-async function fetchTab(tab, area, segment, product, description, geo, competitors, price, apiKey, urls, analysisContext, searchContext) {
+async function fetchTab(tab, area, segment, product, description, geo, competitors, price, apiKey, urls, analysisContext, searchContext, margoContext) {
   const compLine = competitors && competitors.length
     ? `Конкуренты: ${competitors.join(', ')}\n`
     : '';
@@ -324,6 +324,12 @@ ${analysisContext}` : '';
 - Анализируй конкурентов из ВСЕХ указанных регионов — не только из первого. Покажи микс компаний из разных рынков.
 - Если в указанных регионах нет сильных локальных конкурентов — показывай глобальных игроков которые присутствуют на этих рынках. В поле summary обязательно отметь: "Локальный рынок [регион] не заполнен — это прямая возможность для входа."`;
 
+  // Данные из Margo — реальные UVP, отзывы, реклама (приоритетный источник)
+  const MARGO_TABS = ['reputation','offers','channels','market','gaps','swot','strategy','quickwins'];
+  const margoSection = margoContext && margoContext.length > 50 && MARGO_TABS.includes(tab)
+    ? `\n\nДАННЫЕ ИЗ МАРГО-РАЗВЕДКИ (реальные данные собранные о конкурентах — используй как приоритетный источник, они важнее догадок):\n${margoContext}`
+    : '';
+
   const prompt = `Ты — ведущий аналитик конкурентной разведки. Продукт: ${product} | Сфера: ${area} | Сегмент: ${segment} | География: ${geo} | Цена: ${price}
 Описание: ${description}
 ${compLine}
@@ -335,7 +341,7 @@ ${realDataRule}
 - Максимум 5-7 слов в ячейке таблицы.
 - summary — конкретные выводы с именами компаний и цифрами, не общие фразы.
 - bestAdvice — одно конкретное действие для ${product} прямо сейчас.
-${strategyExtra}${quickwinsExtra}${strategyRules}${scrapedContext}${searchContext && tab === 'market' ? `\n\nРЕАЛЬНЫЕ РЕЗУЛЬТАТЫ ПОИСКА (используй только компании из этого текста, не выдумывай других):\n${searchContext}` : ''}
+${strategyExtra}${quickwinsExtra}${strategyRules}${scrapedContext}${margoSection}${searchContext && tab === 'market' ? `\n\nРЕАЛЬНЫЕ РЕЗУЛЬТАТЫ ПОИСКА (используй только компании из этого текста, не выдумывай других):\n${searchContext}` : ''}
 Шаблон: ${TAB_SCHEMAS[tab]}`;
 
   const maxTokens = tab === 'pricing' ? (scrapedContext ? 1600 : 1100) : (scrapedContext ? 1400 : 900);
@@ -398,7 +404,7 @@ module.exports = async (req, res) => {
       return;
     }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, analysisContext, searchContext, apiKey: clientKey } = body;
+    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, analysisContext, searchContext, margoContext, apiKey: clientKey } = body;
     const apiKey = (clientKey && (clientKey.startsWith('sk-ant-') || clientKey.startsWith('sk-')) && clientKey.length > 20)
       ? clientKey
       : process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
@@ -578,7 +584,7 @@ ${rawSearchText.substring(0, 8000)}
       return;
     }
 
-    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, apiKey, urlList, analysisContext, searchContext);
+    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, apiKey, urlList, analysisContext, searchContext, margoContext);
     res.status(200).json(data);
 
   } catch (error) {

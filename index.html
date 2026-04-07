@@ -1131,7 +1131,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined, margoContext: getMargoContext() || undefined})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1233,6 +1233,43 @@ td:first-child{color:var(--text);font-weight:500}
         ${actions}
         <div class="q-metrics"><span>Как понять что план выполнен:</span> ${data.metrics || '—'}</div>
       </div>`;
+  }
+
+  // Читаем данные собранные Margo — реальные UVP, отзывы, реклама конкурентов
+  function getMargoContext() {
+    try {
+      const raw = localStorage.getItem('margoAnalysis');
+      if (!raw) return '';
+      const data = JSON.parse(raw);
+      // Данные свежее 4 часов
+      if (data._timestamp && Date.now() - data._timestamp > 14400000) return '';
+      const parts = [];
+
+      if (data.site && data.site.competitors && data.site.competitors.length) {
+        const lines = data.site.competitors.map(c =>
+          `${c.name}: оффер="${c.uvp || '—'}", CTA="${c.cta || '—'}", сила сайта=${c.score || '—'}`
+        ).join('\n');
+        parts.push('САЙТЫ КОНКУРЕНТОВ (МАРГО):\n' + lines);
+      }
+
+      if (data.reviews && data.reviews.competitors && data.reviews.competitors.length) {
+        const lines = data.reviews.competitors.map(c =>
+          `${c.name}: рейтинг ${c.rating || '—'}, хвалят: ${(c.positives || []).slice(0,2).join(', ')}, жалобы: ${(c.negatives || []).slice(0,2).join(', ')}`
+        ).join('\n');
+        parts.push('ОТЗЫВЫ КОНКУРЕНТОВ (МАРГО):\n' + lines);
+        if (data.reviews.opportunity) parts.push('Точка входа через отзывы: ' + data.reviews.opportunity);
+      }
+
+      if (data.ads) {
+        const adParts = [];
+        if (data.ads.mainPain) adParts.push('главная боль в рекламе: ' + data.ads.mainPain);
+        if (data.ads.topFormat) adParts.push('топ-формат: ' + data.ads.topFormat);
+        if (data.ads.gaps)     adParts.push('пробелы: ' + data.ads.gaps);
+        if (adParts.length) parts.push('РЕКЛАМА КОНКУРЕНТОВ (МАРГО): ' + adParts.join(', '));
+      }
+
+      return parts.join('\n\n');
+    } catch(e) { return ''; }
   }
 
   function buildAnalysisContext() {
