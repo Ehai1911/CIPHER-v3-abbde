@@ -170,6 +170,45 @@ textarea.fi{resize:vertical;min-height:100px;line-height:1.5;max-width:600px}
 .lst.done   .lst-dot{background:var(--green)}
 .lst.active .lst-dot{background:var(--gold);box-shadow:0 0 8px var(--gold)}
 
+/* Прогресс источников поиска */
+.src-list{display:none;flex-direction:column;gap:5px;padding:8px 0 4px 18px;margin-top:2px}
+.src-list.visible{display:flex}
+.src-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);transition:color .3s}
+.src-item.active{color:var(--text2)}
+.src-item.done{color:var(--green)}
+.src-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
+.src-item.active .src-dot{background:var(--gold);animation:pulse .9s ease-in-out infinite}
+.src-item.done  .src-dot{background:var(--green)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ===== CONFIRM SCREEN ===== */
+#confirmScreen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--bg)}
+#confirmScreen.active{display:flex}
+.confirm-wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:24px}
+.confirm-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.confirm-sub{font-size:13px;color:var(--text2);line-height:1.6;margin-top:6px}
+.confirm-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding-right:4px}
+.confirm-list::-webkit-scrollbar{width:4px}
+.confirm-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.comp-card{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s;user-select:none}
+.comp-card:hover{border-color:var(--border2)}
+.comp-card:has(input:checked){border-color:var(--gold-border);background:var(--surface2)}
+.comp-card input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);flex-shrink:0;margin-top:3px;cursor:pointer}
+.comp-card-logo{width:36px;height:36px;border-radius:8px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--gold);flex-shrink:0}
+.comp-card-info{flex:1;min-width:0}
+.comp-card-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.comp-card-url{font-size:11px;color:var(--muted);margin-bottom:5px;font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-card-preview{font-size:12px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.confirm-add{display:flex;gap:8px}
+.confirm-add input{flex:1;padding:10px 14px;background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s}
+.confirm-add input:focus{border-color:var(--gold-border)}
+.confirm-add input::placeholder{color:var(--muted)}
+.confirm-add-btn{padding:10px 18px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:8px;color:var(--text2);font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.confirm-add-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+.confirm-actions{display:flex;justify-content:space-between;align-items:center;padding-top:4px}
+.confirm-found{font-size:12px;color:var(--muted)}
+.confirm-found span{color:var(--gold);font-weight:600}
+
 /* ===== ANALYSIS SCREEN ===== */
 #analysisScreen{display:none;min-height:100vh;flex-direction:column}
 #analysisScreen.active{display:flex}
@@ -625,13 +664,42 @@ td:first-child{color:var(--text);font-weight:500}
 <!-- LOADING SCREEN -->
 <div id="loadingScreen" class="screen">
   <div class="spin-ring"></div>
-  <div class="load-title">Анализируем рынок</div>
-  <div class="load-sub">Собираем данные по конкурентам, метрикам и стратегии...</div>
+  <div class="load-title" id="loadTitle">Ищем конкурентов</div>
+  <div class="load-sub" id="loadSub">Проверяем DuckDuckGo, Яндекс, Google и Brave...</div>
   <div class="load-steps">
-    <div class="lst" id="ls1"><div class="lst-dot"></div>Поиск конкурентов</div>
+    <div class="lst" id="ls1"><div class="lst-dot"></div>Ищем конкурентов в интернете</div>
+    <div class="src-list" id="srcList">
+      <div class="src-item" id="src-ddg"><div class="src-dot"></div>DuckDuckGo</div>
+      <div class="src-item" id="src-yandex"><div class="src-dot"></div>Яндекс</div>
+      <div class="src-item" id="src-google"><div class="src-dot"></div>Google</div>
+      <div class="src-item" id="src-brave"><div class="src-dot"></div>Brave</div>
+    </div>
     <div class="lst" id="ls2"><div class="lst-dot"></div>Анализ рынка</div>
     <div class="lst" id="ls3"><div class="lst-dot"></div>Финансовые метрики</div>
     <div class="lst" id="ls4"><div class="lst-dot"></div>Формирование отчёта</div>
+  </div>
+</div>
+
+<!-- CONFIRM SCREEN -->
+<div id="confirmScreen" class="screen">
+  <div class="confirm-wrap">
+    <div>
+      <div class="brand" style="margin-bottom:18px">
+        <div class="brand-icon">N</div>
+        <div><div class="brand-name">NEUROVIA LABS</div><div class="brand-sub">CIPHER</div></div>
+      </div>
+      <div class="confirm-title">Нашли конкурентов 🎯</div>
+      <div class="confirm-sub">Выбери кого анализировать. Убери нерелевантных или добавь своих вручную.</div>
+    </div>
+    <div class="confirm-list" id="confirmList"></div>
+    <div class="confirm-add">
+      <input type="text" id="addCompInput" placeholder="Добавить конкурента вручную (сайт или название)..." onkeydown="if(event.key==='Enter')addManualComp()">
+      <button class="confirm-add-btn" onclick="addManualComp()">+ Добавить</button>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-back" onclick="goBack()">← Изменить данные</button>
+      <button class="btn-next" onclick="continueWithCompetitors()">Анализировать <span id="confirmCount">0</span> →</button>
+    </div>
   </div>
 </div>
 
@@ -877,19 +945,151 @@ td:first-child{color:var(--text);font-weight:500}
     }
   }
 
+  // Хранилище найденных конкурентов до подтверждения
+  let _pendingCompetitors = [];
+  let _srcTimers = [];
+
+  function startDiscoverProgress() {
+    const srcList = document.getElementById('srcList');
+    if (srcList) srcList.classList.add('visible');
+    const sources = ['src-ddg','src-yandex','src-google','src-brave'];
+    const delays  = [0, 2000, 3500, 5000];
+    _srcTimers = [];
+    sources.forEach((id, i) => {
+      _srcTimers.push(setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.className = 'src-item active';
+      }, delays[i]));
+    });
+  }
+
+  function stopDiscoverProgress() {
+    _srcTimers.forEach(t => clearTimeout(t));
+    _srcTimers = [];
+    ['src-ddg','src-yandex','src-google','src-brave'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.className = 'src-item done';
+    });
+    // Переключаем заголовок на анализ рынка
+    const title = document.getElementById('loadTitle');
+    const sub   = document.getElementById('loadSub');
+    if (title) title.textContent = 'Анализируем рынок';
+    if (sub)   sub.textContent   = 'Собираем данные по конкурентам, метрикам и стратегии...';
+    const srcList = document.getElementById('srcList');
+    if (srcList) srcList.classList.remove('visible');
+  }
+
   async function fetchAnalysis() {
     setLoadingStep(0, 'active');
-    const t1 = setTimeout(() => setLoadingStep(1, 'active'), 3000);
-    const t2 = setTimeout(() => setLoadingStep(2, 'active'), 5000);
+    const t1 = setTimeout(() => setLoadingStep(1, 'active'), 5000);
+    const t2 = setTimeout(() => setLoadingStep(2, 'active'), 9000);
+
+    // ШАГ 1: Поиск конкурентов (только если не заданы вручную)
+    const hasManualCompetitors = state.data.competitors && state.data.competitors.trim().length > 2;
+    if (!hasManualCompetitors) {
+      startDiscoverProgress();
+      try {
+        const discoverResp = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({...state.data, tab: 'discover'})
+        });
+        if (discoverResp.ok) {
+          const discoverData = await discoverResp.json();
+          const foundComps = discoverData.competitors || (discoverData.discover && discoverData.discover.competitors) || [];
+          if (discoverData.searchContext) state._searchContext = discoverData.searchContext;
+          stopDiscoverProgress();
+          if (foundComps.length > 0) {
+            clearTimeout(t1); clearTimeout(t2);
+            // Показываем экран подтверждения — пользователь сам выбирает конкурентов
+            showConfirmScreen(foundComps);
+            return;
+          }
+        }
+      } catch(e) { stopDiscoverProgress(); /* поиск не критичен — продолжаем без него */ }
+    }
+    clearTimeout(t1); clearTimeout(t2);
+    stopDiscoverProgress();
+    // Конкуренты заданы вручную или не найдены — сразу запускаем анализ
+    await runAnalysis();
+  }
+
+  function showConfirmScreen(competitors) {
+    _pendingCompetitors = competitors;
+    document.getElementById('loadingScreen').classList.remove('active');
+    document.getElementById('confirmScreen').classList.add('active');
+    renderConfirmList();
+  }
+
+  function renderConfirmList() {
+    const list = document.getElementById('confirmList');
+    if (!list) return;
+    list.innerHTML = _pendingCompetitors.map((c, i) => {
+      const letter = (c.name || c.url || '?')[0].toUpperCase();
+      const preview = c.preview ? c.preview.substring(0, 160) : (c.why || '');
+      return `<label class="comp-card" for="cc${i}">
+        <input type="checkbox" id="cc${i}" checked onchange="updateConfirmCount()">
+        <div class="comp-card-logo">${letter}</div>
+        <div class="comp-card-info">
+          <div class="comp-card-name">${c.name || c.url}</div>
+          <div class="comp-card-url">${c.url || ''}</div>
+          ${preview ? `<div class="comp-card-preview">${preview}</div>` : ''}
+        </div>
+      </label>`;
+    }).join('');
+    updateConfirmCount();
+  }
+
+  function updateConfirmCount() {
+    const checked = document.querySelectorAll('#confirmList input[type=checkbox]:checked').length;
+    const el = document.getElementById('confirmCount');
+    if (el) el.textContent = checked;
+  }
+
+  function addManualComp() {
+    const inp = document.getElementById('addCompInput');
+    const val = (inp.value || '').trim();
+    if (!val) return;
+    let url = val, name = val;
+    if (val.includes('.') && !val.includes(' ')) {
+      url = val.startsWith('http') ? val : 'https://' + val;
+      try { name = new URL(url).hostname.replace('www.', ''); } catch(e) {}
+    } else { url = ''; }
+    _pendingCompetitors.push({ name, url: url || val, why: 'Добавлен вручную', preview: '' });
+    inp.value = '';
+    renderConfirmList();
+  }
+
+  function continueWithCompetitors() {
+    const checkboxes = document.querySelectorAll('#confirmList input[type=checkbox]');
+    const selected = Array.from(checkboxes)
+      .map((cb, i) => cb.checked ? _pendingCompetitors[i] : null)
+      .filter(Boolean);
+    if (selected.length === 0) { updateConfirmCount(); return; }
+
+    state.competitorNames = selected.map(c => c.name).filter(Boolean);
+    state.data.competitorUrls = selected
+      .filter(c => c.url && c.url.startsWith('http'))
+      .map(c => c.url).join('\n');
+
+    document.getElementById('confirmScreen').classList.remove('active');
+    document.getElementById('loadingScreen').classList.add('active');
+    runAnalysis();
+  }
+
+  async function runAnalysis() {
+    setLoadingStep(0, 'done');
+    setLoadingStep(1, 'active');
+    const t1 = setTimeout(() => setLoadingStep(2, 'active'), 4000);
 
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'market'})
+        body: JSON.stringify({...state.data, tab: 'market', competitorNames: state.competitorNames || [], searchContext: state._searchContext || undefined})
       });
-      clearTimeout(t1); clearTimeout(t2);
-      setLoadingStep(0, 'done'); setLoadingStep(1, 'done');
+      clearTimeout(t1);
+      setLoadingStep(1, 'done');
       setLoadingStep(2, 'active');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'API error ' + response.status);
@@ -898,14 +1098,16 @@ td:first-child{color:var(--text);font-weight:500}
       if (data && data.market) {
         if (!state.aiData) state.aiData = {};
         state.aiData.market = data.market;
-        if (data.competitors) state.competitorNames = data.competitors;
+        if (data.competitors && (!state.competitorNames || state.competitorNames.length === 0)) {
+          state.competitorNames = data.competitors;
+        }
         saveToStorage();
       } else {
         state.aiData = null;
         state.lastError = 'Сервер не вернул данные — попробуй снова';
       }
-    } catch (e) {
-      clearTimeout(t1); clearTimeout(t2);
+    } catch(e) {
+      clearTimeout(t1);
       [0,1,2,3].forEach(i => setLoadingStep(i, 'done'));
       state.aiData = null;
       state.lastError = e.message;
@@ -938,11 +1140,35 @@ td:first-child{color:var(--text);font-weight:500}
         if (!state.aiData) state.aiData = {};
         state.aiData[tabId] = data[tabId];
         saveToStorage();
+        updateLoadBtn();
       }
     } catch (e) {
       state.lastError = e.message;
     }
     switchTab(TABS.findIndex(t => t.id === tabId));
+  }
+
+  async function fetchTiers() {
+    // Загружает тарифные планы конкурентов отдельным запросом, затем перерисовывает pricing
+    const btn = document.querySelector('button[onclick="fetchTiers()"]');
+    if (btn) { btn.textContent = 'Загружаю...'; btn.disabled = true; }
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...state.data, tab: 'pricingtiers', competitorNames: state.competitorNames || []})
+      });
+      if (!response.ok) throw new Error('API error ' + response.status);
+      const data = await response.json();
+      if (data && data.pricingtiers && Array.isArray(data.pricingtiers)) {
+        if (!state.aiData) state.aiData = {};
+        state.aiData.pricingtiers = data.pricingtiers;
+        saveToStorage();
+      }
+    } catch (e) {
+      console.error('fetchTiers error:', e);
+    }
+    switchTab(TABS.findIndex(t => t.id === 'pricing'));
   }
 
   function noDataHtml(tab) {
@@ -954,16 +1180,39 @@ td:first-child{color:var(--text);font-weight:500}
     </div>`;
   }
 
-  function renderTabs() {
+  // currentTabIdx — запоминаем активную вкладку чтобы не сбрасывать при обновлении
+  var currentTabIdx = 0;
+
+  function renderTabs(keepCurrent) {
+    const activeIdx = keepCurrent ? currentTabIdx : 0;
     const row1 = TABS.slice(0,9).map((t,i) =>
-      `<button class="tab tab-row1 ${i === 0 ? 'on' : ''}" onclick="switchTab(${i})">${t.emoji} ${t.title}</button>`
+      `<button class="tab tab-row1 ${i === activeIdx ? 'on' : ''}" onclick="switchTab(${i})">${t.emoji} ${t.title}</button>`
     ).join('');
     const row2 = TABS.slice(9).map((t,i) =>
-      `<button class="tab tab-row2" onclick="switchTab(${i+9})">${t.emoji} ${t.title}</button>`
+      `<button class="tab tab-row2 ${(i+9) === activeIdx ? 'on' : ''}" onclick="switchTab(${i+9})">${t.emoji} ${t.title}</button>`
     ).join('');
     document.getElementById('tabsBar').innerHTML =
       `<div class="tabs-row1">${row1}</div><div class="tabs-row2">${row2}</div>`;
-    switchTab(0);
+    if (!keepCurrent) switchTab(0);
+    // Обновляем кнопку загрузки
+    updateLoadBtn();
+  }
+
+  function updateLoadBtn() {
+    const btn = document.getElementById('btnLoadAll');
+    if (!btn) return;
+    const missing = TABS.filter(t => !state.aiData || !state.aiData[t.id]);
+    if (missing.length === 0) {
+      btn.textContent = '✓ Всё загружено';
+      btn.style.color = '#4ade80';
+      btn.style.borderColor = '#16a34a';
+      btn.disabled = true;
+    } else {
+      btn.textContent = '↻ Загрузить ' + missing.length;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }
   }
 
   function renderStrategyQuarter(key, data, label, dotColor) {
@@ -990,21 +1239,22 @@ td:first-child{color:var(--text);font-weight:500}
     const ai = state.aiData;
     if (!ai) return '';
     const parts = [];
-    if (ai.market && ai.market.summary) parts.push('РЫНОК: ' + ai.market.summary.join('. '));
+    const joinSummary = s => [].concat(s).join('. ');
+    if (ai.market && ai.market.summary) parts.push('РЫНОК: ' + joinSummary(ai.market.summary));
     if (ai.market && ai.market.bestAdvice) parts.push('Лучший в рынке: ' + ai.market.bestCompany + ' — ' + ai.market.bestAdvice);
-    if (ai.audience && ai.audience.summary) parts.push('АУДИТОРИЯ: ' + ai.audience.summary.join('. '));
+    if (ai.audience && ai.audience.summary) parts.push('АУДИТОРИЯ: ' + joinSummary(ai.audience.summary));
     if (ai.swot) {
-      if (ai.swot.strengths) parts.push('СИЛЬНЫЕ СТОРОНЫ: ' + ai.swot.strengths.slice(0,2).join('. '));
-      if (ai.swot.weaknesses) parts.push('СЛАБЫЕ СТОРОНЫ: ' + ai.swot.weaknesses.slice(0,2).join('. '));
-      if (ai.swot.opportunities) parts.push('ВОЗМОЖНОСТИ: ' + ai.swot.opportunities.slice(0,2).join('. '));
-      if (ai.swot.threats) parts.push('УГРОЗЫ: ' + ai.swot.threats.slice(0,2).join('. '));
+      if (ai.swot.strengths) parts.push('СИЛЬНЫЕ СТОРОНЫ: ' + [].concat(ai.swot.strengths).slice(0,2).join('. '));
+      if (ai.swot.weaknesses) parts.push('СЛАБЫЕ СТОРОНЫ: ' + [].concat(ai.swot.weaknesses).slice(0,2).join('. '));
+      if (ai.swot.opportunities) parts.push('ВОЗМОЖНОСТИ: ' + [].concat(ai.swot.opportunities).slice(0,2).join('. '));
+      if (ai.swot.threats) parts.push('УГРОЗЫ: ' + [].concat(ai.swot.threats).slice(0,2).join('. '));
     }
-    if (ai.pricing && ai.pricing.summary) parts.push('ЦЕНЫ: ' + ai.pricing.summary.join('. '));
+    if (ai.pricing && ai.pricing.summary) parts.push('ЦЕНЫ: ' + joinSummary(ai.pricing.summary));
     if (ai.pricing && ai.pricing.recommendation) parts.push('Рекомендация по цене: ' + ai.pricing.recommendation.why);
-    if (ai.product && ai.product.summary) parts.push('ПРОДУКТ: ' + ai.product.summary.join('. '));
-    if (ai.channels && ai.channels.summary) parts.push('МАРКЕТИНГ: ' + ai.channels.summary.join('. '));
-    if (ai.reputation && ai.reputation.summary) parts.push('РЕПУТАЦИЯ: ' + ai.reputation.summary.join('. '));
-    if (ai.offers && ai.offers.summary) parts.push('ОФФЕРЫ: ' + ai.offers.summary.join('. '));
+    if (ai.product && ai.product.summary) parts.push('ПРОДУКТ: ' + joinSummary(ai.product.summary));
+    if (ai.channels && ai.channels.summary) parts.push('МАРКЕТИНГ: ' + joinSummary(ai.channels.summary));
+    if (ai.reputation && ai.reputation.summary) parts.push('РЕПУТАЦИЯ: ' + joinSummary(ai.reputation.summary));
+    if (ai.offers && ai.offers.summary) parts.push('ОФФЕРЫ: ' + joinSummary(ai.offers.summary));
     if (ai.gaps) parts.push('ПРОБЕЛЫ РЫНКА: ' + ai.gaps.map(g => g.title + ' — ' + g.description).join('. '));
     if (ai.positioning && ai.positioning.insight) parts.push('ПОЗИЦИОНИРОВАНИЕ: ' + ai.positioning.insight);
     return parts.join('\n');
@@ -1042,6 +1292,7 @@ td:first-child{color:var(--text);font-weight:500}
   }
 
   function switchTab(idx) {
+    currentTabIdx = idx;
     document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('on', i === idx));
     const tab = TABS[idx];
     const product = state.data.product || 'Ваш продукт';
@@ -1208,6 +1459,55 @@ td:first-child{color:var(--text);font-weight:500}
           </div>
         </div>` : '';
 
+      // ===== TIERS =====
+      const tiers = state.aiData?.pricingtiers || [];
+      function renderTierComp(comp) {
+        // Формат с plans: [{name, price, items}]
+        if (comp.plans && comp.plans.length) {
+          return `<div style="padding:10px 14px">
+            ${comp.plans.map((plan, pi) => `
+              ${pi > 0 ? '<div style="height:1px;background:var(--border);margin:8px 0"></div>' : ''}
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                <span style="font-size:11px;font-weight:600;color:var(--gold)">${plan.name}</span>
+                <span style="font-size:10px;font-weight:700;color:var(--text);background:var(--surface3);padding:2px 7px;border-radius:4px;white-space:nowrap">${plan.price}</span>
+              </div>
+              <ul style="padding-left:13px;margin:0">
+                ${(plan.items || []).map(item => `<li style="font-size:10px;color:var(--text2);line-height:1.7">${item}</li>`).join('')}
+              </ul>
+            `).join('')}
+          </div>`;
+        }
+        // Плоский формат: {service, price, features, region}
+        const rows = [];
+        if (comp.service) rows.push(`<div style="font-size:10px;color:var(--gold);font-weight:600;margin-bottom:6px">${comp.service}</div>`);
+        if (comp.price) rows.push(`<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;padding:4px 8px;background:var(--surface3);border-radius:5px;display:inline-block">${comp.price}</div>`);
+        if (comp.features) {
+          const items = comp.features.split(/[,;]/).map(s => s.trim()).filter(Boolean);
+          rows.push(`<ul style="padding-left:13px;margin:0 0 4px 0">${items.map(i => `<li style="font-size:10px;color:var(--text2);line-height:1.8">${i}</li>`).join('')}</ul>`);
+        }
+        if (comp.region) rows.push(`<div style="font-size:9px;color:var(--muted);margin-top:4px">🌍 ${comp.region}</div>`);
+        return `<div style="padding:10px 14px">${rows.join('')}</div>`;
+      }
+      const tiersHtml = tiers.length ? `
+        <div style="margin-top:22px">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">📋 Детализация тарифных планов</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            ${tiers.map(comp => `
+              <div style="flex:1;min-width:200px;max-width:280px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+                <div style="padding:10px 14px;background:var(--surface3);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text)">${comp.company}</div>
+                ${renderTierComp(comp)}
+              </div>
+            `).join('')}
+          </div>
+        </div>` : `
+        <div style="margin-top:22px;padding:16px;background:var(--surface2);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">📋 Детализация тарифных планов</div>
+            <div style="font-size:11px;color:var(--muted)">Пакеты и состав каждого конкурента — отдельный запрос</div>
+          </div>
+          <button onclick="fetchTiers()" style="padding:8px 18px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0a0e1a;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Syne',sans-serif">Загрузить тарифы</button>
+        </div>`;
+
       const rec = p.recommendation;
       const recHtml = rec ? `
         <div style="margin-top:20px;background:linear-gradient(135deg,rgba(212,168,67,.07),rgba(212,168,67,.02));border:1.5px solid var(--gold-border);border-radius:12px;padding:18px 20px">
@@ -1230,6 +1530,7 @@ td:first-child{color:var(--text);font-weight:500}
               <div style="font-size:13px;color:var(--text);font-weight:600">${rec.freeLimit}</div>
             </div>` : ''}
           </div>
+          ${rec.priceWindow ? `<div style="font-size:12px;color:var(--gold-l);font-weight:500;background:rgba(212,168,67,.08);border-radius:7px;padding:9px 13px;margin-bottom:10px;line-height:1.6">🎯 Ценовое окно: ${rec.priceWindow}</div>` : ''}
           <div style="font-size:12px;color:var(--text2);line-height:1.7;border-top:1px solid var(--border);padding-top:12px">${rec.why}</div>
         </div>` : '';
 
@@ -1243,10 +1544,11 @@ td:first-child{color:var(--text);font-weight:500}
             <tbody>${(()=>{const um=getCompetitorUrlMap();return p.rows.map(row=>`<tr>${row.map((c,i)=>linkCell(c,i,um)).join('')}</tr>`).join('');})()}</tbody>
           </table>
         </div>
+        ${tiersHtml}
         ${getSourceBadges()}
         <div class="summary-box">
           <div class="summary-title">Выводы</div>
-          ${p.summary.map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
+          ${[].concat(p.summary).map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
         </div>
         ${recHtml}
       `;
@@ -1339,7 +1641,7 @@ td:first-child{color:var(--text);font-weight:500}
       ${getSourceBadges()}
       <div class="summary-box">
         <div class="summary-title">Выводы</div>
-        ${data.summary.map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
+        ${[].concat(data.summary).map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
       </div>
       ${criticalRec ? `<div class="rec-item" style="border-color:var(--red)"><div class="rec-pri" style="color:var(--red)">Критично</div><div class="rec-title">${criticalRec}</div></div>` : ''}
       ${importantRec ? `<div class="rec-item"><div class="rec-pri">Важно</div><div class="rec-title">${importantRec}</div></div>` : ''}
@@ -1360,7 +1662,7 @@ td:first-child{color:var(--text);font-weight:500}
         </table>
       </div>
       <div style="font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">Выводы</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6">${data.summary.join('<br>')}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${[].concat(data.summary).join('<br>')}</div>
     `;
     document.getElementById('modal').classList.add('open');
   }
@@ -1369,7 +1671,7 @@ td:first-child{color:var(--text);font-weight:500}
 
   function retryAnalysis() {
     state.aiData = {};
-    state.competitorNames = [];
+    // НЕ сбрасываем competitorNames — они нужны для правильных названий в анализе
     state.lastError = '';
     document.getElementById('analysisScreen').classList.remove('active');
     document.getElementById('loadingScreen').classList.add('active');
@@ -1381,7 +1683,10 @@ td:first-child{color:var(--text);font-weight:500}
     clearStorage();
     state.aiData = undefined;
     state.step = 0;
+    _pendingCompetitors = [];
     document.getElementById('analysisScreen').classList.remove('active');
+    document.getElementById('confirmScreen').classList.remove('active');
+    document.getElementById('loadingScreen').classList.remove('active');
     document.getElementById('questionsScreen').classList.add('active');
     renderQuestion();
   }
@@ -1502,7 +1807,7 @@ td:first-child{color:var(--text);font-weight:500}
     state.aiData = {
       market:{headers:['Компания','Доля рынка','Рост/год','Позиция','Тренд'],rows:[['Asana','18%','24%','Лидер','↑'],['Monday.com','15%','31%','Претендент','↑'],['Notion','12%','42%','Быстрорастущий','↑'],['Trello','14%','8%','Зрелый','→'],['ClickUp','11%','38%','Агрессивный','↑']],summary:['Рынок инструментов управления проектами растёт на 24% ежегодно — вход своевременный','Monday и ClickUp агрессивно теснят Asana через цену и AI-функции','Notion разрушает границу между базой знаний и управлением проектами — новая категория'],bestCompany:'Monday.com',bestAdvice:'Прозрачная цена + бесплатный триал + автоматизация без кода — ключ к малому бизнесу'},
       audience:{headers:['Компания','Сегмент','Ключевые роли','Главная боль','Зрелость аудитории'],rows:[['Asana','Средний/Крупный','Менеджер проектов, Техдир','Сложный онбординг','Высокая'],['Monday.com','Малый/Средний','Операционный менеджер','Нет единой картины','Средняя'],['Notion','Малый/Через продукт','Основатель, соло-команды','Слишком гибкий = хаос','Низкая'],['Trello','Малый бизнес','Разработчики','Доска без аналитики','Высокая'],['ClickUp','Малый/Средний','Команды "всё-в-одном"','Перегруженность функций','Средняя']],summary:['Аудитория малого бизнеса хочет простоту, но с реальной аналитикой','Основатели и операционные менеджеры — главные сторонники покупки','Ключевая боль: слишком много инструментов, нет единого места'],bestCompany:'Monday.com',bestAdvice:'Целься в операционного менеджера компании 20–100 человек — он принимает решение и чувствует боль'},
-      pricing:{headers:['Компания','Модель','Старт цена','Бесплатно','Пробный период','Годовая скидка'],rows:[['Asana','За пользователя','$10.99/мес','✅ до 15 чел','30 дней','-20%'],['Monday.com','За пользователя','$9/мес','❌','14 дней','-18%'],['Notion','За пользователя','$8/мес','✅ личный','—','-20%'],['Trello','Бесплатный план','$5/мес','✅ навсегда','—','-17%'],['ClickUp','Бесплатный план','$7/мес','✅ навсегда','—','-45%']],summary:['ClickUp и Trello захватывают базу через бесплатный план — потом конвертируют в платный','Средний чек SMB $12–25/мес на пользователя — Asana выше рынка при росте команды','Годовая скидка 17–45% — стандарт: без неё клиент выбирает конкурента'],bestCompany:'ClickUp',bestAdvice:'Бесплатный план с ограничением 3 проекта + скидка 30% на год = лучшая механика конверсии на рынке',chart:[{name:'Asana',url:'https://asana.com/pricing',start:10.99,color:'#60a5fa'},{name:'Monday.com',url:'https://monday.com/pricing',start:9,color:'#a78bfa'},{name:'Notion',url:'https://notion.so/pricing',start:8,color:'#34d399'},{name:'Trello',url:'https://trello.com/pricing',start:5,color:'#f87171'},{name:'ClickUp',url:'https://clickup.com/pricing',start:7,color:'#fbbf24'}],recommendation:{model:'Бесплатный план + Платный',freeLimit:'3 проекта, 5 пользователей',startPrice:'$9/мес',annualDiscount:'-30%',why:'Trello и ClickUp заняли "бесплатно навсегда" — туда не идём. Asana стоит $10.99 и теряет SMB при росте команды — это твоё окно. Старт $9/мес с бесплатным тиром под 3 проекта снимает барьер входа, а годовая скидка -30% (до $6.3/мес) делает тебя дешевле Asana на 42% при годовой оплате. Это конкретный аргумент для покупки.'}},
+      pricing:{headers:['Компания','Модель','Старт цена','Бесплатно','Пробный период','Годовая скидка'],rows:[['Asana','За пользователя','$10.99/мес','✅ до 15 чел','30 дней','-20%'],['Monday.com','За пользователя','$9/мес','❌','14 дней','-18%'],['Notion','За пользователя','$8/мес','✅ личный','—','-20%'],['Trello','Бесплатный план','$5/мес','✅ навсегда','—','-17%'],['ClickUp','Бесплатный план','$7/мес','✅ навсегда','—','-45%']],summary:['ClickUp и Trello захватывают базу через бесплатный план — потом конвертируют в платный','Средний чек SMB $12–25/мес на пользователя — Asana выше рынка при росте команды','Годовая скидка 17–45% — стандарт: без неё клиент выбирает конкурента'],bestCompany:'ClickUp',bestAdvice:'Бесплатный план с ограничением 3 проекта + скидка 30% на год = лучшая механика конверсии на рынке',chart:[{name:'Asana',url:'https://asana.com/pricing',start:10.99,color:'#60a5fa'},{name:'Monday.com',url:'https://monday.com/pricing',start:9,color:'#a78bfa'},{name:'Notion',url:'https://notion.so/pricing',start:8,color:'#34d399'},{name:'Trello',url:'https://trello.com/pricing',start:5,color:'#f87171'},{name:'ClickUp',url:'https://clickup.com/pricing',start:7,color:'#fbbf24'}],tiers:[{company:'Asana',plans:[{name:'Базовый',price:'Бесплатно',items:['До 15 пользователей','Задачи и проекты','Базовый дашборд','Мобильное приложение']},{name:'Premium',price:'$10.99/мес',items:['Неограниченно пользователей','Таймлайн и Gantt','Расширенные отчёты','Рабочие процессы']},{name:'Business',price:'$24.99/мес',items:['Портфолио проектов','Цели и метрики','Интеграции с Salesforce','Расширенная аналитика']}]},{company:'Monday.com',plans:[{name:'Free',price:'Бесплатно',items:['До 2 пользователей','3 доски','200+ шаблонов']},{name:'Basic',price:'$9/мес',items:['Неограниченно досок','5 ГБ хранилище','Приоритетная поддержка']},{name:'Standard',price:'$12/мес',items:['Timeline и Gantt','Гостевой доступ','Автоматизации 250 шт/мес']},{name:'Pro',price:'$19/мес',items:['CRM функции','Зависимости задач','Аналитика и графики','Автоматизации 25 000/мес']}]},{company:'ClickUp',plans:[{name:'Free',price:'$0',items:['100 МБ хранилище','Неограниченно задач','Чат и совместная работа']},{name:'Unlimited',price:'$7/мес',items:['Безлимитное хранилище','Интеграции','Дашборды','ClickUp AI базовый']},{name:'Business',price:'$12/мес',items:['Расширенная автоматизация','Управление командой','Временные метки','Экспорт данных']}]}],recommendation:{model:'Бесплатный план + Платный',freeLimit:'3 проекта, 5 пользователей',startPrice:'$9/мес',annualDiscount:'-30%',priceWindow:'$9–12/мес — дыра между Trello ($5, слишком базовый) и Asana ($10.99→$24.99, дорожает при масштабе). Именно здесь SMB ищет альтернативу.',why:'Trello и ClickUp заняли "бесплатно навсегда" — туда не идём. Asana стоит $10.99 и теряет SMB при росте команды — это твоё окно. Старт $9/мес с бесплатным тиром под 3 проекта снимает барьер входа, а годовая скидка -30% (до $6.3/мес) делает тебя дешевле Asana на 42% при годовой оплате.'}},
       channels:{headers:['Компания','Модель роста','Поиск','Реклама','Соцсети','Email/Контент'],rows:[['Asana','Продажи→Продукт','35%','25%','15%','25%'],['Monday.com','Через маркетинг','20%','40%','20%','20%'],['Notion','Через продукт','45%','10%','30%','15%'],['Trello','Через продукт','50%','10%','20%','20%'],['ClickUp','Продукт+Маркетинг','40%','25%','20%','15%']],summary:['Поиск и рост через продукт — самые эффективные каналы для этого рынка','Monday тратит больше всех на рекламу: $300M+ в год','Notion растёт почти органически через комьюнити и сарафанное радио'],bestCompany:'Notion',bestAdvice:'Инвестируй в поисковый контент и библиотеку шаблонов раньше платной рекламы — дешевле и долгосрочнее'},
       product:{headers:['Компания','Ключевые функции','ИИ-функции','Интеграции','Мобильное','Удержание клиентов'],rows:[['Asana','Goals, Portfolio, Timeline','AI summarizer','900+','✅ хорош','🟢 Высокое'],['Monday.com','WorkOS, CRM, Dev','AI automations','200+','✅ хорош','🟢 Высокое'],['Notion','Wiki+DB+Projects','Notion AI','100+','⚠️ среднее','🟡 Среднее'],['Trello','Kanban, Butler','⚠️ базовый','200+','✅ хорош','🔴 Низкое'],['ClickUp','All-in-one, Docs','ClickUp AI','1000+','✅ хорош','🟡 Среднее']],summary:['ИИ-функции стали обязательными — без них продукт выглядит устаревшим','ClickUp пытается быть всем сразу — это и преимущество, и слабость','Удержание клиентов строится через данные и интеграции, не функции'],bestCompany:'Monday.com',bestAdvice:'Строй WorkOS а не таск-менеджер — платформа стоит дороже и держит клиентов'},
       reputation:{headers:['Компания','Рейтинг G2','Кол-во отзывов','Главная жалоба','Поддержка','Медийность'],rows:[['Asana','4.3/5','9,800','Дорого для малых','4.1/5','🟢 Высокая'],['Monday.com','4.6/5','12,100','Дорого при росте','4.4/5','🟢 Высокая'],['Notion','4.7/5','5,400','Плохой оффлайн','4.2/5','🟡 Средняя'],['Trello','4.4/5','13,500','Нет аналитики','4.0/5','🟡 Средняя'],['ClickUp','4.7/5','9,200','Перегружен UI','4.3/5','🟡 Средняя']],summary:['Notion и ClickUp — лидеры G2 по рейтингу, но жалуются на сложность','Главная боль рынка: дорого при масштабировании — твоё окно','Качество поддержки важно для SMB — инвестируй в onboarding'],bestCompany:'Monday.com',bestAdvice:'Фокус на онбординге и скорости до первого результата — 80% негатива про "сложно начать"'},
@@ -2082,6 +2387,14 @@ ${sectionsHtml}
         competitorNames: state.competitorNames,
         savedAt: Date.now()
       }));
+      // Обновляем отдельный кеш для neurovia payload
+      if (state.data && state.data.product) {
+        localStorage.setItem('neurovia_cipher_cache', JSON.stringify({
+          aiData: state.aiData,
+          product: state.data.product,
+          savedAt: Date.now()
+        }));
+      }
     } catch(e) {}
   }
 
@@ -2127,21 +2440,25 @@ ${sectionsHtml}
     document.getElementById('questionsScreen').style.paddingTop = '';
   }
 
-  // ===== LOAD ALL TABS =====
+  // ===== LOAD ALL TABS (параллельно) =====
   async function loadAllTabs() {
     const btn = document.getElementById('btnLoadAll');
     const missing = TABS.filter(t => !state.aiData || !state.aiData[t.id]);
-    if (missing.length === 0) { generateFullReport(); return; }
+    if (missing.length === 0) { updateLoadBtn(); return; }
     btn.disabled = true;
-    btn.textContent = '↻ 0/' + missing.length;
-    for (let i = 0; i < missing.length; i++) {
-      btn.textContent = '↻ ' + (i+1) + '/' + missing.length;
-      await fetchTab(missing[i].id);
-      saveToStorage();
-    }
-    btn.disabled = false;
-    btn.textContent = '↻ Загрузить все';
-    generateFullReport();
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    btn.textContent = '↻ ' + missing.length + ' разделов...';
+    let done = 0;
+    await Promise.all(missing.map(function(t) {
+      return fetchTab(t.id).then(function() {
+        done++;
+        btn.textContent = '↻ ' + done + '/' + missing.length;
+        saveToStorage();
+        renderTabs(true); // keepCurrent=true — не сбрасывать активную вкладку
+      }).catch(function(){done++;});
+    }));
+    updateLoadBtn();
   }
 
   // Init
@@ -2151,6 +2468,75 @@ ${sectionsHtml}
     const btn = document.getElementById('demoBtn');
     if (btn) btn.style.display = '';
   }
+
+  // === NEUROVIA LABS INTEGRATION ===
+  (function(){
+    var h = window.location.hash;
+    if(!h || h.indexOf('#neurovia=') !== 0) return;
+    try {
+      // Сбрасываем старый кеш — данные из дашборда всегда свежее
+      try { localStorage.removeItem('neurovia_state'); } catch(e2) {}
+      // Скрываем баннер восстановления если успел показаться
+      var rb = document.getElementById('restoreBanner');
+      if(rb) rb.style.display = 'none';
+
+      var b64 = h.slice(10);
+      var bytes = Uint8Array.from(atob(b64), function(c){ return c.charCodeAt(0); });
+      var payload = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      state.data = payload.data || {};
+      state.competitorNames = payload.competitorNames || [];
+      // Проверяем кеш (7 дней) — если свежий, используем; иначе сбрасываем
+      var cacheKey = 'neurovia_cipher_cache';
+      var cacheOk = false;
+      try {
+        var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+        var cacheAge = cached && cached.savedAt ? (Date.now() - cached.savedAt) : Infinity;
+        var cacheProduct = cached && cached.product;
+        var payloadProduct = (payload.data || {}).product || '';
+        // Используем кеш если: < 7 дней И тот же продукт И есть хотя бы 5 вкладок
+        if (cached && cacheAge < 7 * 24 * 3600 * 1000
+            && cacheProduct === payloadProduct
+            && cached.aiData && Object.keys(cached.aiData).length >= 5) {
+          state.aiData = cached.aiData;
+          cacheOk = true;
+        }
+      } catch(e) {}
+      if (!cacheOk) {
+        state.aiData = {};
+      }
+      var qs = document.getElementById('questionsScreen');
+      var as_ = document.getElementById('analysisScreen');
+      var ap = document.getElementById('anProduct');
+      if(qs) qs.classList.remove('active');
+      if(as_) as_.classList.add('active');
+      if(ap) ap.textContent = (payload.data||{}).product || 'Neurovia Labs';
+      // Показываем дату анализа если из кеша
+      if (cacheOk && cached && cached.savedAt) {
+        var ageH = Math.round((Date.now() - cached.savedAt) / 3600000);
+        var ageLabel = ageH < 1 ? 'только что' : ageH < 24 ? ageH + 'ч назад' : Math.round(ageH/24) + 'д назад';
+        if (ap) ap.title = 'Кеш от ' + ageLabel;
+      }
+      renderTabs();
+      history.replaceState(null,'',window.location.pathname+window.location.search);
+      // Авто-запуск анализа всех разделов параллельно при открытии из дашборда
+      setTimeout(async function() {
+        if (typeof fetchTab === 'undefined' || typeof TABS === 'undefined') return;
+        const btn = document.getElementById('btnLoadAll');
+        // Загружаем ВСЕ вкладки — aiData уже сброшен в {} выше, поэтому все "missing"
+        const missing = TABS.filter(t => !state.aiData || !state.aiData[t.id]);
+        if (missing.length === 0) return;
+        if (btn) { btn.disabled = true; btn.textContent = '↻ ' + missing.length + ' разделов...'; }
+        // Параллельная загрузка — всё сразу вместо по одному
+        await Promise.all(missing.map(function(t) {
+          return fetchTab(t.id).then(function() {
+            if (typeof saveToStorage === 'function') saveToStorage();
+            if (typeof renderTabs === 'function') renderTabs(true); // keepCurrent=true
+          }).catch(function(){});
+        }));
+        if (typeof updateLoadBtn === 'function') updateLoadBtn();
+      }, 600);
+    } catch(e){ console.warn('[CIPHER] Neurovia payload error:',e); }
+  })();
 </script>
 </body>
 </html>
