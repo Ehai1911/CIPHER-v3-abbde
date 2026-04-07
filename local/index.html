@@ -195,7 +195,7 @@ select option{background:var(--surface2);color:var(--text)}
     <div class="src-list" id="srcList">
       <div class="src-item" id="src-2gis"><div class="src-dot"></div>2GIS</div>
       <div class="src-item" id="src-yandex"><div class="src-dot"></div>Яндекс.Карты</div>
-      <div class="src-item" id="src-google"><div class="src-dot"></div>Google Maps</div>
+      <div class="src-item" id="src-google"><div class="src-dot"></div>Яндекс.Поиск</div>
     </div>
     <div class="lst" id="ls2"><div class="lst-dot"></div>Анализируем рейтинги и цены</div>
     <div class="lst" id="ls3"><div class="lst-dot"></div>Формируем отчёт</div>
@@ -423,7 +423,7 @@ async function runDiscover() {
         description: state.data.business + ' в городе ' + state.data.city,
         geography: [state.data.city],
         price: state.data.price || 'mid',
-        tab: 'discover'
+        tab: 'discover-local'
       })
     });
     stopSourceProgress();

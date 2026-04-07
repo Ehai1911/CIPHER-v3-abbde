@@ -147,6 +147,56 @@ async function searchYandexRaw(queries, geo) {
   return rawTexts.join('\n\n---\n\n');
 }
 
+// Поиск локальных бизнесов через 2GIS — лучший источник для офлайн/локальных конкурентов (4.4)
+async function search2GIS(businessType, city) {
+  const CITY_SLUGS = {
+    'алматы': 'almaty', 'алма-ата': 'almaty',
+    'астана': 'astana', 'нур-султан': 'astana', 'акмола': 'astana',
+    'шымкент': 'shymkent', 'шимкент': 'shymkent',
+    'актобе': 'aktobe', 'актюбинск': 'aktobe',
+    'павлодар': 'pavlodar',
+    'семей': 'semey', 'семипалатинск': 'semey',
+    'усть-каменогорск': 'ust-kamenogorsk', 'оскемен': 'ust-kamenogorsk',
+    'тараз': 'taraz', 'жамбыл': 'taraz',
+    'атырау': 'atyrau', 'гурьев': 'atyrau',
+    'кызылорда': 'kyzylorda',
+    'актау': 'aktau',
+    'москва': 'moscow',
+    'санкт-петербург': 'saint-petersburg', 'питер': 'saint-petersburg',
+    'новосибирск': 'novosibirsk',
+    'екатеринбург': 'yekaterinburg',
+    'краснодар': 'krasnodar',
+    'казань': 'kazan',
+    'бишкек': 'bishkek',
+    'алматинская': 'almaty',
+  };
+  const cityLower = (city || 'алматы').toLowerCase().trim();
+  const citySlug = CITY_SLUGS[cityLower] || cityLower.replace(/\s+/g, '-');
+  const base = cityLower.includes('москва') || cityLower.includes('питер') || cityLower.includes('санкт') || cityLower.includes('новосибирск') || cityLower.includes('екатеринбург') || cityLower.includes('краснодар') || cityLower.includes('казань')
+    ? 'https://2gis.ru' : 'https://2gis.kz';
+
+  const results = [];
+  const queries = [
+    `${base}/${citySlug}/search/${encodeURIComponent(businessType)}`,
+    `${base}/${citySlug}/search/${encodeURIComponent(businessType + ' ' + city)}`
+  ];
+  for (const url of queries.slice(0, 2)) {
+    const text = await searchViaReader(url, 15000);
+    if (text && text.length > 300) {
+      results.push(text.substring(0, 4000));
+      break; // достаточно одного удачного результата
+    }
+  }
+  return results.join('\n\n');
+}
+
+// Поиск через Яндекс Карты — хорошо показывает локальные офлайн бизнесы (4.4)
+async function searchYandexMaps(businessType, city) {
+  const query = encodeURIComponent(`${businessType} ${city}`);
+  const text = await searchViaReader(`https://yandex.kz/maps/?text=${query}&lang=ru_RU`, 15000);
+  return text && text.length > 300 ? text.substring(0, 4000) : '';
+}
+
 // Поиск через Google
 async function searchGoogle(queries) {
   const allUrls = [];
@@ -580,6 +630,87 @@ ${rawSearchText.substring(0, 8000)}
         searchUsed: rawSearchText.length > 100,
         searchContext: '',
         debug: { rawLen: rawSearchText.length, engine: useCis ? 'ddg+yandex+google+brave' : 'google+brave', useCis }
+      });
+      return;
+    }
+
+    // DISCOVER-LOCAL MODE: поиск офлайн конкурентов через 2GIS + Яндекс Карты (задача 4.4)
+    if (targetTab === 'discover-local') {
+      const city = geoArr[0] || 'Алматы';
+
+      // Параллельный поиск: 2GIS + Яндекс Карты + DDG с городом
+      const [twoGisRaw, yandexMapsRaw, ddgRaw, yandexSearchRaw] = await Promise.all([
+        search2GIS(area, city),
+        searchYandexMaps(area, city),
+        searchDDGRaw([
+          `${area} ${city}`,
+          `${area} ${city} адрес телефон`
+        ], city),
+        searchYandexRaw([`${area} ${city}`, `топ ${area} ${city}`], city)
+      ]);
+
+      const rawText = [twoGisRaw, yandexMapsRaw, yandexSearchRaw, ddgRaw].filter(Boolean).join('\n\n---\n\n');
+
+      let candidates = [];
+      if (rawText.length > 100) {
+        const localPrompt = `Продукт клиента: "${product}"
+Тип бизнеса: "${area}"
+Город: "${city}"
+
+Ниже — сырой текст из 2GIS, Яндекс Карт и поисковых систем.
+Найди в тексте реальные компании — офлайн конкурентов в нише "${area}" в городе "${city}".
+
+ПРАВИЛА:
+- ТОЛЬКО реальные компании которые есть в тексте. Не выдумывай.
+- ИСКЛЮЧИ: сам 2GIS как сайт, агрегаторы, справочники, госорганы, нерелевантные ниши.
+- Ищи: названия организаций, адреса рядом с ними, рейтинги (формат "4.8 ★" или "4.5 из 5"), количество отзывов.
+- Если нашёл адрес рядом с названием — добавь его. Если нет — оставь пустую строку.
+- Верни до 12 конкурентов.
+
+ТЕКСТ:
+${rawText.substring(0, 8000)}
+
+Верни ТОЛЬКО JSON массив:
+[{"name":"Название организации","address":"ул. Пример, 123 или пустая строка","phone":"+7 xxx xxx xx xx или пустая строка","rating":4.8,"reviews":50,"why":"краткое описание 8-10 слов"}]`;
+
+        try {
+          const sysPrompt = 'Ты извлекаешь данные о локальных бизнесах из текста 2GIS и Яндекс Карт. Верни ТОЛЬКО JSON массив без markdown. Только реальные организации из текста.';
+          let raw = '';
+          if (apiKey.startsWith('sk-ant-')) {
+            const r = await httpPost('api.anthropic.com', '/v1/messages',
+              { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+              { model: 'claude-haiku-4-5-20251001', max_tokens: 2000, system: sysPrompt, messages: [{ role: 'user', content: localPrompt }] }
+            );
+            raw = r.content && r.content[0] ? r.content[0].text : '[]';
+          } else {
+            const r = await httpPost('api.openai.com', '/v1/chat/completions',
+              { 'Authorization': `Bearer ${apiKey}` },
+              { model: 'gpt-4o-mini', messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: localPrompt }], temperature: 0.1, max_tokens: 2000 }
+            );
+            raw = r.choices && r.choices[0] ? r.choices[0].message.content : '[]';
+          }
+
+          const jsonMatch = raw.match(/\[[\s\S]*\]/);
+          const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+          candidates = Array.isArray(parsed) ? parsed.filter(c => c && c.name) : [];
+
+        } catch(e) { candidates = []; }
+      }
+
+      // Пре-скрап Яндекс/2GIS ссылок или просто валидация — добавляем preview
+      // Для локальных бизнесов preview берём из поля why (у них нет сайта)
+      candidates = candidates.map(c => ({
+        ...c,
+        rating: typeof c.rating === 'number' ? c.rating : parseFloat(c.rating) || null,
+        reviews: typeof c.reviews === 'number' ? c.reviews : parseInt(c.reviews) || null,
+        preview: c.why || ''
+      }));
+
+      res.status(200).json({
+        competitors: candidates.slice(0, 12),
+        searchUsed: rawText.length > 100,
+        searchContext: '',
+        debug: { rawLen: rawText.length, engine: '2gis+yandex-maps+yandex+ddg', city }
       });
       return;
     }
