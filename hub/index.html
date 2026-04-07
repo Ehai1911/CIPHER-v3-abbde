@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Анализ конкурентов · Neurovia Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;
+  --surface:#0f1628;
+  --surface2:#141d35;
+  --surface3:#1a2540;
+  --border:#1e2d4a;
+  --border2:#243558;
+  --text:#e2e8f5;
+  --text2:#a8b4cc;
+  --muted:#5b6b8a;
+  --gold:#d4a843;
+  --gold-l:#e8c87a;
+  --gold-d:#b08830;
+  --gold-glow:rgba(212,168,67,.1);
+  --gold-border:rgba(212,168,67,.22);
+  --green:#34d399;
+  --red:#f87171;
+  --blue:#60a5fa;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+
+/* LAYOUT */
+.wrap{display:flex;min-height:100vh}
+
+/* LEFT PANEL */
+.lp{
+  width:280px;flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  padding:32px 28px;display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh
+}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:40px}
+.brand-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:var(--gold-glow);border:1px solid var(--gold-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--gold)
+}
+.brand-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+
+.steps{flex:1}
+.si{display:flex;align-items:flex-start;gap:12px;padding:10px 0;position:relative}
+.si:not(:last-child)::after{content:'';position:absolute;left:12px;top:36px;bottom:0;width:1px;background:var(--border)}
+.si.done::after,.si.active::after{background:var(--gold-border)}
+.si-dot{
+  width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border2);
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:10px;color:var(--muted);font-weight:600;transition:all .3s
+}
+.si.done .si-dot{background:rgba(52,211,153,.1);border-color:var(--green);color:var(--green);font-size:12px}
+.si.active .si-dot{background:var(--gold-glow);border-color:var(--gold);color:var(--gold)}
+.si-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1px}
+.si-name{font-size:12px;color:var(--text2);font-weight:500}
+.si.active .si-name{color:var(--text)}
+
+.prog-wrap{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.prog-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:7px}
+.prog-track{height:2px;background:var(--border2);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold));border-radius:2px;transition:width .5s ease}
+
+.lp-hint{margin-top:20px;font-size:11px;color:var(--muted);line-height:1.6;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+
+/* RIGHT PANEL */
+.rp{flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:60px 40px}
+
+.step{display:none;max-width:600px;width:100%}
+.step.active{display:block}
+
+.step-tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);background:var(--gold-glow);border:1px solid var(--gold-border);border-radius:20px;padding:4px 12px;margin-bottom:20px}
+.step h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.25}
+.step p{font-size:13px;color:var(--text2);margin-bottom:32px;line-height:1.6}
+
+/* TEXT INPUT */
+.field{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:12px;padding:16px 20px;font-size:15px;color:var(--text);
+  font-family:'Inter',sans-serif;resize:none;outline:none;transition:border .2s
+}
+.field:focus{border-color:var(--gold)}
+.field::placeholder{color:var(--muted)}
+
+/* CHOICE CARDS */
+.choices{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.choice{
+  display:flex;align-items:center;gap:16px;
+  background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:12px;padding:18px 20px;cursor:pointer;transition:all .2s
+}
+.choice:hover{border-color:var(--border);background:var(--surface3)}
+.choice.selected{border-color:var(--gold);background:var(--gold-glow)}
+.choice-icon{font-size:24px;flex-shrink:0}
+.choice-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.choice-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* TAGS (geo/source) */
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.tag{
+  padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;
+  border:1.5px solid var(--border2);background:var(--surface2);
+  color:var(--text2);cursor:pointer;transition:all .2s
+}
+.tag:hover{border-color:var(--border);color:var(--text)}
+.tag.selected{border-color:var(--gold);background:var(--gold-glow);color:var(--gold)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:28px 0}
+
+/* BUTTONS */
+.btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.btn-back{
+  padding:12px 20px;background:none;color:var(--muted);
+  border:1.5px solid var(--border2);border-radius:9px;
+  font-size:12px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif
+}
+.btn-back:hover{color:var(--text2);border-color:var(--border)}
+.btn-next{
+  padding:14px 32px;background:var(--gold);color:#0a0e1a;
+  border:none;border-radius:9px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s
+}
+.btn-next:hover{background:var(--gold-l)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed}
+
+/* LAUNCH SCREEN */
+.launch{
+  display:none;max-width:500px;width:100%;text-align:center
+}
+.launch.active{display:block}
+.launch-icon{font-size:48px;margin-bottom:24px}
+.launch h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:10px}
+.launch p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:32px}
+.launch-card{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:14px;padding:20px 24px;margin-bottom:12px;
+  text-align:left;cursor:pointer;transition:all .2s
+}
+.launch-card:hover{border-color:var(--gold);background:var(--gold-glow)}
+.launch-card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.launch-card-desc{font-size:12px;color:var(--muted)}
+
+/* SUMMARY ROW */
+.summary{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:14px 18px;margin-bottom:24px;
+  display:flex;flex-wrap:wrap;gap:8px
+}
+.sum-tag{
+  font-size:11px;color:var(--text2);
+  background:var(--surface3);border:1px solid var(--border2);
+  border-radius:6px;padding:4px 10px
+}
+.sum-tag span{color:var(--gold);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- LEFT -->
+  <div class="lp">
+    <div class="brand">
+      <div class="brand-icon">N</div>
+      <div>
+        <div class="brand-name">NEUROVIA LABS</div>
+        <div class="brand-sub">Competitor Intel</div>
+      </div>
+    </div>
+
+    <div class="steps" id="stepsList"></div>
+
+    <div class="prog-wrap">
+      <div class="prog-row">
+        <span>Прогресс</span>
+        <span id="progText">1 / <span id="totalSteps">3</span></span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill" style="width:33%"></div></div>
+    </div>
+
+    <div class="lp-hint" id="lp-hint">Чем точнее ответы — тем точнее найдём конкурентов.</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="rp" id="rightPanel">
+
+    <!-- ШАГ 1: Что продаёшь -->
+    <div class="step active" id="s1">
+      <div class="step-tag">ШАГ 1 ИЗ <span class="total-steps">3</span></div>
+      <h1>Что продаёшь?</h1>
+      <p>Опиши в 1-2 предложениях — что это, для кого и какую проблему решает.</p>
+      <textarea class="field" id="f-product" rows="3" placeholder="Например: абилитационный центр для детей с ОВЗ в Астане, услуги логопеда и дефектолога"></textarea>
+      <div class="divider"></div>
+      <div class="btn-row">
+        <span></span>
+        <button class="btn-next" onclick="next(1)">Дальше →</button>
+      </div>
+    </div>
+
+    <!-- ШАГ 2: Онлайн или офлайн -->
+    <div class="step" id="s2">
+      <div class="step-tag">ШАГ 2 ИЗ <span class="total-steps">3</span></div>
+      <h1>Как работает твой бизнес?</h1>
+      <p>Это определит какой агент будет искать конкурентов и как анализировать рынок.</p>
+      <div class="choices">
+        <div class="choice" id="c-online" onclick="selectType('online')">
+          <div class="choice-icon">🌐</div>
+          <div>
+            <div class="choice-title">Онлайн / Digital</div>
+            <div class="choice-desc">SaaS, приложение, маркетплейс, онлайн-курсы, сайт. Клиент пользуется через интернет из любой точки.</div>
+          </div>
+        </div>
+        <div class="choice" id="c-offline" onclick="selectType('offline')">
+          <div class="choice-icon">📍</div>
+          <div>
+            <div class="choice-title">Офлайн / Локальный</div>
+            <div class="choice-desc">Кафе, клиника, салон, магазин, центр услуг. Клиент приходит физически в определённое место.</div>
+          </div>
+        </div>
+        <div class="choice" id="c-hybrid" onclick="selectType('hybrid')">
+          <div class="choice-icon">⚡</div>
+          <div>
+            <div class="choice-title">Смешанный</div>
+            <div class="choice-desc">Есть и офлайн точка и онлайн продажи / запись. Например: салон красоты с онлайн-записью.</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="back(2)">← Назад</button>
+        <button class="btn-next" id="btn2" onclick="next(2)" disabled>Дальше →</button>
+      </div>
+    </div>
+
+    <!-- ШАГ 3a: Онлайн — рынок и цена -->
+    <div class="step" id="s3-online">
+      <div class="step-tag">ШАГ 3 ИЗ 4</div>
+      <h1>Рынок и цена</h1>
+      <p>На каких рынках работаешь и сколько стоит продукт?</p>
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Рынок (можно несколько)</div>
+      <div class="tags" id="geo-tags">
+        <div class="tag" onclick="toggleTag(this,'geo')">Казахстан</div>
+        <div class="tag" onclick="toggleTag(this,'geo')">СНГ</div>
+        <div class="tag" onclick="toggleTag(this,'geo')">Европа</div>
+        <div class="tag" onclick="toggleTag(this,'geo')">США</div>
+        <div class="tag" onclick="toggleTag(this,'geo')">Азия</div>
+        <div class="tag" onclick="toggleTag(this,'geo')">Глобально</div>
+      </div>
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Модель монетизации</div>
+      <div class="tags" id="model-tags">
+        <div class="tag" onclick="toggleTag(this,'model')">Подписка</div>
+        <div class="tag" onclick="toggleTag(this,'model')">Разовая оплата</div>
+        <div class="tag" onclick="toggleTag(this,'model')">Freemium</div>
+        <div class="tag" onclick="toggleTag(this,'model')">За проект</div>
+      </div>
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Цена (примерно)</div>
+      <input class="field" id="f-price-online" type="text" placeholder="Например: $29/мес, от $500 за проект">
+
+      <div class="divider"></div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="back(3)">← Назад</button>
+        <button class="btn-next" onclick="launch('online')">Найти конкурентов →</button>
+      </div>
+    </div>
+
+    <!-- ШАГ 3b: Офлайн — город и каналы -->
+    <div class="step" id="s3-offline">
+      <div class="step-tag">ШАГ 3 ИЗ 4</div>
+      <h1>Где работаешь и как находят?</h1>
+      <p>Для офлайн бизнеса локация — главное. Конкурент в другом городе — не конкурент.</p>
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Город</div>
+      <input class="field" id="f-city" type="text" placeholder="Астана, Алматы, Шымкент..." style="margin-bottom:20px">
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Средний чек</div>
+      <input class="field" id="f-price-offline" type="text" placeholder="Например: 5 000 ₸, 15 000 ₸/мес" style="margin-bottom:20px">
+
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:500">Где тебя находят клиенты? (можно несколько)</div>
+      <div class="tags" id="source-tags">
+        <div class="tag" onclick="toggleTag(this,'source')">Сайт / Google</div>
+        <div class="tag" onclick="toggleTag(this,'source')">2GIS / Карты</div>
+        <div class="tag" onclick="toggleTag(this,'source')">Instagram</div>
+        <div class="tag" onclick="toggleTag(this,'source')">WhatsApp / Telegram</div>
+        <div class="tag" onclick="toggleTag(this,'source')">Сарафан</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="back(3)">← Назад</button>
+        <button class="btn-next" onclick="launch('offline')">Найти конкурентов →</button>
+      </div>
+    </div>
+
+    <!-- ИТОГ -->
+    <div class="launch" id="launch-screen">
+      <div class="launch-icon" id="launch-icon">🔍</div>
+      <h2 id="launch-title">Запускаем поиск</h2>
+      <p id="launch-desc">Переходим к нужному агенту...</p>
+      <div class="summary" id="launch-summary"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const state = {
+  product: '',
+  type: '',    // online | offline | hybrid
+  geo: [],
+  model: [],
+  source: [],
+  city: '',
+  priceOnline: '',
+  priceOffline: ''
+};
+
+const STEPS_ONLINE = [
+  { label: 'ШАГ 1', name: 'Продукт' },
+  { label: 'ШАГ 2', name: 'Тип бизнеса' },
+  { label: 'ШАГ 3', name: 'Рынок и цена' }
+];
+const STEPS_OFFLINE = [
+  { label: 'ШАГ 1', name: 'Продукт' },
+  { label: 'ШАГ 2', name: 'Тип бизнеса' },
+  { label: 'ШАГ 3', name: 'Город и каналы' }
+];
+const STEPS_BASE = [
+  { label: 'ШАГ 1', name: 'Продукт' },
+  { label: 'ШАГ 2', name: 'Тип бизнеса' },
+  { label: 'ШАГ 3', name: 'Детали' }
+];
+
+let currentStep = 1;
+
+function renderSteps(steps, active) {
+  const list = document.getElementById('stepsList');
+  list.innerHTML = steps.map((s, i) => {
+    const idx = i + 1;
+    const isDone = idx < active;
+    const isActive = idx === active;
+    return `<div class="si ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}">
+      <div class="si-dot">${isDone ? '✓' : idx}</div>
+      <div>
+        <div class="si-lbl">${s.label}</div>
+        <div class="si-name">${s.name}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateProgress(step, total) {
+  document.getElementById('progText').innerHTML = `${step} / <span id="totalSteps">${total}</span>`;
+  document.getElementById('progFill').style.width = (step / total * 100) + '%';
+  document.querySelectorAll('.total-steps').forEach(el => el.textContent = total);
+}
+
+function getSteps() {
+  if (state.type === 'online' || state.type === 'hybrid') return STEPS_ONLINE;
+  if (state.type === 'offline') return STEPS_OFFLINE;
+  return STEPS_BASE;
+}
+
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('launch-screen').classList.remove('active');
+
+  if (n === 1) document.getElementById('s1').classList.add('active');
+  else if (n === 2) document.getElementById('s2').classList.add('active');
+  else if (n === 3) {
+    const id = (state.type === 'offline' || state.type === 'hybrid') ? 's3-offline' : 's3-online';
+    document.getElementById(id).classList.add('active');
+  }
+
+  const steps = getSteps();
+  renderSteps(steps, n);
+  updateProgress(n, steps.length);
+
+  const hints = {
+    1: 'Чем точнее описание — тем точнее найдём конкурентов.',
+    2: 'От типа бизнеса зависит где и как мы будем искать.',
+    3: state.type === 'offline'
+      ? 'Для офлайна конкуренты должны быть в том же городе.'
+      : 'Рынок и цена помогают найти конкурентов того же уровня.'
+  };
+  document.getElementById('lp-hint').textContent = hints[n] || '';
+}
+
+function next(from) {
+  if (from === 1) {
+    const val = document.getElementById('f-product').value.trim();
+    if (!val) { document.getElementById('f-product').focus(); return; }
+    state.product = val;
+    showStep(2);
+  } else if (from === 2) {
+    if (!state.type) return;
+    showStep(3);
+  }
+}
+
+function back(from) {
+  if (from === 2) showStep(1);
+  else if (from === 3) showStep(2);
+}
+
+function selectType(type) {
+  state.type = type;
+  document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('c-' + type).classList.add('selected');
+  document.getElementById('btn2').disabled = false;
+}
+
+function toggleTag(el, group) {
+  el.classList.toggle('selected');
+  const vals = Array.from(document.querySelectorAll(`#${group === 'geo' ? 'geo-tags' : group === 'model' ? 'model-tags' : 'source-tags'} .tag.selected`)).map(t => t.textContent);
+  if (group === 'geo') state.geo = vals;
+  else if (group === 'model') state.model = vals;
+  else if (group === 'source') state.source = vals;
+}
+
+function launch(type) {
+  if (type === 'offline') {
+    state.city = document.getElementById('f-city').value.trim();
+    state.priceOffline = document.getElementById('f-price-offline').value.trim();
+  } else {
+    state.priceOnline = document.getElementById('f-price-online').value.trim();
+  }
+
+  // Показываем итоговый экран
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const ls = document.getElementById('launch-screen');
+  ls.classList.add('active');
+
+  // Сводка данных
+  const summary = document.getElementById('launch-summary');
+  const items = [
+    { label: 'Бизнес', val: state.product.substring(0, 50) + (state.product.length > 50 ? '...' : '') },
+    { label: 'Тип', val: type === 'offline' ? 'Офлайн' : type === 'hybrid' ? 'Смешанный' : 'Онлайн' },
+    type === 'offline' && state.city ? { label: 'Город', val: state.city } : null,
+    type !== 'offline' && state.geo.length ? { label: 'Рынок', val: state.geo.join(', ') } : null,
+    (state.priceOnline || state.priceOffline) ? { label: 'Цена', val: state.priceOnline || state.priceOffline } : null,
+    state.source.length ? { label: 'Каналы', val: state.source.join(', ') } : null
+  ].filter(Boolean);
+
+  summary.innerHTML = items.map(i => `<div class="sum-tag">${i.label}: <span>${i.val}</span></div>`).join('');
+
+  // Роутинг
+  if (type === 'offline' || type === 'hybrid') {
+    document.getElementById('launch-icon').textContent = '📍';
+    document.getElementById('launch-title').textContent = 'Ищем локальных конкурентов';
+    document.getElementById('launch-desc').textContent = 'Запускаем агента для офлайн бизнеса. Ищем в 2GIS, Instagram и локальных источниках...';
+    setTimeout(() => goToLocal(), 1500);
+  } else {
+    document.getElementById('launch-icon').textContent = '🌐';
+    document.getElementById('launch-title').textContent = 'Ищем онлайн конкурентов';
+    document.getElementById('launch-desc').textContent = 'Запускаем CIPHER — агент для онлайн и SaaS продуктов...';
+    setTimeout(() => goToCipher(), 1500);
+  }
+
+  renderSteps(getSteps(), 4);
+  updateProgress(3, 3);
+}
+
+function goToCipher() {
+  const params = new URLSearchParams({
+    area: state.product,
+    segment: 'Частные лица',
+    product: state.product.split(' ').slice(0, 2).join(' '),
+    description: state.product,
+    geography: state.geo.join(',') || 'глобально',
+    price: state.priceOnline || ''
+  });
+  window.location.href = '/?' + params.toString();
+}
+
+function goToLocal() {
+  const params = new URLSearchParams({
+    product: state.product,
+    city: state.city || '',
+    price: state.priceOffline || '',
+    sources: state.source.join(',')
+  });
+  window.location.href = '/local/index.html?' + params.toString();
+}
+
+// Инит
+renderSteps(STEPS_BASE, 1);
+updateProgress(1, 3);
+</script>
+</body>
+</html>
