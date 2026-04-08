@@ -8,6 +8,9 @@
     },
     "api/history.js": {
       "maxDuration": 10
+    },
+    "api/admin.js": {
+      "maxDuration": 15
     }
   },
   "rewrites": [
