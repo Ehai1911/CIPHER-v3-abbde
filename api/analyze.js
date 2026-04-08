@@ -301,6 +301,105 @@ function httpPost(hostname, path, headers, body) {
   });
 }
 
+// Единая функция вызова AI — поддерживает Anthropic, OpenAI, DeepSeek, Z.ai (6.1, 6.2, 6.3)
+// provider: 'anthropic' | 'openai' | 'deepseek' | 'zai'
+async function callAI(provider, apiKey, systemPrompt, userPrompt, maxTokens) {
+  if (provider === 'anthropic') {
+    const resp = await httpPost('api.anthropic.com', '/v1/messages',
+      { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      { model: 'claude-haiku-4-5-20251001', max_tokens: maxTokens, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }
+    );
+    if (resp.error) throw new Error('Anthropic: ' + (resp.error.message || JSON.stringify(resp.error)));
+    if (!resp.content || !resp.content[0]) throw new Error('Anthropic empty response');
+    return resp.content[0].text;
+  }
+
+  if (provider === 'deepseek') {
+    const resp = await httpPost('api.deepseek.com', '/v1/chat/completions',
+      { 'Authorization': `Bearer ${apiKey}` },
+      { model: 'deepseek-chat', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.3, max_tokens: maxTokens }
+    );
+    if (resp.error) throw new Error('DeepSeek: ' + resp.error.message);
+    if (!resp.choices || !resp.choices[0]) throw new Error('DeepSeek empty response');
+    return resp.choices[0].message.content;
+  }
+
+  if (provider === 'zai') {
+    const resp = await httpPost('open.bigmodel.cn', '/api/paas/v4/chat/completions',
+      { 'Authorization': `Bearer ${apiKey}` },
+      { model: 'glm-4-flash', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.3, max_tokens: maxTokens }
+    );
+    if (resp.error) throw new Error('Z.ai: ' + (resp.error.message || JSON.stringify(resp.error)));
+    if (!resp.choices || !resp.choices[0]) throw new Error('Z.ai empty response');
+    return resp.choices[0].message.content;
+  }
+
+  // openai (default)
+  const resp = await httpPost('api.openai.com', '/v1/chat/completions',
+    { 'Authorization': `Bearer ${apiKey}` },
+    { model: 'gpt-4o-mini', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.4, max_tokens: maxTokens, response_format: { type: 'json_object' } }
+  );
+  if (resp.error) throw new Error('OpenAI: ' + resp.error.message);
+  if (!resp.choices || !resp.choices[0]) throw new Error('OpenAI empty response');
+  return resp.choices[0].message.content;
+}
+
+// Роутинг по задачам: discover → zai, простые табы → deepseek, аналитика → anthropic (6.4)
+const COMPLEX_TABS = new Set(['strategy', 'swot', 'quickwins', 'gaps']);
+
+function getProviders() {
+  return {
+    discover:  { provider: 'zai',       key: process.env.ZAI_API_KEY },
+    simple:    { provider: 'deepseek',  key: process.env.DEEPSEEK_API_KEY },
+    complex:   { provider: 'anthropic', key: process.env.ANTHROPIC_API_KEY },
+  };
+}
+
+// Вызов с fallback цепочкой (6.5): если провайдер упал или вернул невалидный JSON → следующий
+async function callAIWithFallback(role, systemPrompt, userPrompt, maxTokens) {
+  const p = getProviders();
+
+  // Цепочки fallback для каждой роли
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  const chains = {
+    discover: [
+      p.discover,
+      p.simple,
+      { provider: 'anthropic', key: anthropicKey },
+      { provider: 'openai',    key: openaiKey }
+    ],
+    simple: [
+      p.simple,
+      { provider: 'anthropic', key: anthropicKey },
+      { provider: 'openai',    key: openaiKey }
+    ],
+    complex: [
+      p.complex,
+      p.simple,
+      { provider: 'openai', key: openaiKey }
+    ]
+  };
+
+  const chain = chains[role] || chains.simple;
+
+  for (const { provider, key } of chain) {
+    if (!key) continue; // ключ не задан — пропускаем
+    try {
+      const raw = await callAI(provider, key, systemPrompt, userPrompt, maxTokens);
+      // Валидируем что вернулся JSON (для tabов и discover)
+      const match = raw.match(/[\[{][\s\S]*[\]}]/);
+      if (!match) throw new Error(`${provider}: не найден JSON в ответе`);
+      return JSON.parse(match[0]);
+    } catch(e) {
+      console.warn(`callAI fallback: ${provider} failed — ${e.message}`);
+      // продолжаем к следующему в цепочке
+    }
+  }
+  throw new Error('Все провайдеры недоступны');
+}
+
 const TAB_SCHEMAS = {
   market: `{"market":{"headers":["Компания","Доля рынка","Рост/год","Позиция","Тренд"],"rows":[["Н1","X%","X%","Лидер","↑"],["Н2","X%","X%","Претендент","→"],["Н3","X%","X%","Быстрорастущий","↑"],["Н4","X%","X%","Зрелый","↓"],["Н5","X%","X%","Нишевый","→"],["Н6","X%","X%","Нишевый","↑"],["Н7","X%","X%","Нишевый","→"],["Н8","X%","X%","Нишевый","↑"]],"summary":["конкретный вывод1","конкретный вывод2","конкретный вывод3"],"bestCompany":"Н","bestAdvice":"конкретный совет что делать с учётом анализа"},"competitors":["Н1","Н2","Н3","Н4","Н5","Н6","Н7","Н8"]}`,
   audience: `{"audience":{"headers":["Компания","Сегмент","Роли","Боль","Зрелость"],"rows":[["Н1","сег","роли","боль","ур"],["Н2","сег","роли","боль","ур"],["Н3","сег","роли","боль","ур"],["Н4","сег","роли","боль","ур"],["Н5","сег","роли","боль","ур"]],"summary":["в1","в2","в3"],"bestCompany":"Н","bestAdvice":"совет"}}`,
@@ -317,7 +416,7 @@ const TAB_SCHEMAS = {
   gaps: `{"gaps":[{"emoji":"💰","title":"Название пробела рынка","description":"Детальное описание пробела: что не делают конкуренты и почему это проблема","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🤖","title":"Название пробела рынка","description":"Детальное описание пробела с конкретными данными","opportunity":"🔥 Очень высокая","who":"Целевой сегмент"},{"emoji":"🌍","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"},{"emoji":"🎯","title":"Название пробела рынка","description":"Детальное описание пробела","opportunity":"⚡ Высокая","who":"Целевой сегмент"}]}`
 };
 
-async function fetchTab(tab, area, segment, product, description, geo, competitors, price, apiKey, urls, analysisContext, searchContext, margoContext) {
+async function fetchTab(tab, area, segment, product, description, geo, competitors, price, urls, analysisContext, searchContext, margoContext) {
   const compLine = competitors && competitors.length
     ? `Конкуренты: ${competitors.join(', ')}\n`
     : '';
@@ -395,44 +494,11 @@ ${strategyExtra}${quickwinsExtra}${strategyRules}${scrapedContext}${margoSection
 Шаблон: ${TAB_SCHEMAS[tab]}`;
 
   const maxTokens = tab === 'pricing' ? (scrapedContext ? 1600 : 1100) : (scrapedContext ? 1400 : 900);
-
   const systemPrompt = 'Ты — ведущий аналитик конкурентной разведки с 15 годами опыта. Верни ТОЛЬКО валидный JSON без markdown, без комментариев, без обёртки. Используй реальные данные о компаниях, конкретные цифры и факты. Никаких заглушек — только реальные бренды и реальные данные.';
 
-  const isAnthropic = apiKey.startsWith('sk-ant-');
-
-  if (isAnthropic) {
-    // Anthropic Claude API
-    const resp = await httpPost('api.anthropic.com', '/v1/messages',
-      { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      {
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: maxTokens,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: prompt }]
-      }
-    );
-    if (resp.error) throw new Error('Anthropic: ' + (resp.error.message || JSON.stringify(resp.error)));
-    if (!resp.content || !resp.content[0]) throw new Error('Anthropic вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
-    return JSON.parse(resp.content[0].text);
-  } else {
-    // OpenAI API
-    const resp = await httpPost('api.openai.com', '/v1/chat/completions',
-      { 'Authorization': `Bearer ${apiKey}` },
-      {
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.4,
-        max_tokens: maxTokens,
-        response_format: { type: 'json_object' }
-      }
-    );
-    if (resp.error) throw new Error('OpenAI: ' + resp.error.message);
-    if (!resp.choices || !resp.choices[0]) throw new Error('OpenAI вернул пустой ответ: ' + JSON.stringify(resp).substring(0, 200));
-    return JSON.parse(resp.choices[0].message.content);
-  }
+  // Роутинг: аналитические табы → Haiku (качество), простые → DeepSeek (дёшево) (6.4)
+  const role = COMPLEX_TABS.has(tab) ? 'complex' : 'simple';
+  return callAIWithFallback(role, systemPrompt, prompt, maxTokens);
 }
 
 // Vercel serverless function format
@@ -454,13 +520,12 @@ module.exports = async (req, res) => {
       return;
     }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, analysisContext, searchContext, margoContext, apiKey: clientKey } = body;
-    const apiKey = (clientKey && (clientKey.startsWith('sk-ant-') || clientKey.startsWith('sk-')) && clientKey.length > 20)
-      ? clientKey
-      : process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
+    const { area, segment, product, description, geography, competitors, competitorUrls, price, tab, competitorNames, analysisContext, searchContext, margoContext } = body;
 
-    if (!apiKey) {
-      res.status(500).json({ error: 'Нет ключа OpenAI. Вставь свой ключ в поле вверху страницы.' });
+    // Проверяем наличие хотя бы одного ключа (6.7)
+    const hasAnyKey = process.env.ZAI_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
+    if (!hasAnyKey) {
+      res.status(500).json({ error: 'Сервис временно недоступен. Обратитесь к администратору.' });
       return;
     }
 
@@ -565,25 +630,11 @@ ${rawSearchText.substring(0, 8000)}
 
         try {
           const sysPrompt = 'Ты извлекаешь URL компаний из текста поисковых результатов. Верни ТОЛЬКО JSON массив без markdown. Не придумывай URL — только те что реально есть в тексте. Возвращай максимально возможное количество реальных конкурентов.';
-          let raw = '';
-          if (apiKey.startsWith('sk-ant-')) {
-            const r = await httpPost('api.anthropic.com', '/v1/messages',
-              { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-              { model: 'claude-haiku-4-5-20251001', max_tokens: 1500, system: sysPrompt, messages: [{ role: 'user', content: filterPrompt }] }
-            );
-            raw = r.content && r.content[0] ? r.content[0].text : '[]';
-          } else {
-            const r = await httpPost('api.openai.com', '/v1/chat/completions',
-              { 'Authorization': `Bearer ${apiKey}` },
-              { model: 'gpt-4o-mini', messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: filterPrompt }], temperature: 0.1, max_tokens: 1500 }
-            );
-            raw = r.choices && r.choices[0] ? r.choices[0].message.content : JSON.stringify(r).substring(0, 200);
-          }
+          // Z.ai (бесплатно) → DeepSeek → Haiku (6.4, 6.8)
+          const parsed = await callAIWithFallback('discover', sysPrompt, filterPrompt, 1500);
           const SKIP_DOMAINS = ['vk.com','2gis','instagram','facebook','youtube','telegram','t.me',
             'wikipedia','avito','hh.ru','gosuslugi','gov.kz','egov.kz','pomogi.kz','inbusiness.kz',
             'el.kz','qazaqstanhalqyna.kz','medelement.com','smart.allart.kz','fnn.kz','allart.kz'];
-          const jsonMatch = raw.match(/\[[\s\S]*\]/);
-          const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
           // Нормализация URL + фильтр SKIP_DOMAINS
           const normalized = Array.isArray(parsed) ? parsed
@@ -675,23 +726,8 @@ ${rawText.substring(0, 8000)}
 
         try {
           const sysPrompt = 'Ты извлекаешь данные о локальных бизнесах из текста 2GIS и Яндекс Карт. Верни ТОЛЬКО JSON массив без markdown. Только реальные организации из текста.';
-          let raw = '';
-          if (apiKey.startsWith('sk-ant-')) {
-            const r = await httpPost('api.anthropic.com', '/v1/messages',
-              { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-              { model: 'claude-haiku-4-5-20251001', max_tokens: 2000, system: sysPrompt, messages: [{ role: 'user', content: localPrompt }] }
-            );
-            raw = r.content && r.content[0] ? r.content[0].text : '[]';
-          } else {
-            const r = await httpPost('api.openai.com', '/v1/chat/completions',
-              { 'Authorization': `Bearer ${apiKey}` },
-              { model: 'gpt-4o-mini', messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: localPrompt }], temperature: 0.1, max_tokens: 2000 }
-            );
-            raw = r.choices && r.choices[0] ? r.choices[0].message.content : '[]';
-          }
-
-          const jsonMatch = raw.match(/\[[\s\S]*\]/);
-          const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+          // Z.ai (бесплатно) → DeepSeek → Haiku (6.8)
+          const parsed = await callAIWithFallback('discover', sysPrompt, localPrompt, 2000);
           candidates = Array.isArray(parsed) ? parsed.filter(c => c && c.name) : [];
 
         } catch(e) { candidates = []; }
@@ -715,7 +751,7 @@ ${rawText.substring(0, 8000)}
       return;
     }
 
-    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, apiKey, urlList, analysisContext, searchContext, margoContext);
+    const data = await fetchTab(targetTab, area, segment, product, description, geo, knownCompetitors, price, urlList, analysisContext, searchContext, margoContext);
     res.status(200).json(data);
 
   } catch (error) {

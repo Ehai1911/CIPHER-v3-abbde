@@ -64,6 +64,38 @@
 
 ---
 
+## 🤖 БЛОК 6 — Оптимизация AI моделей (наш ключ, наши расходы)
+
+> Цель: убрать BYOK, использовать наши ключи, снизить стоимость одного анализа с ~$0.05 до ~$0.008
+
+### Архитектура
+- Discover (извлечение URL): **Z.ai GLM-4.7-Flash** → бесплатно
+- Простые табы (9 шт): **DeepSeek V3** → ~$0.0002/таб
+- Аналитические табы strategy/swot/quickwins/gaps (4 шт): **Claude Haiku** → качество важнее
+- Fallback цепочка на каждом уровне если провайдер недоступен
+
+### Задачи
+
+- ✅ **6.1** Вынести вызов AI в единую функцию `callAI(provider, apiKey, systemPrompt, userPrompt, maxTokens)` — убрать дублирование Anthropic/OpenAI кода из 3 мест в analyze.js
+
+- ✅ **6.2** Добавить поддержку DeepSeek V3 (`api.deepseek.com`, модель `deepseek-chat`, OpenAI-совместимый формат)
+
+- ✅ **6.3** Добавить поддержку Z.ai GLM-4.7-Flash (`open.bigmodel.cn`, модель `glm-4-flash`, OpenAI-совместимый формат)
+
+- ✅ **6.4** Роутинг задач по моделям: discover → Z.ai, простые табы → DeepSeek, strategy/swot/quickwins/gaps → Haiku
+
+- ✅ **6.5** Fallback цепочка: discover [Z.ai→DeepSeek→Haiku→OpenAI], simple [DeepSeek→Haiku→OpenAI], complex [Haiku→DeepSeek→OpenAI]. Пропуск если ключ не задан, retry на следующем при ошибке или невалидном JSON.
+
+- ⬜ **6.6** Убрать поле ввода API ключа из `index.html` — теперь ключи только на сервере (Vercel env)
+
+- ✅ **6.7** Добавить в `.env`: `ZAI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`. Инструкция для Vercel.
+
+- ✅ **6.8** Обновить `discover-local` (2GIS режим) — переключён на `callAIWithFallback('discover', ...)`
+
+- ⬜ **6.9** Проверить все 12 табов + discover + discover-local: валидный JSON, правильная модель, fallback работает
+
+---
+
 ## 🗄️ БЛОК 5 — Supabase хранилище (будущее)
 
 - ⬜ **5.1** Спроектировать схему БД: таблицы `clients`, `competitors`, `analyses`.
