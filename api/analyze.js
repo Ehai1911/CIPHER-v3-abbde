@@ -1,4 +1,5 @@
 const https = require('https');
+const { saveAnalysis } = require('./supabase');
 
 // Проверка URL через Jina — возвращает true если сайт реально существует
 function validateUrl(url) {
@@ -676,8 +677,17 @@ ${rawSearchText.substring(0, 8000)}
         candidates = scrapeResults.filter(Boolean); // убираем null (недоступные сайты)
       }
 
+      const finalCandidates = candidates.slice(0, 15);
+
+      // Сохраняем анализ в Supabase (5.3) — не блокирует ответ клиенту
+      const clientKey = body.clientKey || null;
+      if (clientKey) {
+        saveAnalysis({ clientKey, area, product, segment, description, geography: geoArr, price, competitors: finalCandidates })
+          .catch(e => console.warn('Supabase save error:', e.message));
+      }
+
       res.status(200).json({
-        competitors: candidates.slice(0, 15),
+        competitors: finalCandidates,
         searchUsed: rawSearchText.length > 100,
         searchContext: '',
         debug: { rawLen: rawSearchText.length, engine: useCis ? 'ddg+yandex+google+brave' : 'google+brave', useCis }

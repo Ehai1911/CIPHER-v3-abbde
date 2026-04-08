@@ -72,6 +72,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold));border-radius:2px;transition:width .5s ease}
 
 .lp-hint{margin-top:20px;font-size:11px;color:var(--muted);line-height:1.6;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.hist-btn{margin-top:14px;width:100%;display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s}
+.hist-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+.hist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:60px 20px;backdrop-filter:blur(4px)}
+.hist-panel{background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:640px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+.hist-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.hist-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text)}
+.hist-close{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.hist-close:hover{color:var(--text);border-color:var(--border)}
+.hist-body{overflow-y:auto;padding:16px 24px;flex:1}
+.hist-empty{text-align:center;padding:40px 0;color:var(--muted);font-size:13px}
+.hist-item{padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.hist-item:hover{border-color:var(--gold-border)}
+.hist-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.hist-item-product{font-size:13px;font-weight:600;color:var(--text)}
+.hist-item-date{font-size:10px;color:var(--muted)}
+.hist-item-area{font-size:11px;color:var(--text2);margin-bottom:6px}
+.hist-item-meta{display:flex;gap:10px}
+.hist-item-tag{font-size:10px;color:var(--muted);background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 7px}
 
 /* RIGHT PANEL (questions) */
 .rp{flex:1;overflow-y:auto;display:flex;flex-direction:column}
@@ -633,6 +651,10 @@ td:first-child{color:var(--text);font-weight:500}
       <div class="prog-track"><div class="prog-fill" id="stepProgress" style="width:14%"></div></div>
     </div>
     <div class="lp-hint" id="novaHint"></div>
+    <button class="hist-btn" onclick="openHistory()" id="histBtn" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      История анализов
+    </button>
   </div>
 
   <div class="rp">
@@ -659,6 +681,19 @@ td:first-child{color:var(--text);font-weight:500}
   </div>
   <button onclick="restoreAnalysis()" style="padding:8px 18px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0a0e1a;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif">Продолжить</button>
   <button onclick="dismissRestore()" style="padding:8px 14px;background:none;border:1.5px solid var(--border2);border-radius:7px;color:var(--muted);font-size:12px;cursor:pointer">Начать заново</button>
+</div>
+
+<!-- HISTORY MODAL -->
+<div id="histOverlay" class="hist-overlay" style="display:none" onclick="if(event.target===this)closeHistory()">
+  <div class="hist-panel">
+    <div class="hist-head">
+      <div class="hist-title">История анализов</div>
+      <button class="hist-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div class="hist-body" id="histBody">
+      <div class="hist-empty">Загрузка...</div>
+    </div>
+  </div>
 </div>
 
 <!-- LOADING SCREEN -->
@@ -992,7 +1027,7 @@ td:first-child{color:var(--text);font-weight:500}
         const discoverResp = await fetch('/api/analyze', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({...state.data, tab: 'discover'})
+          body: JSON.stringify({...state.data, tab: 'discover', clientKey: getClientKey()})
         });
         if (discoverResp.ok) {
           const discoverData = await discoverResp.json();
@@ -1086,7 +1121,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'market', competitorNames: state.competitorNames || [], searchContext: state._searchContext || undefined})
+        body: JSON.stringify({...state.data, tab: 'market', competitorNames: state.competitorNames || [], searchContext: state._searchContext || undefined, clientKey: getClientKey()})
       });
       clearTimeout(t1);
       setLoadingStep(1, 'done');
@@ -1131,7 +1166,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined, margoContext: getMargoContext() || undefined})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined, margoContext: getMargoContext() || undefined, clientKey: getClientKey()})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1156,7 +1191,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'pricingtiers', competitorNames: state.competitorNames || []})
+        body: JSON.stringify({...state.data, tab: 'pricingtiers', competitorNames: state.competitorNames || [], clientKey: getClientKey()})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1234,6 +1269,94 @@ td:first-child{color:var(--text);font-weight:500}
         <div class="q-metrics"><span>Как понять что план выполнен:</span> ${data.metrics || '—'}</div>
       </div>`;
   }
+
+  // Уникальный ID клиента — генерируется один раз, хранится в localStorage (5.1)
+  function getClientKey() {
+    try {
+      let key = localStorage.getItem('cipher_client_key');
+      if (!key) {
+        key = 'ck_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+        localStorage.setItem('cipher_client_key', key);
+      }
+      return key;
+    } catch(e) { return null; }
+  }
+
+  // История анализов (5.5)
+  async function openHistory() {
+    const overlay = document.getElementById('histOverlay');
+    const body = document.getElementById('histBody');
+    overlay.style.display = 'flex';
+    body.innerHTML = '<div class="hist-empty">Загрузка...</div>';
+    try {
+      const resp = await fetch('/api/history', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ clientKey: getClientKey() })
+      });
+      const data = await resp.json();
+      if (!data.enabled) {
+        body.innerHTML = '<div class="hist-empty">История недоступна — база данных не подключена.</div>';
+        return;
+      }
+      const history = data.history || [];
+      if (!history.length) {
+        body.innerHTML = '<div class="hist-empty">Нет сохранённых анализов.<br>Запусти первый анализ — он появится здесь.</div>';
+        return;
+      }
+      body.innerHTML = history.map(a => {
+        const date = new Date(a.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'short',year:'numeric'});
+        const geo = Array.isArray(a.geography) ? a.geography.join(', ') : (a.geography || '');
+        const compCount = a.competitor_count || (a.competitors ? a.competitors.length : 0);
+        return `<div class="hist-item" onclick="loadFromHistory('${a.id}','${(a.area||'').replace(/'/g,"\\'")}','${(a.product||'').replace(/'/g,"\\'")}')">
+          <div class="hist-item-top">
+            <div class="hist-item-product">${a.product || a.area || 'Без названия'}</div>
+            <div class="hist-item-date">${date}</div>
+          </div>
+          <div class="hist-item-area">${a.area || ''}</div>
+          <div class="hist-item-meta">
+            ${geo ? `<span class="hist-item-tag">📍 ${geo}</span>` : ''}
+            ${a.price ? `<span class="hist-item-tag">💰 ${a.price}</span>` : ''}
+            ${compCount ? `<span class="hist-item-tag">🏢 ${compCount} конкурентов</span>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      body.innerHTML = '<div class="hist-empty">Не удалось загрузить историю.</div>';
+    }
+  }
+
+  function closeHistory() {
+    document.getElementById('histOverlay').style.display = 'none';
+  }
+
+  // Загрузить конкурентов из прошлого анализа (5.4)
+  async function loadFromHistory(analysisId, area, product) {
+    closeHistory();
+    try {
+      const resp = await fetch('/api/history', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ clientKey: getClientKey(), analysisId })
+      });
+      const data = await resp.json();
+      const competitors = data.competitors || [];
+      if (competitors.length > 0) {
+        state._pendingCompetitors = competitors;
+        // Заполняем state.data если пусто
+        if (!state.data) state.data = {};
+        if (!state.data.area) state.data.area = area;
+        if (!state.data.product) state.data.product = product;
+        showConfirmScreen(competitors);
+      }
+    } catch(e) {}
+  }
+
+  // Показываем кнопку истории если есть clientKey
+  (function initHistBtn() {
+    const btn = document.getElementById('histBtn');
+    if (btn && getClientKey()) btn.style.display = 'flex';
+  })();
 
   // Читаем данные собранные Margo — реальные UVP, отзывы, реклама конкурентов
   function getMargoContext() {
