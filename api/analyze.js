@@ -679,11 +679,14 @@ ${rawSearchText.substring(0, 8000)}
 
       const finalCandidates = candidates.slice(0, 15);
 
-      // Сохраняем анализ в Supabase (5.3) — не блокирует ответ клиенту
+      // Сохраняем анализ в Supabase (5.3) — await чтобы Vercel не убил запрос до завершения
       const clientKey = body.clientKey || null;
       if (clientKey) {
-        saveAnalysis({ clientKey, area, product, segment, description, geography: geoArr, price, competitors: finalCandidates })
-          .catch(e => console.warn('Supabase save error:', e.message));
+        try {
+          await saveAnalysis({ clientKey, area, product, segment, description, geography: geoArr, price, competitors: finalCandidates });
+        } catch(e) {
+          console.warn('Supabase save error:', e.message);
+        }
       }
 
       res.status(200).json({
