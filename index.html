@@ -818,6 +818,7 @@ td:first-child{color:var(--text);font-weight:500}
 
 <script>
   const QUESTIONS = [
+    {id:'email',title:'Твой email для связи',hint:'Необязательно. Нужен чтобы мы знали кто запустил анализ.',type:'input',placeholder:'example@email.com',examples:[],optional:true},
     {id:'area',title:'В какой сфере работает твой продукт?',hint:'Чем точнее сфера — тем точнее подберём конкурентов. Можно написать свободно.',type:'input',placeholder:'Например: SaaS для управления задачами',examples:['SaaS / B2B-инструменты','EdTech / онлайн-обучение','FinTech / финансы','E-commerce / магазин','HR-платформа','Маркетплейс','HealthTech','PropTech / недвижимость']},
     {id:'segment',title:'Кто твой целевой клиент?',hint:'Выбери кому ты продаёшь — это влияет на выбор конкурентов и стратегию.',type:'radio',options:['Частные лица','Малый и средний бизнес','Крупный бизнес']},
     {id:'product',title:'Как называется твой продукт?',hint:'Рабочее или официальное название — оно появится в заголовке отчёта.',type:'input',placeholder:'Например: FlowDesk',examples:[]},
@@ -828,7 +829,7 @@ td:first-child{color:var(--text);font-weight:500}
     {id:'price',title:'Какой ценовой диапазон?',hint:'Укажи стартовую цену — это влияет на сравнение с конкурентами в том же сегменте.',type:'radio',options:['Бесплатно','Есть бесплатный план','До $50/мес','$50-200/мес','$200-1000/мес','Корпоративная (договорная)']}
   ];
 
-  const STEP_NAMES = ['Сфера продукта','Целевой клиент','Название','Описание','Рынки','Конкуренты','Сайты','Ценообразование'];
+  const STEP_NAMES = ['Email','Сфера продукта','Целевой клиент','Название','Описание','Рынки','Конкуренты','Сайты','Ценообразование'];
 
   const TABS = [
     {id:'market',emoji:'📊',title:'Рынок'},
@@ -864,14 +865,15 @@ td:first-child{color:var(--text);font-weight:500}
 
   function renderQuestion() {
     const q = QUESTIONS[state.step];
-    document.getElementById('stepBadge').textContent = `Шаг ${state.step + 1} из 7`;
+    const totalSteps = QUESTIONS.length;
+    document.getElementById('stepBadge').textContent = `Шаг ${state.step + 1} из ${totalSteps}`;
     document.getElementById('qTitle').textContent = q.title;
     document.getElementById('qHintText').textContent = q.hint;
     document.getElementById('novaHint').textContent = q.hint;
-    document.getElementById('stepCounter').textContent = `${state.step + 1} / 7`;
-    document.getElementById('stepProgress').style.width = ((state.step + 1) / 7 * 100) + '%';
+    document.getElementById('stepCounter').textContent = `${state.step + 1} / ${totalSteps}`;
+    document.getElementById('stepProgress').style.width = ((state.step + 1) / totalSteps * 100) + '%';
     document.getElementById('prevBtn').style.display = state.step > 0 ? 'block' : 'none';
-    document.getElementById('nextBtn').textContent = state.step === 6 ? 'НАЧАТЬ АНАЛИЗ →' : 'ДАЛЬШЕ →';
+    document.getElementById('nextBtn').textContent = state.step === totalSteps - 1 ? 'НАЧАТЬ АНАЛИЗ →' : 'ДАЛЬШЕ →';
     document.getElementById('qError').textContent = '';
     renderStepList();
 
@@ -927,12 +929,12 @@ td:first-child{color:var(--text);font-weight:500}
   function nextStep() {
     const q = QUESTIONS[state.step];
     const val = state.data[q.id];
-    const optional = q.id === 'competitors' || q.id === 'competitorUrls';
+    const optional = q.id === 'competitors' || q.id === 'competitorUrls' || q.id === 'email' || q.optional;
     if(!optional && (!val || (Array.isArray(val) && val.length === 0))) {
       document.getElementById('qError').textContent = 'Выбери ответ чтобы продолжить';
       return;
     }
-    if(state.step < 6) {state.step++; renderQuestion();} else {startAnalysis();}
+    if(state.step < QUESTIONS.length - 1) {state.step++; renderQuestion();} else {startAnalysis();}
   }
 
   function prevStep() {if(state.step > 0) {state.step--; renderQuestion();}}

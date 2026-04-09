@@ -43,7 +43,7 @@ function supabaseRequest(method, path, body, key, hostname) {
 }
 
 // Сохранить анализ и конкурентов (вызывается после discover)
-async function saveAnalysis({ clientKey, area, product, segment, description, geography, price, competitors }) {
+async function saveAnalysis({ clientKey, area, product, segment, description, geography, price, competitors, email }) {
   const cfg = getSupabaseConfig();
   if (!cfg) return null;
 
@@ -59,7 +59,7 @@ async function saveAnalysis({ clientKey, area, product, segment, description, ge
       client_key: clientKey,
       area, product, segment, description,
       geography: geography || [],
-      price,
+      price, email: email || null,
       competitor_count: competitors ? competitors.length : 0
     }, cfg.key, cfg.hostname);
 

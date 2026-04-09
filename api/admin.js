@@ -85,7 +85,7 @@ module.exports = async (req, res) => {
       const { page = 0 } = body;
       const limit = 50;
       const offset = page * limit;
-      const path = `/analyses?order=created_at.desc&limit=${limit}&offset=${offset}&select=id,client_key,area,product,geography,price,competitor_count,created_at`;
+      const path = `/analyses?order=created_at.desc&limit=${limit}&offset=${offset}&select=id,client_key,area,product,geography,price,competitor_count,created_at,email`;
       const result = await supabaseRequest('GET', path, null, SERVICE_KEY, hostname);
 
       if (result.status >= 300) {

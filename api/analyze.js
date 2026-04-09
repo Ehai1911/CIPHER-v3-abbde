@@ -685,7 +685,7 @@ ${rawSearchText.substring(0, 8000)}
       const clientKey = body.clientKey || null;
       if (clientKey) {
         try {
-          await saveAnalysis({ clientKey, area, product, segment, description, geography: geoArr, price, competitors: finalCandidates });
+          await saveAnalysis({ clientKey, area, product, segment, description, geography: geoArr, price, competitors: finalCandidates, email: body.email || null });
         } catch(e) {
           console.warn('Supabase save error:', e.message);
         }

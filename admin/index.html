@@ -304,7 +304,7 @@ function renderTable(rows) {
     return `<tr>
       <td>
         <div class="td-product">${esc(a.product || '—')}</div>
-        <div style="margin-top:3px"><span class="td-client">${clientShort}</span></div>
+        <div style="margin-top:3px"><span class="td-client">${clientShort}</span>${a.email ? ` <span style="color:#a78bfa;font-size:10px">${esc(a.email)}</span>` : ''}</div>
       </td>
       <td class="td-area">${esc(a.area || '—')}</td>
       <td class="td-geo">${esc(geo)}</td>
