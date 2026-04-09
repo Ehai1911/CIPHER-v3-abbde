@@ -2624,6 +2624,16 @@ ${sectionsHtml}
   // Init
   renderQuestion();
   checkSavedState();
+  // Открыть анализ по ссылке из /admin (?analysis=ID&area=...&product=...)
+  (function checkAnalysisParam() {
+    const params = new URLSearchParams(window.location.search);
+    const analysisId = params.get('analysis');
+    if (analysisId) {
+      const area = decodeURIComponent(params.get('area') || '');
+      const product = decodeURIComponent(params.get('product') || '');
+      loadFromHistory(analysisId, area, product);
+    }
+  })();
   if (new URLSearchParams(window.location.search).get('demo') === '1') {
     const btn = document.getElementById('demoBtn');
     if (btn) btn.style.display = '';

@@ -179,10 +179,11 @@ tr:hover td{background:var(--surface2)}
             <th>Конкур.</th>
             <th>Цена</th>
             <th>Дата</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr class="empty-row"><td colspan="6">Загрузка...</td></tr>
+          <tr class="empty-row"><td colspan="7">Загрузка...</td></tr>
         </tbody>
       </table>
     </div>
@@ -290,7 +291,7 @@ function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   document.getElementById('countBadge').textContent = rows.length + ' записей';
   if (!rows.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Анализов пока нет</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Анализов пока нет</td></tr>';
     return;
   }
   tbody.innerHTML = rows.map(a => {
@@ -299,6 +300,7 @@ function renderTable(rows) {
     const date = a.created_at
       ? new Date(a.created_at).toLocaleString('ru-RU', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
       : '—';
+    const cipherUrl = `/cipher?analysis=${a.id}&area=${encodeURIComponent(a.area||'')}&product=${encodeURIComponent(a.product||'')}`;
     return `<tr>
       <td>
         <div class="td-product">${esc(a.product || '—')}</div>
@@ -309,6 +311,7 @@ function renderTable(rows) {
       <td class="td-count">${a.competitor_count || 0}</td>
       <td class="td-price">${esc(a.price || '—')}</td>
       <td class="td-date">${date}</td>
+      <td><a href="${cipherUrl}" target="_blank" style="color:#a78bfa;font-size:12px;text-decoration:none;white-space:nowrap">▶ Открыть</a></td>
     </tr>`;
   }).join('');
 }
