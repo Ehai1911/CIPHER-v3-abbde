@@ -2623,17 +2623,23 @@ ${sectionsHtml}
 
   // Init
   renderQuestion();
-  checkSavedState();
-  // Открыть анализ по ссылке из /admin (?analysis=ID&area=...&product=...)
-  (function checkAnalysisParam() {
-    const params = new URLSearchParams(window.location.search);
-    const analysisId = params.get('analysis');
-    if (analysisId) {
-      const area = decodeURIComponent(params.get('area') || '');
-      const product = decodeURIComponent(params.get('product') || '');
-      loadFromHistory(analysisId, area, product);
-    }
-  })();
+  // Если открыли по ссылке из /admin — пропускаем checkSavedState и сразу грузим анализ
+  const _adminAnalysisId = new URLSearchParams(window.location.search).get('analysis');
+  if (_adminAnalysisId) {
+    const _p = new URLSearchParams(window.location.search);
+    // Скрываем форму и показываем загрузку сразу
+    document.getElementById('questionsScreen').style.display = 'none';
+    document.getElementById('loadingScreen').classList.add('active');
+    loadFromHistory(
+      _adminAnalysisId,
+      decodeURIComponent(_p.get('area') || ''),
+      decodeURIComponent(_p.get('product') || '')
+    ).then(() => {
+      document.getElementById('loadingScreen').classList.remove('active');
+    });
+  } else {
+    checkSavedState();
+  }
   if (new URLSearchParams(window.location.search).get('demo') === '1') {
     const btn = document.getElementById('demoBtn');
     if (btn) btn.style.display = '';
