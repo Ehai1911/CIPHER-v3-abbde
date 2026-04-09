@@ -48,8 +48,11 @@ async function saveAnalysis({ clientKey, area, product, segment, description, ge
   if (!cfg) return null;
 
   try {
-    // 1. Upsert клиента (Prefer: resolution=ignore-duplicates чтобы не падало на дубль)
-    await supabaseRequest('POST', '/clients', { client_key: clientKey }, cfg.key, cfg.hostname);
+    // 1. Upsert клиента — игнорируем дубликат если уже есть
+    const clientRes = await supabaseRequest('POST', '/clients?on_conflict=client_key', { client_key: clientKey }, cfg.key, cfg.hostname);
+    if (clientRes.status >= 400 && clientRes.status !== 409) {
+      console.warn('Supabase clients insert status:', clientRes.status, JSON.stringify(clientRes.data).substring(0, 200));
+    }
 
     // 2. Вставляем анализ
     const analysisRes = await supabaseRequest('POST', '/analyses', {
@@ -60,6 +63,7 @@ async function saveAnalysis({ clientKey, area, product, segment, description, ge
       competitor_count: competitors ? competitors.length : 0
     }, cfg.key, cfg.hostname);
 
+    console.log('Supabase analyses insert status:', analysisRes.status, JSON.stringify(analysisRes.data).substring(0, 300));
     if (!analysisRes.data || analysisRes.status >= 300) return null;
     const analysis = Array.isArray(analysisRes.data) ? analysisRes.data[0] : analysisRes.data;
     if (!analysis || !analysis.id) return null;
