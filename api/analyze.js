@@ -593,16 +593,18 @@ module.exports = async (req, res) => {
         const googleText = googleUrls.map(r => `${r.url} — ${r.title}`).join('\n');
         rawSearchText = [ddgRaw, yandexRaw, googleText, braveText].filter(Boolean).join('\n\n---\n\n');
       } else {
-        // Для глобальных рынков: Google + Brave + топ-запросы
-        const [googleUrls, googleTop, braveR1, braveR2] = await Promise.all([
+        // Для глобальных рынков: Google + Brave + Яндекс (СНГ аналоги) + топ-запросы
+        const cisQuery = `${areaShort} СНГ Казахстан аналог`;
+        const [googleUrls, googleTop, braveR1, braveR2, yandexRaw] = await Promise.all([
           searchGoogle(queries.slice(0, 2)),
-          searchGoogle([queries[3], queries[4]].filter(Boolean)),                    // топ-запросы (1.9)
+          searchGoogle([queries[3], queries[4]].filter(Boolean)),
           searchJina(queries[0]),
-          searchJina(queries[1] || queries[0])
+          searchJina(queries[1] || queries[0]),
+          searchYandexRaw([cisQuery, `${areaShort} Казахстан`], 'Казахстан')        // СНГ/KZ аналоги
         ]);
         const braveText = [...braveR1, ...braveR2].map(r => `${r.url} — ${r.title} — ${r.description}`).join('\n');
         const googleText = [...googleUrls, ...googleTop].map(r => `${r.url} — ${r.title}`).join('\n');
-        rawSearchText = [googleText, braveText].filter(Boolean).join('\n\n---\n\n');
+        rawSearchText = [googleText, braveText, yandexRaw].filter(Boolean).join('\n\n---\n\n');
       }
 
       // Шаг 3: AI извлекает и фильтрует конкурентов из всего найденного текста
@@ -633,7 +635,7 @@ ${rawSearchText.substring(0, 8000)}
           const sysPrompt = 'Ты извлекаешь URL компаний из текста поисковых результатов. Верни ТОЛЬКО JSON массив без markdown. Не придумывай URL — только те что реально есть в тексте. Возвращай максимально возможное количество реальных конкурентов.';
           // Z.ai (бесплатно) → DeepSeek → Haiku (6.4, 6.8)
           const parsed = await callAIWithFallback('discover', sysPrompt, filterPrompt, 1500);
-          const SKIP_DOMAINS = ['vk.com','2gis','instagram','facebook','youtube','telegram','t.me',
+          const SKIP_DOMAINS = ['vk.com','instagram','facebook','youtube','telegram','t.me',
             'wikipedia','avito','hh.ru','gosuslugi','gov.kz','egov.kz','pomogi.kz','inbusiness.kz',
             'el.kz','qazaqstanhalqyna.kz','medelement.com','smart.allart.kz','fnn.kz','allart.kz'];
 
@@ -668,7 +670,7 @@ ${rawSearchText.substring(0, 8000)}
         const scrapeResults = await Promise.all(
           candidates.slice(0, 12).map(async (c) => {
             const content = await fetchJina(c.url);
-            if (!content || content.length < 100) return null; // сайт мёртвый или недоступен (1.7)
+            if (!content || content.length < 30) return null; // сайт мёртвый или недоступен (1.7)
             // Берём первые 300 символов — там обычно название, описание компании (1.6)
             const preview = content.replace(/\s+/g, ' ').trim().substring(0, 300);
             return { ...c, preview };
