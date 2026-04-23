@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/analyze.js": {
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "api/nova.js": {
       "maxDuration": 15
@@ -11,6 +11,9 @@
     },
     "api/admin.js": {
       "maxDuration": 15
+    },
+    "api/parse-file.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [

@@ -37,9 +37,9 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'POST') { res.status(405).end(); return; }
 
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-  const SUPABASE_URL   = process.env.SUPABASE_URL;
-  const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD           || '').trim();
+  const SUPABASE_URL   = (process.env.SUPABASE_URL             || '').trim();
+  const SERVICE_KEY    = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
   if (!ADMIN_PASSWORD) {
     res.status(500).json({ error: 'ADMIN_PASSWORD не задан в env' });

@@ -1,4 +1,4 @@
-const { getHistory, getAnalysisCompetitors, getSupabaseConfig } = require('./supabase');
+const { getHistory, getAnalysisById, getAnalysisCompetitors, getLatestAnalysisByEmail, getSupabaseConfig } = require('./supabase');
 
 module.exports = async (req, res) => {
   const corsHeaders = {
@@ -17,17 +17,36 @@ module.exports = async (req, res) => {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const { clientKey, analysisId } = body;
+    const { clientKey, analysisId, email } = body;
+
+    // Режим: загрузить последний анализ по email (share-ссылка через email)
+    if (email) {
+      const analysis = await getLatestAnalysisByEmail(email);
+      const competitors = analysis ? analysis.competitors : [];
+      const analysisData = analysis ? {
+        area: analysis.area, product: analysis.product,
+        segment: analysis.segment, description: analysis.description,
+        geography: analysis.geography, price: analysis.price
+      } : null;
+      res.status(200).json({ competitors, analysisData, analysisId: analysis ? analysis.id : null, aiCache: analysis ? analysis.aiCache : null });
+      return;
+    }
 
     if (!clientKey) {
       res.status(400).json({ error: 'clientKey обязателен' });
       return;
     }
 
-    // Режим: загрузить конкурентов конкретного анализа (для повторного запуска — 5.4)
+    // Режим: загрузить анализ по ID (share-ссылка или повторный запуск — 5.4)
     if (analysisId) {
-      const competitors = await getAnalysisCompetitors(analysisId);
-      res.status(200).json({ competitors });
+      const analysis = await getAnalysisById(analysisId);
+      const competitors = analysis ? analysis.competitors : [];
+      const analysisData = analysis ? {
+        area: analysis.area, product: analysis.product,
+        segment: analysis.segment, description: analysis.description,
+        geography: analysis.geography, price: analysis.price
+      } : null;
+      res.status(200).json({ competitors, analysisData, aiCache: analysis ? analysis.aiCache : null });
       return;
     }
 

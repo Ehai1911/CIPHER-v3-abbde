@@ -107,6 +107,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .q-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.2}
 .q-hint{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:30px}
 
+.file-upload-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  background:var(--surface2);border:1.5px solid var(--border2);
+  color:var(--text2);cursor:pointer;transition:all .2s
+}
+.file-upload-btn:hover{border-color:var(--gold);color:var(--gold)}
+.mic-btn{
+  flex-shrink:0;width:40px;height:40px;border-radius:50%;
+  background:var(--surface2);border:1.5px solid var(--border2);
+  color:var(--text2);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;line-height:1
+}
+.mic-btn:hover{border-color:var(--gold);color:var(--gold)}
+.mic-btn.recording{background:rgba(248,113,113,.15);border-color:#f87171;color:#f87171;animation:pulse-mic .8s infinite}
+@keyframes pulse-mic{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
 .fi{
   width:100%;max-width:600px;padding:11px 14px;
   background:var(--surface2);border:1.5px solid var(--border2);
@@ -494,7 +511,24 @@ td:first-child{color:var(--text);font-weight:500}
 }
 .nova-msg.user{flex-direction:row-reverse}
 .nova-msg.user .nova-bubble{background:var(--gold-glow);border-color:var(--gold-border);border-radius:12px 4px 12px 12px}
-.nova-opts{padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nova-opts{padding:14px 22px 10px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nova-chat-input{padding:10px 22px 16px;border-top:1px solid var(--border2);background:var(--surface);flex-shrink:0}
+.nova-chat-input-wrap{display:flex;gap:8px;align-items:flex-end}
+.nova-chat-input-wrap textarea{
+  flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;
+  color:var(--text);padding:10px 12px;font-size:12px;font-family:'Inter',sans-serif;
+  resize:none;outline:none;line-height:1.5;min-height:38px;max-height:100px;
+  overflow-y:auto;transition:.2s
+}
+.nova-chat-input-wrap textarea:focus{border-color:var(--gold)}
+.nova-chat-input-wrap textarea::placeholder{color:var(--muted)}
+.nova-chat-send{
+  width:38px;height:38px;border-radius:10px;border:none;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0a0e1a;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s
+}
+.nova-chat-send:hover{opacity:.85;transform:scale(1.05)}
+.nova-chat-input-hint{font-size:10px;color:var(--muted);margin-top:5px;text-align:center}
 .nova-opt{
   background:var(--surface2);border:1.5px solid var(--border2);border-radius:8px;
   padding:9px 16px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:.2s
@@ -595,8 +629,10 @@ td:first-child{color:var(--text);font-weight:500}
   .nova-chat-sub{display:none}
   .nova-msgs{padding:14px 16px}
   .nova-bubble{font-size:12px;max-width:85vw}
-  .nova-opts{padding:10px 14px 14px;gap:7px}
+  .nova-opts{padding:10px 14px 8px;gap:7px}
   .nova-opt{padding:9px 13px;font-size:11px}
+  .nova-chat-input{padding:8px 14px 12px}
+  .nova-chat-input-hint{display:none}
   .nova-trigger{
     width:calc(100% - 32px);left:16px;transform:none;
     font-size:12px;padding:12px 20px;bottom:16px
@@ -747,10 +783,17 @@ td:first-child{color:var(--text);font-weight:500}
       <div class="an-product" id="anProduct"></div>
       <button class="btn-export" id="btnLoadAll" onclick="loadAllTabs()" title="Загрузить все разделы">↻ Загрузить все</button>
       <button class="btn-export" onclick="generateFullReport()" title="Скачать полный PDF всех разделов">↓ Полный PDF</button>
+      <button class="btn-export" id="btnShareLink" onclick="copyAnalysisLink()" title="Скопировать ссылку на этот анализ" style="display:none">🔗 Моя ссылка</button>
     </div>
     <div class="tabs-wrap" id="tabsBar"></div>
   </div>
   <div class="content" id="content"></div>
+</div>
+
+<!-- ===== COMPETITOR PROFILE PANEL ===== -->
+<div id="cpOverlay" onclick="closeCompProfile()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;backdrop-filter:blur(2px)"></div>
+<div id="cpPanel" style="display:none;position:fixed;top:0;right:0;width:min(520px,100vw);height:100vh;background:var(--surface,#0f1117);border-left:1px solid var(--border,#2a2d3a);z-index:901;overflow-y:auto;padding:0;box-shadow:-8px 0 40px rgba(0,0,0,.4);transition:transform .3s ease">
+  <div id="cpContent" style="padding:24px 28px 40px"></div>
 </div>
 
 <!-- MODAL -->
@@ -790,6 +833,17 @@ td:first-child{color:var(--text);font-weight:500}
     </div>
     <div class="nova-msgs" id="novaMsgs"></div>
     <div class="nova-opts" id="novaOpts"></div>
+    <div class="nova-chat-input" id="novaChatInput">
+      <div class="nova-chat-input-wrap">
+        <textarea id="novaChatTextarea" placeholder="Задай любой вопрос про анализ..." rows="1"
+          onkeypress="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendNovaChatMessage()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+        <button class="nova-chat-send" onclick="sendNovaChatMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="nova-chat-input-hint">Shift+Enter — новая строка · Enter — отправить</div>
+    </div>
   </div>
 </div>
 
@@ -843,7 +897,12 @@ td:first-child{color:var(--text);font-weight:500}
     {id:'offers',emoji:'🎯',title:'Офферы'},
     {id:'gaps',emoji:'🔍',title:'Пробелы рынка'},
     {id:'quickwins',emoji:'⚡',title:'Первые шаги'},
-    {id:'strategy',emoji:'📋',title:'Стратегия'}
+    {id:'strategy',emoji:'📋',title:'Стратегия'},
+    {id:'funnel',emoji:'🌀',title:'Воронка'},
+    {id:'messaging',emoji:'💬',title:'Месседжинг'},
+    {id:'cards',emoji:'🃏',title:'Карточки'},
+    {id:'evidence',emoji:'🔎',title:'Источники'},
+    {id:'weaknesses',emoji:'💔',title:'Слабости'}
   ];
 
   let state = {step:0, data:{}};
@@ -883,9 +942,23 @@ td:first-child{color:var(--text);font-weight:500}
         `<button class="q-option ${state.data[q.id] === o ? 'selected' : ''}" onclick="select('${q.id}', '${o}')">${o}</button>`
       ).join('')}</div>`;
     } else if(q.type === 'input') {
-      html = `<input type="text" class="fi" id="fi_${q.id}" placeholder="${q.placeholder}" value="${state.data[q.id] || ''}" oninput="updateText('${q.id}', this.value)">`;
+      html = `<div style="position:relative;display:flex;align-items:center;gap:8px">
+        <input type="text" class="fi" id="fi_${q.id}" placeholder="${q.placeholder}" value="${state.data[q.id] || ''}" oninput="updateText('${q.id}', this.value)" style="flex:1">
+        <button class="mic-btn" id="micBtn_${q.id}" onclick="toggleVoice('${q.id}')" title="Говори голосом">🎤</button>
+      </div>`;
     } else if(q.type === 'textarea') {
-      html = `<textarea class="fi" id="fi_${q.id}" placeholder="${q.placeholder}" oninput="updateText('${q.id}', this.value)">${state.data[q.id] || ''}</textarea>`;
+      const isDesc = q.id === 'description';
+      html = `<div style="position:relative">
+        <textarea class="fi" id="fi_${q.id}" placeholder="${q.placeholder}" oninput="updateText('${q.id}', this.value)" style="padding-right:48px">${state.data[q.id] || ''}</textarea>
+        <button class="mic-btn" id="micBtn_${q.id}" onclick="toggleVoice('${q.id}')" title="Говори голосом" style="position:absolute;right:10px;top:10px">🎤</button>
+      </div>
+      ${isDesc ? `<div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <label class="file-upload-btn" id="fileUploadLabel" title="Загрузи PDF, Word или txt — AI заполнит поля автоматически">
+          📎 Загрузить документ
+          <input type="file" id="fileUploadInput" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="handleFileUpload(this)">
+        </label>
+        <span id="fileUploadStatus" style="font-size:12px;color:var(--text2)"></span>
+      </div>` : ''}`;
     } else if(q.type === 'multi') {
       const selected = state.data[q.id] || [];
       html = `<div class="q-multi-grid">${q.options.map(o =>
@@ -908,6 +981,152 @@ td:first-child{color:var(--text);font-weight:500}
 
   function select(id, val) {state.data[id] = val; renderQuestion();}
   function updateText(id, val) {state.data[id] = val;}
+
+  // ===== FILE UPLOAD — AI читает документ и заполняет поля =====
+  async function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const status = document.getElementById('fileUploadStatus');
+    const label = document.getElementById('fileUploadLabel');
+
+    status.textContent = '⏳ Читаю документ...';
+    if (label) label.style.opacity = '0.6';
+
+    try {
+      // Читаем файл как текст (txt) или base64 (pdf/doc)
+      const isTxt = file.type === 'text/plain' || file.name.endsWith('.txt');
+      let content = '';
+
+      if (isTxt) {
+        content = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsText(file, 'UTF-8');
+        });
+      } else {
+        // Для PDF/DOC — конвертируем в base64 и отправляем на сервер через data URL
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        // Отправляем base64 на Jina через наш endpoint
+        const resp = await fetch('/api/parse-file', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: base64.split(',')[1] ? `[Файл: ${file.name}]` : '', fileBase64: base64, fileName: file.name })
+        });
+        const result = await resp.json();
+        if (result.error) { status.textContent = '⚠️ ' + result.error; return; }
+        applyParsedData(result.data, status, label, file.name);
+        return;
+      }
+
+      if (!content || content.length < 30) {
+        status.textContent = '⚠️ Файл пустой или не читается';
+        return;
+      }
+
+      // Отправляем текст на AI-парсинг
+      const resp = await fetch('/api/parse-file', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ text: content })
+      });
+      const result = await resp.json();
+      if (result.error) { status.textContent = '⚠️ ' + result.error; return; }
+      applyParsedData(result.data, status, label, file.name);
+
+    } catch(e) {
+      status.textContent = '⚠️ Ошибка: ' + e.message;
+      if (label) label.style.opacity = '1';
+    }
+  }
+
+  function applyParsedData(data, status, label, fileName) {
+    if (!data) { status.textContent = '⚠️ Не удалось разобрать документ'; return; }
+    // Заполняем поля
+    if (data.area) state.data.area = data.area;
+    if (data.product) state.data.product = data.product;
+    if (data.description) state.data.description = data.description;
+    if (data.segment && ['Частные лица','Малый и средний бизнес','Крупный бизнес'].includes(data.segment)) state.data.segment = data.segment;
+    if (data.competitors) state.data.competitors = data.competitors;
+    if (data.price) state.data.price = data.price;
+
+    // Обновляем текущее поле описания
+    const el = document.getElementById('fi_description');
+    if (el && data.description) el.value = data.description;
+
+    status.textContent = `✅ Заполнено из "${fileName}"`;
+    if (label) label.style.opacity = '1';
+
+    // Показываем что AI понял
+    setTimeout(() => {
+      const fields = [];
+      if (data.product) fields.push(`Продукт: ${data.product}`);
+      if (data.area) fields.push(`Ниша: ${data.area}`);
+      if (data.segment) fields.push(`Клиент: ${data.segment}`);
+      if (fields.length) status.textContent = '✅ ' + fields.join(' · ');
+    }, 500);
+  }
+
+  // ===== VOICE INPUT (Web Speech API) =====
+  let _voiceRecognition = null;
+  let _voiceFieldId = null;
+
+  function toggleVoice(fieldId) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Голосовой ввод не поддерживается в этом браузере. Используй Chrome или Edge.');
+      return;
+    }
+    const btn = document.getElementById('micBtn_' + fieldId);
+    // Если уже записываем — останавливаем
+    if (_voiceRecognition && _voiceFieldId === fieldId) {
+      _voiceRecognition.stop();
+      return;
+    }
+    // Останавливаем предыдущую если была
+    if (_voiceRecognition) _voiceRecognition.stop();
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ru-RU';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    _voiceRecognition = recognition;
+    _voiceFieldId = fieldId;
+
+    if (btn) btn.classList.add('recording');
+
+    recognition.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      const el = document.getElementById('fi_' + fieldId);
+      if (el) {
+        el.value = transcript;
+        updateText(fieldId, transcript);
+      }
+    };
+
+    recognition.onend = () => {
+      if (btn) btn.classList.remove('recording');
+      _voiceRecognition = null;
+      _voiceFieldId = null;
+    };
+
+    recognition.onerror = (e) => {
+      if (btn) btn.classList.remove('recording');
+      _voiceRecognition = null;
+      _voiceFieldId = null;
+      if (e.error !== 'aborted') console.warn('Speech error:', e.error);
+    };
+
+    recognition.start();
+  }
   function fillExample(id, val, append) {
     if (append) {
       const existing = (state.data[id] || '').trim();
@@ -1017,37 +1236,62 @@ td:first-child{color:var(--text);font-weight:500}
   }
 
   async function fetchAnalysis() {
+    // Сбрасываем конкурентов от предыдущего анализа — иначе старые данные попадут в новый запрос
+    state.competitorNames = [];
+    state._enrichedCompetitors = null;
+    state._searchContext = null;
+
     setLoadingStep(0, 'active');
     const t1 = setTimeout(() => setLoadingStep(1, 'active'), 5000);
     const t2 = setTimeout(() => setLoadingStep(2, 'active'), 9000);
 
-    // ШАГ 1: Поиск конкурентов (только если не заданы вручную)
+    // Ручные конкуренты (если введены) — добавляем первыми, помечаем флагом
     const hasManualCompetitors = state.data.competitors && state.data.competitors.trim().length > 2;
-    if (!hasManualCompetitors) {
-      startDiscoverProgress();
-      try {
-        const discoverResp = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({...state.data, tab: 'discover', clientKey: getClientKey()})
-        });
-        if (discoverResp.ok) {
-          const discoverData = await discoverResp.json();
-          const foundComps = discoverData.competitors || (discoverData.discover && discoverData.discover.competitors) || [];
-          if (discoverData.searchContext) state._searchContext = discoverData.searchContext;
-          stopDiscoverProgress();
-          if (foundComps.length > 0) {
-            clearTimeout(t1); clearTimeout(t2);
-            // Показываем экран подтверждения — пользователь сам выбирает конкурентов
-            showConfirmScreen(foundComps);
-            return;
-          }
-        }
-      } catch(e) { stopDiscoverProgress(); /* поиск не критичен — продолжаем без него */ }
-    }
-    clearTimeout(t1); clearTimeout(t2);
+    const manualObjs = hasManualCompetitors
+      ? state.data.competitors.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+          .map(n => ({name: n, url: '', why: 'Введён вами', _manual: true}))
+      : [];
+
+    // ШАГ 1: Всегда ищем конкурентов в интернете (дополняем ручных или находим сами)
+    startDiscoverProgress();
+    let foundComps = [];
+    try {
+      const discoverResp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...state.data, tab: 'discover', clientKey: getClientKey(), ..._visitMeta})
+      });
+      if (discoverResp.ok) {
+        const discoverData = await discoverResp.json();
+        foundComps = discoverData.competitors || (discoverData.discover && discoverData.discover.competitors) || [];
+        if (discoverData.searchContext) state._searchContext = discoverData.searchContext;
+        if (discoverData.analysisId) state._analysisId = discoverData.analysisId;
+      }
+    } catch(e) { /* поиск не критичен — продолжаем без него */ }
     stopDiscoverProgress();
-    // Конкуренты заданы вручную или не найдены — сразу запускаем анализ
+    clearTimeout(t1); clearTimeout(t2);
+
+    // Мёрджим: ручные первыми + найденные (без дублей по имени)
+    const manualNames = new Set(manualObjs.map(c => c.name.toLowerCase()));
+    const extraComps = foundComps.filter(c => !manualNames.has((c.name || '').toLowerCase()));
+    const mergedComps = [...manualObjs, ...extraComps];
+
+    if (mergedComps.length > 0) {
+      // Показываем экран подтверждения с полным списком
+      showConfirmScreen(mergedComps);
+      return;
+    }
+
+    // Ничего не нашли — запускаем анализ с ручными (если есть)
+    if (hasManualCompetitors) {
+      state._enrichedCompetitors = manualObjs;
+      fetch('/api/analyze', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...state.data, tab: 'discover', saveOnly: true, manualCompetitors: manualObjs, clientKey: getClientKey(), ..._visitMeta})
+      }).then(r => r.json()).then(d => {
+        if (d.analysisId) state._analysisId = d.analysisId;
+      }).catch(() => {});
+    }
     await runAnalysis();
   }
 
@@ -1063,13 +1307,15 @@ td:first-child{color:var(--text);font-weight:500}
     if (!list) return;
     list.innerHTML = _pendingCompetitors.map((c, i) => {
       const letter = (c.name || c.url || '?')[0].toUpperCase();
-      const preview = c.preview ? c.preview.substring(0, 160) : (c.why || '');
+      const rawPreview = c.preview || c.why || '';
+      const preview = /RateLimit|Error:|error:|ParamValidation|Could not resolve|failed|exception/i.test(rawPreview) ? (c.why && !/Error|error/i.test(c.why) ? c.why : '') : rawPreview.substring(0, 160);
+      const manualBadge = c._manual ? `<span style="font-size:9px;font-weight:700;color:#d4a843;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.3);border-radius:4px;padding:1px 6px;margin-left:6px;letter-spacing:.04em">✏️ Вы ввели</span>` : '';
       return `<label class="comp-card" for="cc${i}">
         <input type="checkbox" id="cc${i}" checked onchange="updateConfirmCount()">
-        <div class="comp-card-logo">${letter}</div>
+        <div class="comp-card-logo" style="${c._manual ? 'background:rgba(212,168,67,.15);color:#d4a843;border:1.5px solid rgba(212,168,67,.3)' : ''}">${letter}</div>
         <div class="comp-card-info">
-          <div class="comp-card-name">${c.name || c.url}</div>
-          <div class="comp-card-url">${c.url || ''}</div>
+          <div class="comp-card-name">${c.name || c.url}${manualBadge}</div>
+          <div class="comp-card-url">${c.url ? `${c.url} <a href="${c.url}" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);text-decoration:none;font-size:10px;margin-left:4px">↗</a>` : ''}</div>
           ${preview ? `<div class="comp-card-preview">${preview}</div>` : ''}
         </div>
       </label>`;
@@ -1108,6 +1354,8 @@ td:first-child{color:var(--text);font-weight:500}
     state.data.competitorUrls = selected
       .filter(c => c.url && c.url.startsWith('http'))
       .map(c => c.url).join('\n');
+    // Сохраняем обогащённые данные для таба Карточки
+    state._enrichedCompetitors = selected;
 
     document.getElementById('confirmScreen').classList.remove('active');
     document.getElementById('loadingScreen').classList.add('active');
@@ -1123,7 +1371,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'market', competitorNames: state.competitorNames || [], searchContext: state._searchContext || undefined, clientKey: getClientKey()})
+        body: JSON.stringify({...state.data, tab: 'market', competitorNames: state.competitorNames || [], searchContext: state._searchContext || undefined, clientKey: getClientKey(), analysisId: state._analysisId || null, ..._visitMeta})
       });
       clearTimeout(t1);
       setLoadingStep(1, 'done');
@@ -1151,14 +1399,43 @@ td:first-child{color:var(--text);font-weight:500}
     }
 
     setTimeout(() => {
+      // Fallback: если _enrichedCompetitors не задан (discover не нашёл конкурентов или не запускался),
+      // строим заглушки из competitorNames — чтобы Карточки и Источники показали хоть что-нибудь
+      if (!state._enrichedCompetitors || !state._enrichedCompetitors.length) {
+        const names = state.competitorNames || [];
+        const urlLines = ((state.data && state.data.competitorUrls) || '').split('\n')
+          .map(u => u.trim()).filter(u => u.startsWith('http'));
+        if (names.length) {
+          state._enrichedCompetitors = names.map((name, i) => ({
+            name,
+            url: urlLines[i] || '',
+            why: 'Добавлен в анализ',
+            competitor_type: null,
+            confidence_score: null,
+            found_in: null,
+          }));
+        }
+      }
       document.getElementById('loadingScreen').classList.remove('active');
       document.getElementById('analysisScreen').classList.add('active');
       document.getElementById('anProduct').textContent = state.data.product || '';
+      // Показываем кнопку ссылки если есть analysisId
+      if (state._analysisId) {
+        const btn = document.getElementById('btnShareLink');
+        if (btn) btn.style.display = '';
+        const url = `${location.origin}/cipher?analysis=${state._analysisId}&area=${encodeURIComponent(state.data.area||'')}&product=${encodeURIComponent(state.data.product||'')}`;
+        history.replaceState(null, '', url);
+      }
       renderTabs();
+      // Автозагрузка всех разделов сразу после основного анализа (только если market загрузился)
+      if (state.aiData && state.aiData.market) {
+        setTimeout(() => loadAllTabs(), 800);
+      }
     }, 300);
   }
 
   async function fetchTab(tabId) {
+    if (tabId === 'cards' || tabId === 'evidence' || tabId === 'weaknesses') { switchTab(TABS.findIndex(t => t.id === tabId)); return; }
     document.getElementById('content').innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:50vh;gap:14px;flex-direction:column">
         <div style="width:36px;height:36px;border:2px solid var(--border2);border-top:2px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite"></div>
@@ -1168,7 +1445,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: (tabId === 'strategy' || tabId === 'quickwins') ? buildAnalysisContext() : undefined, margoContext: getMargoContext() || undefined, clientKey: getClientKey()})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: buildAnalysisContext() || undefined, margoContext: getMargoContext() || undefined, clientKey: getClientKey(), analysisId: state._analysisId || null, ..._visitMeta})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1193,7 +1470,7 @@ td:first-child{color:var(--text);font-weight:500}
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: 'pricingtiers', competitorNames: state.competitorNames || [], clientKey: getClientKey()})
+        body: JSON.stringify({...state.data, tab: 'pricingtiers', competitorNames: state.competitorNames || [], clientKey: getClientKey(), ..._visitMeta})
       });
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
@@ -1238,7 +1515,8 @@ td:first-child{color:var(--text);font-weight:500}
   function updateLoadBtn() {
     const btn = document.getElementById('btnLoadAll');
     if (!btn) return;
-    const missing = TABS.filter(t => !state.aiData || !state.aiData[t.id]);
+    const _LOCAL = new Set(['cards','evidence','weaknesses']);
+    const missing = TABS.filter(t => !_LOCAL.has(t.id) && (!state.aiData || !state.aiData[t.id]));
     if (missing.length === 0) {
       btn.textContent = '✓ Всё загружено';
       btn.style.color = '#4ade80';
@@ -1257,7 +1535,7 @@ td:first-child{color:var(--text);font-weight:500}
       <div class="q-action">
         <div>
           <div class="q-action-title">${a.title}</div>
-          <div class="q-action-detail">${a.detail}</div>
+          ${(a.detail || a.action) ? `<div class="q-action-detail">${a.detail || a.action}</div>` : ''}
         </div>
       </div>`).join('');
     return `
@@ -1273,6 +1551,22 @@ td:first-child{color:var(--text);font-weight:500}
   }
 
   // Уникальный ID клиента — генерируется один раз, хранится в localStorage (5.1)
+  function copyAnalysisLink() {
+    const email = state.data && state.data.email;
+    const id = state._analysisId;
+    if (!email && !id) return;
+    // Если есть email — ссылка красивая по email, иначе по UUID
+    const url = email
+      ? `${location.origin}/cipher?email=${encodeURIComponent(email)}`
+      : `${location.origin}/cipher?analysis=${id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btnShareLink');
+      if (btn) { const orig = btn.textContent; btn.textContent = '✓ Скопировано!'; setTimeout(() => btn.textContent = orig, 2000); }
+    }).catch(() => {
+      prompt('Скопируй ссылку:', url);
+    });
+  }
+
   function getClientKey() {
     try {
       let key = localStorage.getItem('cipher_client_key');
@@ -1283,6 +1577,18 @@ td:first-child{color:var(--text);font-weight:500}
       return key;
     } catch(e) { return null; }
   }
+
+  // Данные об источнике визита — один раз при загрузке страницы
+  const _visitMeta = (function() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      sourceUrl:   window.location.href,
+      referrer:    document.referrer || null,
+      utmSource:   params.get('utm_source')   || null,
+      utmMedium:   params.get('utm_medium')   || null,
+      utmCampaign: params.get('utm_campaign') || null,
+    };
+  })();
 
   // История анализов (5.5)
   async function openHistory() {
@@ -1332,8 +1638,177 @@ td:first-child{color:var(--text);font-weight:500}
     document.getElementById('histOverlay').style.display = 'none';
   }
 
+  // ===== COMPETITOR PROFILE PANEL =====
+  function openCompProfile(name, url) {
+    const overlay = document.getElementById('cpOverlay');
+    const panel   = document.getElementById('cpPanel');
+    const content = document.getElementById('cpContent');
+    overlay.style.display = 'block';
+    panel.style.display   = 'block';
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+
+    content.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text,#e8eaf0)">${name}</div>
+          ${url ? `<a href="${url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--muted,#5b6b8a);text-decoration:none;border-bottom:1px dotted var(--border2,#1e2130)">${url.replace(/^https?:\/\/(www\.)?/,'')}</a>` : ''}
+        </div>
+        <button onclick="closeCompProfile()" style="background:none;border:1px solid var(--border,#2a2d3a);border-radius:8px;color:var(--muted,#5b6b8a);padding:6px 12px;cursor:pointer;font-size:13px">✕ Закрыть</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;color:var(--muted,#5b6b8a);font-size:13px">
+        <div class="spin" style="width:18px;height:18px;border:2px solid var(--border2,#1e2130);border-top-color:var(--gold,#d4a843);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+        Загружаем профиль конкурента…
+      </div>`;
+
+    fetch('/api/analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        tab: 'competitor-profile',
+        competitorName: name,
+        competitorUrl: url || '',
+        area: state.data && state.data.area || '',
+        product: state.data && state.data.product || '',
+        clientKey: getClientKey()
+      })
+    })
+    .then(r => r.json())
+    .then(data => renderCompProfile(name, url, data.profile || {}))
+    .catch(() => {
+      content.innerHTML += '<div style="color:#f87171;margin-top:16px">Ошибка загрузки профиля. Попробуй снова.</div>';
+    });
+  }
+
+  function closeCompProfile() {
+    document.getElementById('cpOverlay').style.display = 'none';
+    document.getElementById('cpPanel').style.display   = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function renderCompProfile(name, url, p) {
+    const content = document.getElementById('cpContent');
+    const gold = 'var(--gold,#d4a843)';
+    const muted = 'var(--muted,#5b6b8a)';
+    const text  = 'var(--text,#e8eaf0)';
+    const text2 = 'var(--text2,#9aa3b8)';
+    const surface2 = 'var(--surface2,#161b27)';
+    const surface3 = 'var(--surface3,#0d1018)';
+    const border = 'var(--border,#2a2d3a)';
+
+    const section = (title, html) => `
+      <div style="margin-bottom:20px">
+        <div style="font-size:10px;font-weight:700;color:${muted};text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">${title}</div>
+        ${html}
+      </div>`;
+
+    const pill = (txt, color='#60a5fa') =>
+      `<span style="display:inline-block;font-size:11px;padding:3px 10px;border-radius:12px;background:${color}18;color:${color};border:1px solid ${color}40;margin:2px 3px 2px 0">${txt}</span>`;
+
+    const stealCard = (item, i) => `
+      <div style="background:${surface3};border:1px solid ${border};border-radius:10px;padding:12px 14px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:600;color:${text};margin-bottom:6px">💡 ${item.idea || ''}</div>
+        <div style="font-size:11px;color:${text2};line-height:1.5;margin-bottom:4px"><span style="color:${muted}">Почему работает:</span> ${item.why || ''}</div>
+        <div style="font-size:11px;color:${text2};line-height:1.5"><span style="color:${gold}">Как взять:</span> ${item.how || ''}</div>
+      </div>`;
+
+    const reviews = p.reviews || {};
+    const rating = reviews.rating ? Number(reviews.rating).toFixed(1) : null;
+    const stars = rating ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) : '';
+
+    let html = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:${text}">${name}</div>
+          ${url ? `<a href="${url}" target="_blank" rel="noopener" style="font-size:11px;color:${muted};text-decoration:none;border-bottom:1px dotted ${border}">${url.replace(/^https?:\/\/(www\.)?/,'')}</a>` : ''}
+        </div>
+        <button onclick="closeCompProfile()" style="background:none;border:1px solid ${border};border-radius:8px;color:${muted};padding:6px 12px;cursor:pointer;font-size:13px">✕</button>
+      </div>`;
+
+    // Главный оффер
+    if (p.main_offer) html += section('Главный оффер / УТП', `<div style="font-size:13px;color:${text};line-height:1.6;padding:10px 14px;background:${surface2};border-radius:8px;border-left:3px solid ${gold}">${p.main_offer}</div>`);
+
+    // Позиционирование
+    if (p.positioning) html += section('Позиционирование', `<div style="font-size:12px;color:${text2};line-height:1.6">${p.positioning}</div>`);
+
+    // Цены
+    if (p.pricing) {
+      const pr = p.pricing;
+      const freeTag = pr.free_tier ? pill('Есть бесплатный план', '#34d399') : '';
+      html += section('Цены', `
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${pill(pr.model || 'неизвестно', '#a78bfa')}
+          ${pr.price && pr.price !== 'неизвестно' ? `<span style="font-size:13px;font-weight:600;color:${text}">${pr.price}</span>` : ''}
+          ${freeTag}
+        </div>`);
+    }
+
+    // Ключевые фичи
+    if (p.key_features && p.key_features.length) {
+      html += section('Ключевые функции', (p.key_features).map(f => pill(f, '#60a5fa')).join(''));
+    }
+
+    // Платформа
+    if (p.platform) {
+      const pl = p.platform;
+      let inner = '';
+      if (pl.type && pl.type.length) inner += `<div style="margin-bottom:8px">${pl.type.map(t => pill(t, '#a78bfa')).join('')}</div>`;
+      if (pl.stack) inner += `<div style="font-size:11px;color:${text2};margin-bottom:6px">⚙️ <span style="color:${muted}">Стек:</span> ${pl.stack}</div>`;
+      if (pl.integrations && pl.integrations.length) inner += `<div style="margin-bottom:6px">${pl.integrations.map(i => pill(i, '#34d399')).join('')}</div>`;
+      if (pl.notable_ux) inner += `<div style="font-size:11px;color:${text2};padding:8px 10px;background:${surface3};border-radius:7px;border-left:2px solid #a78bfa60">🖥️ ${pl.notable_ux}</div>`;
+      if (inner) html += section('🖥️ Платформа', inner);
+    }
+
+    // Инструменты
+    if (p.tools_used && p.tools_used.length) {
+      html += section('🔧 Инструменты & технологии', p.tools_used.map(t => pill(t, '#fb923c')).join(''));
+    }
+
+    // Что взять из платформы
+    if (p.platform_steal && p.platform_steal.length) {
+      const platformCard = (item) => `
+        <div style="background:${surface3};border:1px solid ${border};border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:600;color:${text};margin-bottom:6px">⚡ ${item.feature || ''}</div>
+          <div style="font-size:11px;color:${text2};line-height:1.5;margin-bottom:4px"><span style="color:${muted}">Почему ценно:</span> ${item.why_works || ''}</div>
+          <div style="font-size:11px;color:${text2};line-height:1.5"><span style="color:#a78bfa">Как реализовать:</span> ${item.adapt_for_us || ''}</div>
+        </div>`;
+      html += section('⚡ Что взять из их платформы', p.platform_steal.map(platformCard).join(''));
+    }
+
+    // Тон + сильные стороны
+    if (p.tone || (p.strengths && p.strengths.length)) {
+      let inner = '';
+      if (p.tone) inner += `<div style="margin-bottom:8px">${pill('Тон: ' + p.tone, '#fbbf24')}</div>`;
+      if (p.strengths && p.strengths.length) {
+        inner += p.strengths.map(s => `<div style="font-size:12px;color:${text2};padding:4px 0;border-bottom:1px solid ${border}40">✅ ${s}</div>`).join('');
+      }
+      html += section('Тон & Сильные стороны', inner);
+    }
+
+    // Слабые места
+    if (p.weaknesses && p.weaknesses.length) {
+      html += section('Слабые места', p.weaknesses.map(w => `<div style="font-size:12px;color:#f87171;padding:4px 0;border-bottom:1px solid ${border}40">⚠️ ${w}</div>`).join(''));
+    }
+
+    // Отзывы
+    if (reviews.rating || (reviews.positives && reviews.positives.length) || (reviews.complaints && reviews.complaints.length)) {
+      let rev = '';
+      if (rating) rev += `<div style="font-size:20px;font-weight:700;color:${gold};margin-bottom:8px">${rating} <span style="font-size:14px;color:#fbbf24">${stars}</span></div>`;
+      if (reviews.positives && reviews.positives.length) rev += reviews.positives.map(r => `<div style="font-size:11px;color:#34d399;padding:3px 0">👍 ${r}</div>`).join('');
+      if (reviews.complaints && reviews.complaints.length) rev += reviews.complaints.map(r => `<div style="font-size:11px;color:#f87171;padding:3px 0">👎 ${r}</div>`).join('');
+      html += section('Отзывы (G2 / Capterra)', rev);
+    }
+
+    // Что взять (маркетинг/стратегия)
+    if (p.steal_ideas && p.steal_ideas.length) {
+      html += section('💡 Стратегические идеи', p.steal_ideas.map(stealCard).join(''));
+    }
+
+    content.innerHTML = html;
+  }
+
   // Загрузить конкурентов из прошлого анализа (5.4)
-  async function loadFromHistory(analysisId, area, product) {
+  async function loadFromHistory(analysisId, area, product, autoRun) {
     closeHistory();
     try {
       const resp = await fetch('/api/history', {
@@ -1344,12 +1819,42 @@ td:first-child{color:var(--text);font-weight:500}
       const data = await resp.json();
       const competitors = data.competitors || [];
       if (competitors.length > 0) {
-        state._pendingCompetitors = competitors;
-        // Заполняем state.data если пусто
+        _pendingCompetitors = competitors;
         if (!state.data) state.data = {};
-        if (!state.data.area) state.data.area = area;
-        if (!state.data.product) state.data.product = product;
-        showConfirmScreen(competitors);
+        // Заполняем все поля из базы если они есть
+        const ad = data.analysisData;
+        if (ad) {
+          state.data.area = ad.area || area;
+          state.data.product = ad.product || product;
+          if (ad.segment) state.data.segment = ad.segment;
+          if (ad.description) state.data.description = ad.description;
+          if (ad.geography) state.data.geography = Array.isArray(ad.geography) ? ad.geography.join(', ') : ad.geography;
+          if (ad.price) state.data.price = ad.price;
+        } else {
+          if (!state.data.area) state.data.area = area;
+          if (!state.data.product) state.data.product = product;
+        }
+        state._analysisId = analysisId;
+        if (autoRun) {
+          state.competitorNames = competitors.map(c => c.name).filter(Boolean);
+          state.data.competitorUrls = competitors.filter(c => c.url && c.url.startsWith('http')).map(c => c.url).join('\n');
+          state._enrichedCompetitors = competitors;
+          if (data.aiCache && Object.keys(data.aiCache).length > 0) {
+            // Кеш есть — показываем мгновенно
+            state.aiData = data.aiCache;
+            document.getElementById('loadingScreen').classList.remove('active');
+            document.getElementById('analysisScreen').classList.add('active');
+            document.getElementById('anProduct').textContent = state.data.product || '';
+            const btn = document.getElementById('btnShareLink');
+            if (btn) btn.style.display = '';
+            renderTabs();
+          } else {
+            document.getElementById('loadingScreen').classList.add('active');
+            await runAnalysis();
+          }
+        } else {
+          showConfirmScreen(competitors);
+        }
       }
     } catch(e) {}
   }
@@ -1437,6 +1942,30 @@ td:first-child{color:var(--text);font-weight:500}
     return url
       ? `<td><a href="${url}" target="_blank" rel="noopener" title="Открыть сайт →" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--border)" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='inherit'">${cell}</a></td>`
       : `<td>${cell}</td>`;
+  }
+
+  // Рендерит summary-блок с разделением: ФАКТ / ВЫВОД / ЧТО ДЕЛАТЬ
+  function renderSummary(summary) {
+    const items = [].concat(summary || []);
+    const meta = [
+      {prefix:'ФАКТ:',     icon:'📌', color:'#60a5fa', bg:'rgba(96,165,250,.08)',   border:'rgba(96,165,250,.2)'},
+      {prefix:'ВЫВОД:',    icon:'💡', color:'#fbbf24', bg:'rgba(251,191,36,.08)',   border:'rgba(251,191,36,.2)'},
+      {prefix:'ЧТО ДЕЛАТЬ:',icon:'🎯',color:'#34d399', bg:'rgba(52,211,153,.08)',   border:'rgba(52,211,153,.2)'},
+    ];
+    const rows = items.map((s, i) => {
+      const m = meta[i] || {icon:'·', color:'var(--text2)', bg:'transparent', border:'var(--border)'};
+      let text = String(s);
+      // Убираем префикс если AI его добавил
+      meta.forEach(mm => { text = text.replace(new RegExp('^' + mm.prefix.replace(':','\\:') + '\\s*', 'i'), ''); });
+      return `<div style="display:flex;gap:9px;align-items:flex-start;padding:8px 10px;background:${m.bg};border:1px solid ${m.border};border-radius:7px;margin-bottom:6px">
+        <span style="font-size:13px;flex-shrink:0;line-height:1.4">${m.icon}</span>
+        <div>
+          <div style="font-size:9px;font-weight:700;color:${m.color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">${m.prefix}</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.5">${text}</div>
+        </div>
+      </div>`;
+    });
+    return `<div class="summary-box"><div class="summary-title">Выводы</div>${rows.join('')}</div>`;
   }
 
   function getSourceBadges() {
@@ -1708,10 +2237,7 @@ td:first-child{color:var(--text);font-weight:500}
         </div>
         ${tiersHtml}
         ${getSourceBadges()}
-        <div class="summary-box">
-          <div class="summary-title">Выводы</div>
-          ${[].concat(p.summary).map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
-        </div>
+        ${renderSummary(p.summary)}
         ${recHtml}
       `;
       return;
@@ -1740,7 +2266,11 @@ td:first-child{color:var(--text);font-weight:500}
       return;
     }
 
-    const aiTabData = state.aiData && state.aiData[tab.id];
+    // Локальные табы — не нужен AI, рендерим сразу
+    let aiTabData = state.aiData && state.aiData[tab.id];
+    if (tab.id === 'cards' || tab.id === 'evidence' || tab.id === 'weaknesses') {
+      // рендер ниже по коду
+    } else {
     if (!aiTabData) {
       const isMarket = tab.id === 'market';
       if (isMarket) {
@@ -1787,6 +2317,364 @@ td:first-child{color:var(--text);font-weight:500}
       }
       return;
     }
+    } // end else (non-local tabs)
+
+    // ===== FUNNEL =====
+    if (tab.id === 'funnel') {
+      const fn = state.aiData && state.aiData.funnel;
+      if (!fn) { document.getElementById('content').innerHTML = noDataHtml(tab); return; }
+      const strengthColor = {'🔥 Сильная':'#34d399','⚡ Средняя':'#fbbf24','💤 Слабая':'#f87171'};
+      const cols = [
+        {key:'lead_magnet',   label:'Лид-магнит',   icon:'🎁'},
+        {key:'tripwire',      label:'Трипваер',      icon:'⚡'},
+        {key:'core_offer',    label:'Основной оффер',icon:'💎'},
+        {key:'upsell',        label:'Апсейл',        icon:'🚀'},
+        {key:'cta',           label:'CTA',           icon:'👆'},
+        {key:'sales_model',   label:'Модель продаж', icon:'🔄'},
+      ];
+      const comps = fn.competitors || [];
+      let html = `
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🌀 Воронки и офферы конкурентов</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:18px">Как конкуренты привлекают, прогревают и продают</div>`;
+
+      comps.forEach(c => {
+        const sc = strengthColor[c.funnel_strength] || '#5b6b8a';
+        html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${c.name}</div>
+            <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;background:${sc}18;color:${sc};border:1px solid ${sc}40">${c.funnel_strength || '—'}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+            ${cols.map(col => c[col.key] ? `<div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">${col.icon} ${col.label}</div>
+              <div style="font-size:11px;color:var(--text2);line-height:1.4">${c[col.key]}</div>
+            </div>` : '').join('')}
+          </div>
+        </div>`;
+      });
+
+      if (fn.bestAdvice) {
+        html += `<div style="margin-top:4px;padding:14px 16px;background:rgba(212,168,67,.08);border:1.5px solid var(--gold-border);border-radius:10px">
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">🎯 Как построить воронку лучше конкурентов</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">${fn.bestAdvice}</div>
+        </div>`;
+      }
+      html += renderSummary(fn.summary) + getSourceBadges();
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+
+    // ===== MESSAGING =====
+    if (tab.id === 'messaging') {
+      const mg = state.aiData && state.aiData.messaging;
+      if (!mg) { document.getElementById('content').innerHTML = noDataHtml(tab); return; }
+      const toneColor = {'экспертный':'#60a5fa','дружелюбный':'#34d399','агрессивный':'#f87171','вдохновляющий':'#a78bfa'};
+      const comps = mg.competitors || [];
+      let html = `
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">💬 Контент и месседжинг</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Что говорят конкуренты, какой тон, что молчат</div>`;
+
+      if (mg.market_voice) {
+        html += `<div style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;margin-bottom:14px;font-size:12px;color:var(--text2)"><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-right:8px">Голос рынка</span>${mg.market_voice}</div>`;
+      }
+
+      comps.forEach(c => {
+        const toneKey = Object.keys(toneColor).find(k => (c.tone||'').toLowerCase().includes(k));
+        const toneCol = toneColor[toneKey] || '#5b6b8a';
+        html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${c.name}</div>
+            ${c.tone ? `<span style="font-size:9px;padding:2px 8px;border-radius:10px;background:${toneCol}18;color:${toneCol};border:1px solid ${toneCol}40;text-transform:uppercase;letter-spacing:.06em">${c.tone}</span>` : ''}
+          </div>
+          ${c.main_message ? `<div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:8px;padding:8px 10px;background:var(--surface3);border-radius:7px;border-left:3px solid ${toneCol}">"${c.main_message}"</div>` : ''}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            ${c.pain_pushed ? `<div style="padding:8px 10px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15);border-radius:7px"><div style="font-size:9px;color:#f87171;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">⚡ Боль в контенте</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${c.pain_pushed}</div></div>` : ''}
+            ${c.content_gap ? `<div style="padding:8px 10px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:7px"><div style="font-size:9px;color:#34d399;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">🔇 Что молчат</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${c.content_gap}</div></div>` : ''}
+          </div>
+          ${(c.content_topics && c.content_topics.length) ? `<div style="margin-bottom:6px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Темы</div><div style="display:flex;flex-wrap:wrap;gap:5px">${c.content_topics.map(t=>`<span style="font-size:10px;padding:2px 9px;background:var(--surface3);border:1px solid var(--border);border-radius:12px;color:var(--text2)">${t}</span>`).join('')}</div></div>` : ''}
+          ${(c.key_words && c.key_words.length) ? `<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Ключевые слова</div><div style="display:flex;flex-wrap:wrap;gap:5px">${c.key_words.map(w=>`<span style="font-size:10px;padding:2px 9px;background:rgba(212,168,67,.08);border:1px solid var(--gold-border);border-radius:12px;color:var(--gold)">${w}</span>`).join('')}</div></div>` : ''}
+        </div>`;
+      });
+
+      if (mg.untapped_angle) {
+        html += `<div style="margin-top:4px;padding:14px 16px;background:rgba(167,139,250,.08);border:1.5px solid rgba(167,139,250,.25);border-radius:10px">
+          <div style="font-size:9px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">✨ Незанятый угол коммуникации</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">${mg.untapped_angle}</div>
+        </div>`;
+      }
+      if (mg.bestAdvice) {
+        html += `<div style="margin-top:8px;padding:14px 16px;background:rgba(212,168,67,.08);border:1.5px solid var(--gold-border);border-radius:10px">
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">🎯 Месседж для ${product}</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">${mg.bestAdvice}</div>
+        </div>`;
+      }
+      html += renderSummary(mg.summary) + getSourceBadges();
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+
+    // ===== COMPETITOR CARDS =====
+    if (tab.id === 'cards') {
+      const comps = state._enrichedCompetitors || [];
+      if (!comps.length) {
+        document.getElementById('content').innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:14px;text-align:center;padding:20px">
+            <div style="font-size:40px">🃏</div>
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text)">Карточки конкурентов</div>
+            <div style="font-size:12px;color:var(--muted);max-width:320px;line-height:1.6">Карточки формируются автоматически при поиске конкурентов. Запусти новый анализ — здесь появятся карточки с типом, уверенностью и источником обнаружения.</div>
+          </div>`;
+        return;
+      }
+      const typeLabel = {direct:'Прямой',substitute:'Субститут',indirect:'Косвенный',reference:'Справочный'};
+      const typeColor = {direct:'#f87171',substitute:'#fbbf24',indirect:'#60a5fa',reference:'#a78bfa'};
+      const typeBg    = {direct:'rgba(248,113,113,.1)',substitute:'rgba(251,191,36,.1)',indirect:'rgba(96,165,250,.1)',reference:'rgba(167,139,250,.1)'};
+      const sourceIcon = {ddg:'🔍',yandex:'🔍',google:'🔍',brave:'🔍',g2:'⭐',capterra:'⭐',instagram:'📸',telegram:'💬',getcourse:'🎓',tilda:'🌐',getapp:'⭐'};
+
+      // Группировка: сначала по типу, потом по уверенности
+      const groups = [
+        {key:'direct',   label:'Прямые конкуренты'},
+        {key:'substitute',label:'Субституты'},
+        {key:'indirect', label:'Косвенные'},
+        {key:'reference',label:'Справочники / агрегаторы'},
+      ];
+      // Компании без типа — в группу "unclear"
+      const typed = comps.filter(c => c.competitor_type && c.competitor_type !== 'unknown');
+      const unclear = comps.filter(c => !c.competitor_type || c.competitor_type === 'unknown');
+
+      const scoreBar = (val, color) => {
+        const v = Math.min(100, Math.max(0, Number(val) || 0));
+        return `<div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden">
+            <div style="width:${v}%;height:100%;background:${color};border-radius:2px"></div>
+          </div>
+          <span style="font-size:10px;color:var(--muted);min-width:26px;text-align:right">${v}%</span>
+        </div>`;
+      };
+
+      const cardHtml = (c) => {
+        const letter = (c.name || c.url || '?')[0].toUpperCase();
+        const type = c.competitor_type || 'unknown';
+        const tColor = typeColor[type] || '#5b6b8a';
+        const tBg = typeBg[type] || 'rgba(91,107,138,.1)';
+        const tLabel = typeLabel[type] || type;
+        const src = (c.found_in || '').toLowerCase();
+        const srcIco = sourceIcon[src] || '🌐';
+        const conf = c.confidence_score != null ? Number(c.confidence_score) : null;
+        const rel = c.relevance_score != null ? Number(c.relevance_score) : null;
+        return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px">
+          <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:${tBg};border:1px solid ${tColor}40;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${tColor};flex-shrink:0">${letter}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">${c.name || c.url}</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;background:${tBg};color:${tColor};border:1px solid ${tColor}40;text-transform:uppercase;letter-spacing:.06em">${tLabel}</span>
+              </div>
+              ${c.url ? `<a href="${c.url}" target="_blank" rel="noopener" style="font-size:10px;color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--border2)" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">${c.url.replace(/^https?:\/\/(www\.)?/,'')}</a>` : ''}
+            </div>
+            ${c.found_in ? `<span style="font-size:10px;color:var(--muted);background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap;flex-shrink:0">${srcIco} ${c.found_in}</span>` : ''}
+          </div>
+          ${c.evidence_snippet || c.why ? `<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--surface3);border-radius:7px;border-left:2px solid ${tColor}60">${c.evidence_snippet || c.why}</div>` : ''}
+          ${(conf != null || rel != null) ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:10px">
+            ${conf != null ? `<div><div style="font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Уверенность</div>${scoreBar(conf,'#34d399')}</div>` : ''}
+            ${rel != null  ? `<div><div style="font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Релевантность</div>${scoreBar(rel,'var(--gold)')}</div>` : ''}
+          </div>` : ''}
+          <button data-cpname="${(c.name||c.url||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" data-cpurl="${(c.url||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" onclick="openCompProfile(this.dataset.cpname,this.dataset.cpurl)" style="width:100%;background:none;border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:11px;font-weight:600;padding:7px;cursor:pointer;letter-spacing:.04em;transition:background .15s" onmouseover="this.style.background='rgba(212,168,67,.08)'" onmouseout="this.style.background='none'">🔍 Разобрать конкурента →</button>
+        </div>`;
+      };
+
+      let html = `<div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🃏 Карточки конкурентов</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:18px">Найдено ${comps.length} · тип, источник, уверенность AI</div>`;
+
+      groups.forEach(g => {
+        const gComps = typed.filter(c => c.competitor_type === g.key);
+        if (!gComps.length) return;
+        html += `<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:6px">${g.label} · ${gComps.length}</div>`;
+        html += gComps.map(cardHtml).join('');
+      });
+      if (unclear.length) {
+        html += `<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:6px">Не классифицированы · ${unclear.length}</div>`;
+        html += unclear.map(cardHtml).join('');
+      }
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+
+    // ===== EVIDENCE LOG =====
+    if (tab.id === 'evidence') {
+      const comps = state._enrichedCompetitors || [];
+      if (!comps.length) {
+        document.getElementById('content').innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:14px;text-align:center;padding:20px">
+            <div style="font-size:40px">🔎</div>
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text)">Лог источников</div>
+            <div style="font-size:12px;color:var(--muted);max-width:320px;line-height:1.6">Здесь будет показано из какого источника (DDG, Yandex, G2, Instagram…) нашёлся каждый конкурент. Запусти новый анализ.</div>
+          </div>`;
+        return;
+      }
+
+      const sourceLabel = {ddg:'DuckDuckGo',yandex:'Яндекс',google:'Google',brave:'Brave',g2:'G2',capterra:'Capterra',instagram:'Instagram',telegram:'Telegram',getcourse:'GetCourse',tilda:'Tilda Catalog',getapp:'GetApp'};
+      const sourceColor = {ddg:'#60a5fa',yandex:'#f87171',google:'#34d399',brave:'#fbbf24',g2:'#a78bfa',capterra:'#34d399',instagram:'#f472b6',telegram:'#60a5fa',getcourse:'#fb923c',tilda:'#c084fc',getapp:'#34d399'};
+      const typeLabel = {direct:'Прямой',substitute:'Субститут',indirect:'Косвенный',reference:'Справочный'};
+
+      // Группируем по источнику
+      const bySource = {};
+      comps.forEach(c => {
+        const src = (c.found_in || 'неизвестно').toLowerCase();
+        if (!bySource[src]) bySource[src] = [];
+        bySource[src].push(c);
+      });
+
+      // Сортируем источники по кол-ву находок
+      const sortedSources = Object.entries(bySource).sort((a,b) => b[1].length - a[1].length);
+
+      const totalUniq = comps.length;
+      const sourceCount = sortedSources.length;
+
+      let html = `
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🔎 Лог источников</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px">${totalUniq} конкурентов из ${sourceCount} источников</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:20px">
+          ${sortedSources.map(([src, items]) => {
+            const col = sourceColor[src] || '#5b6b8a';
+            const lbl = sourceLabel[src] || src;
+            const pct = Math.round(items.length / totalUniq * 100);
+            return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center">
+              <div style="font-size:20px;margin-bottom:4px">${src === 'yandex' ? '🔍' : src === 'instagram' ? '📸' : src === 'telegram' ? '💬' : src === 'g2' || src === 'capterra' || src === 'getapp' ? '⭐' : src === 'getcourse' ? '🎓' : '🌐'}</div>
+              <div style="font-size:11px;font-weight:600;color:${col};margin-bottom:2px">${lbl}</div>
+              <div style="font-size:18px;font-weight:700;color:var(--text)">${items.length}</div>
+              <div style="font-size:10px;color:var(--muted)">${pct}% от найденных</div>
+              <div style="margin-top:6px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${col};border-radius:2px"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+
+      // Детальный список по каждому источнику
+      sortedSources.forEach(([src, items]) => {
+        const col = sourceColor[src] || '#5b6b8a';
+        const lbl = sourceLabel[src] || src;
+        html += `<div style="margin-bottom:18px">
+          <div style="font-size:10px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col}"></span>${lbl} · ${items.length} конкурентов
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            ${items.map((c, i) => {
+              const tl = typeLabel[c.competitor_type] || c.competitor_type || '—';
+              const conf = c.confidence_score != null ? Number(c.confidence_score) : null;
+              return `<div style="padding:10px 14px;${i < items.length-1 ? 'border-bottom:1px solid var(--border)' : ''};display:flex;align-items:center;gap:10px">
+                <div style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name || c.url}</div>
+                <span style="font-size:9px;color:var(--muted);background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;flex-shrink:0">${tl}</span>
+                ${conf != null ? `<span style="font-size:10px;color:${conf >= 70 ? '#34d399' : conf >= 40 ? '#fbbf24' : '#f87171'};flex-shrink:0">${conf}%</span>` : ''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      });
+
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+
+    // ===== WEAKNESSES & SWITCHES =====
+    if (tab.id === 'weaknesses') {
+      const sw = state.aiData && state.aiData.swot;
+      const rep = state.aiData && state.aiData.reputation;
+      const pos = state.aiData && state.aiData.positioning;
+      const hasData = sw || rep || pos;
+
+      if (!hasData) {
+        document.getElementById('content').innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:14px;text-align:center;padding:20px">
+            <div style="font-size:40px">💔</div>
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text)">Слабости конкурентов</div>
+            <div style="font-size:12px;color:var(--muted);max-width:320px;line-height:1.6">Загрузи разделы Преимущества и риски и Репутация — здесь появятся слабые места конкурентов и точки переключения.</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+              <button onclick="fetchTab('swot')" style="padding:9px 20px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0a0e1a;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif">Загрузить SWOT</button>
+              <button onclick="fetchTab('reputation')" style="padding:9px 20px;background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">Загрузить Репутацию</button>
+            </div>
+          </div>`;
+        return;
+      }
+
+      // Собираем слабости из SWOT (наши) и жалобы из репутации
+      const ourWeaknesses = (sw && sw.weaknesses) ? [].concat(sw.weaknesses) : [];
+      const compWeaknesses = (sw && sw.threats) ? [].concat(sw.threats) : [];
+
+      // Из репутации — негативные паттерны
+      const repRows = (rep && rep.rows) ? rep.rows : [];
+      const compComplaints = {};
+      repRows.forEach(row => {
+        // row[0] = имя конкурента, ищем столбцы с жалобами / минусами
+        const name = row[0];
+        if (!name || name === product) return;
+        const complaints = row.slice(1).filter(cell => {
+          if (!cell || typeof cell !== 'string') return false;
+          return /жалоб|минус|плохо|медленн|дорого|слабо|нет |не хватает|проблем/i.test(cell);
+        });
+        if (complaints.length) compComplaints[name] = complaints;
+      });
+
+      // Точки переключения — что упоминается как недостаток у конкурентов
+      const switchTriggers = [];
+      if (repRows.length) {
+        const allNeg = repRows.flatMap(row => row.slice(1)).filter(cell =>
+          cell && typeof cell === 'string' && /жалоб|минус|медленн|дорого|нет поддержки|сложно/i.test(cell)
+        );
+        // Уникальные паттерны
+        const seen = new Set();
+        allNeg.forEach(t => { if (t && !seen.has(t)) { seen.add(t); switchTriggers.push(t); } });
+      }
+
+      let html = `
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">💔 Слабости и точки переключения</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Где конкуренты теряют клиентов — и как этим воспользоваться</div>`;
+
+      // Блок 1: Наши слабости (для понимания где атакуют нас)
+      if (ourWeaknesses.length) {
+        html += `
+          <div style="background:rgba(248,113,113,.06);border:1.5px solid rgba(248,113,113,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+            <div style="font-size:10px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">⚠️ Наши слабые стороны (откуда атакуют конкуренты)</div>
+            ${ourWeaknesses.map(w => `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:12px;color:var(--text2);line-height:1.5"><span style="color:#f87171;flex-shrink:0;margin-top:1px">·</span>${w}</div>`).join('')}
+          </div>`;
+      }
+
+      // Блок 2: Угрозы от конкурентов = их сильные стороны
+      if (compWeaknesses.length) {
+        html += `
+          <div style="background:rgba(251,191,36,.06);border:1.5px solid rgba(251,191,36,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+            <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">⚡ Угрозы от конкурентов</div>
+            ${compWeaknesses.map(t => `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:12px;color:var(--text2);line-height:1.5"><span style="color:#fbbf24;flex-shrink:0;margin-top:1px">·</span>${t}</div>`).join('')}
+          </div>`;
+      }
+
+      // Блок 3: Жалобы на конкурентов = точки входа
+      if (Object.keys(compComplaints).length) {
+        html += `<div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:4px">✅ Жалобы на конкурентов — наши точки входа</div>`;
+        Object.entries(compComplaints).forEach(([name, complaints]) => {
+          html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">${name}</div>
+            ${complaints.map(c => `<div style="font-size:11px;color:var(--text2);margin-bottom:4px;padding-left:10px;border-left:2px solid var(--green)40;line-height:1.4">${c}</div>`).join('')}
+          </div>`;
+        });
+      } else if (switchTriggers.length) {
+        html += `<div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:4px">✅ Паттерны отказа от конкурентов</div>`;
+        html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px">`;
+        html += switchTriggers.slice(0, 8).map(t => `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:12px;color:var(--text2);line-height:1.4"><span style="color:var(--green);flex-shrink:0">→</span>${t}</div>`).join('');
+        html += `</div>`;
+      }
+
+      // Если репутация ещё не загружена — подсказка
+      if (!rep) {
+        html += `<div style="margin-top:16px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="font-size:12px;color:var(--text2)">Загрузи раздел Репутация — появятся жалобы на каждого конкурента и конкретные точки переключения</div>
+          <button onclick="fetchTab('reputation')" style="padding:8px 16px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0a0e1a;border:none;border-radius:8px;font-weight:700;font-size:11px;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap">Загрузить репутацию</button>
+        </div>`;
+      }
+
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
 
     const data = aiTabData;
     const criticalRec = state.aiData.strategy && state.aiData.strategy.criticalRec;
@@ -1801,10 +2689,7 @@ td:first-child{color:var(--text);font-weight:500}
         </table>
       </div>
       ${getSourceBadges()}
-      <div class="summary-box">
-        <div class="summary-title">Выводы</div>
-        ${[].concat(data.summary).map(s=>`<div class="summary-item">· ${s}</div>`).join('')}
-      </div>
+      ${renderSummary(data.summary)}
       ${criticalRec ? `<div class="rec-item" style="border-color:var(--red)"><div class="rec-pri" style="color:var(--red)">Критично</div><div class="rec-title">${criticalRec}</div></div>` : ''}
       ${importantRec ? `<div class="rec-item"><div class="rec-pri">Важно</div><div class="rec-title">${importantRec}</div></div>` : ''}
       <button class="btn-analysis" onclick="showModal(${idx})">📋 Полная таблица</button>
@@ -1844,6 +2729,10 @@ td:first-child{color:var(--text);font-weight:500}
   function goBack() {
     clearStorage();
     state.aiData = undefined;
+    state.competitorNames = [];
+    state._enrichedCompetitors = null;
+    state._analysisId = null;
+    state._searchContext = null;
     state.step = 0;
     _pendingCompetitors = [];
     document.getElementById('analysisScreen').classList.remove('active');
@@ -1877,61 +2766,79 @@ td:first-child{color:var(--text);font-weight:500}
     if(chat.classList.contains('open')) document.getElementById('helperInput').focus();
   }
 
+  // Собирает весь загруженный контекст анализа для передачи в AI
+  function buildNovaContext() {
+    const ai = state.aiData || {};
+    const parts = [];
+    if (ai.market) {
+      const comps = (ai.market.rows || []).map(r => r[0]).filter(Boolean);
+      if (comps.length) parts.push('Конкуренты: ' + comps.join(', '));
+      if (ai.market.bestAdvice) parts.push('Вывод по рынку: ' + ai.market.bestAdvice);
+      if (ai.market.summary) parts.push('Рынок: ' + (ai.market.summary || []).join('; '));
+    }
+    if (ai.swot) {
+      if (ai.swot.strengths && ai.swot.strengths.length) parts.push('Сильные стороны: ' + ai.swot.strengths.slice(0,2).join('; '));
+      if (ai.swot.weaknesses && ai.swot.weaknesses.length) parts.push('Слабые стороны: ' + ai.swot.weaknesses.slice(0,2).join('; '));
+      if (ai.swot.opportunities && ai.swot.opportunities.length) parts.push('Возможности: ' + ai.swot.opportunities.slice(0,2).join('; '));
+      if (ai.swot.threats && ai.swot.threats.length) parts.push('Угрозы: ' + ai.swot.threats.slice(0,2).join('; '));
+    }
+    if (ai.strategy) {
+      if (ai.strategy.criticalRec) parts.push('Ключевая рекомендация: ' + ai.strategy.criticalRec);
+      if (ai.strategy.q1 && ai.strategy.q1.goal) parts.push('Цель Q1: ' + ai.strategy.q1.goal);
+      if (ai.strategy.finance) {
+        const f = ai.strategy.finance;
+        parts.push(`Финансы: инвестиции ${f.totalInvest||'?'}, окупаемость ${f.payback||'?'}, ROI ${f.roi||'?'}`);
+      }
+    }
+    if (ai.gaps && ai.gaps.length) parts.push('Пробелы рынка: ' + ai.gaps.slice(0,2).map(g => g.title).join('; '));
+    if (ai.quickwins && ai.quickwins.length) parts.push('Первые шаги: ' + ai.quickwins.slice(0,2).map(q => q.title).join('; '));
+    if (ai.pricing && ai.pricing.recommendation) {
+      const r = ai.pricing.recommendation;
+      parts.push(`Ценообразование: ${r.model||''} от ${r.startPrice||'?'}, ${r.priceWindow||''}`);
+    }
+    if (ai.audience && ai.audience.bestAdvice) parts.push('Совет по аудитории: ' + ai.audience.bestAdvice);
+    if (ai.channels && ai.channels.bestAdvice) parts.push('Совет по каналам: ' + ai.channels.bestAdvice);
+    if (ai.reputation && ai.reputation.summary) parts.push('Репутация: ' + (ai.reputation.summary || []).slice(0,1).join(''));
+    return parts.join('\n');
+  }
+
+  async function callNovaAPI(message, extraContext) {
+    const d = state.data || {};
+    const context = (buildNovaContext() + (extraContext ? '\n' + extraContext : '')).trim();
+    const resp = await fetch('/api/nova', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message,
+        product: d.product,
+        area: d.area,
+        segment: d.segment,
+        geography: d.geography,
+        competitors: d.competitors || (state.competitorNames || []).join(', '),
+        context
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    return data.reply || 'Не получила ответ от AI.';
+  }
+
   async function sendHelperMessage() {
     const input = document.getElementById('helperInput');
     const text = input.value.trim();
-    if(!text) return;
+    if (!text) return;
     addHelperMessage(text, 'user');
     input.value = '';
     const typing = addHelperMessage('Печатает...', 'bot-typing');
 
-    // Build context summary from loaded tabs
-    const d = state.data || {};
-    const contextParts = [];
-    if (state.aiData) {
-      if (state.aiData.market) {
-        const rows = (state.aiData.market.rows || []).map(r => r[0]).filter(Boolean);
-        if (rows.length) contextParts.push('Конкуренты на рынке: ' + rows.join(', '));
-        if (state.aiData.market.bestAdvice) contextParts.push('Лучший совет по рынку: ' + state.aiData.market.bestAdvice);
-      }
-      if (state.aiData.strategy && state.aiData.strategy.criticalRec)
-        contextParts.push('Ключевая рекомендация: ' + state.aiData.strategy.criticalRec);
-      if (state.aiData.swot) {
-        const sw = state.aiData.swot;
-        if (sw.strengths) contextParts.push('Сильные стороны: ' + (sw.strengths[0] || ''));
-        if (sw.opportunities) contextParts.push('Главная возможность: ' + (sw.opportunities[0] || ''));
-      }
-    }
-
-    const isGitHubPages = window.location.hostname.includes('github.io');
-
-    if (!isGitHubPages) {
-      try {
-        const resp = await fetch('/api/nova', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            message: text,
-            product: d.product,
-            area: d.area,
-            segment: d.segment,
-            geography: d.geography,
-            competitors: d.competitors,
-            context: contextParts.join('\n')
-          })
-        });
-        const data = await resp.json();
-        typing.remove();
-        addHelperMessage(data.reply || 'Не смогла ответить', 'bot');
-      } catch(e) {
-        typing.remove();
-        addHelperMessage('Ошибка соединения. ' + getLocalHelperResponse(text), 'bot');
-      }
-    } else {
-      setTimeout(() => {
-        typing.remove();
-        addHelperMessage(getLocalHelperResponse(text), 'bot');
-      }, 400);
+    try {
+      const reply = await callNovaAPI(text);
+      typing.remove();
+      addHelperMessage(reply, 'bot');
+    } catch(e) {
+      typing.remove();
+      // Умный fallback — попытка ответить на основе загруженных данных
+      addHelperMessage(getLocalHelperResponse(text), 'bot');
     }
   }
 
@@ -1952,14 +2859,49 @@ td:first-child{color:var(--text);font-weight:500}
 
   function getLocalHelperResponse(question) {
     const q = question.toLowerCase();
-    for(let key in HELPER_KNOWLEDGE) {
-      const kb = HELPER_KNOWLEDGE[key];
-      if(kb.keywords.some(kw => q.includes(kw))) return kb.answer;
+    const ai = state.aiData || {};
+    const d = state.data || {};
+    // Попытка ответить из загруженных данных
+    if (q.includes('конкур')) {
+      const comps = (state.competitorNames || []).join(', ') || (ai.market && (ai.market.rows||[]).map(r=>r[0]).join(', ')) || 'ещё не загружены';
+      return `Конкуренты в анализе: ${comps}. Подробности — во вкладке "Рынок".`;
     }
-    if(q.includes('конкур')) return 'Конкуренты показаны в таблице раздела "Рынок". Нажми на вкладку чтобы загрузить.';
-    if(q.includes('сколько') || q.includes('бюджет')) return 'Финансовую модель NOVA формирует в разделе "Стратегия" — там инвестиции по кварталам и ROI.';
-    if(q.includes('помощь') || q.includes('не ясно')) return 'Спроси про: рост рынка, стоимость клиента, окупаемость, рост через продукт, бесплатный тариф, модель выхода на рынок, стратегию по кварталам.';
-    return 'Интересный вопрос! Попробуй спросить про метрики (выручка, стоимость клиента, окупаемость), стратегию (кварталы 1–4) или каналы (рост через продукт, маркетинг).';
+    if (q.includes('стратег')) {
+      const rec = ai.strategy && ai.strategy.criticalRec;
+      return rec ? `Ключевая рекомендация по стратегии: ${rec}` : 'Стратегия по кварталам находится во вкладке "Стратегия". Загрузи её чтобы увидеть полный план.';
+    }
+    if (q.includes('цен') || q.includes('прайс') || q.includes('price')) {
+      const adv = ai.pricing && ai.pricing.recommendation && ai.pricing.recommendation.priceWindow;
+      return adv ? `По ценообразованию: ${adv}` : 'Анализ цен конкурентов находится во вкладке "Цены и модели".';
+    }
+    if (q.includes('бюджет') || q.includes('инвести') || q.includes('roi')) {
+      const f = ai.strategy && ai.strategy.finance;
+      return f ? `Финансовая модель: инвестиции ${f.totalInvest||'?'}, окупаемость ${f.payback||'?'}, ROI ${f.roi||'?'}.` : 'Финансовая модель формируется в разделе "Стратегия" после загрузки вкладки.';
+    }
+    if (q.includes('аудитор') || q.includes('клиент') || q.includes('сегмент')) {
+      const adv = ai.audience && ai.audience.bestAdvice;
+      return adv ? `По аудитории: ${adv}` : 'Анализ аудитории и сегментов — во вкладке "Аудитория".';
+    }
+    if (q.includes('слабо') || q.includes('уязим') || q.includes('риск')) {
+      const w = ai.swot && ai.swot.weaknesses && ai.swot.weaknesses[0];
+      return w ? `Главная слабость: ${w}. Подробный SWOT — во вкладке "Преимущества и риски".` : 'SWOT-анализ находится во вкладке "Преимущества и риски".';
+    }
+    if (q.includes('перв') || q.includes('начать') || q.includes('шаг')) {
+      const qw = ai.quickwins && ai.quickwins[0];
+      return qw ? `Первый шаг: ${qw.title} — ${qw.action||qw.why||''}` : 'Первые шаги с конкретными действиями — во вкладке "Первые шаги".';
+    }
+    if (q.includes('пробел') || q.includes('возможност') || q.includes('opportunity')) {
+      const g = ai.gaps && ai.gaps[0];
+      return g ? `Главный пробел рынка: ${g.title}. ${g.description||''}` : 'Пробелы рынка и незакрытые возможности — во вкладке "Пробелы рынка".';
+    }
+    for (let key in HELPER_KNOWLEDGE) {
+      const kb = HELPER_KNOWLEDGE[key];
+      if (kb.keywords.some(kw => q.includes(kw))) return kb.answer;
+    }
+    // Общий ответ с контекстом продукта
+    const product = d.product || 'твоего продукта';
+    const area = d.area || '';
+    return `Задай вопрос про ${product}${area ? ' (' + area + ')' : ''} — например, про конкурентов, стратегию, ценообразование или первые шаги. Если анализ уже запущен, я отвечу по его данным.`;
   }
 
   // ===== DEMO =====
@@ -2208,6 +3150,45 @@ td:first-child{color:var(--text);font-weight:500}
   function closeNova() {
     document.getElementById('novaOverlay').classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  // Свободный AI-чат внутри Nova overlay
+  let novaChatLocked = false;
+  async function sendNovaChatMessage() {
+    if (novaChatLocked) return;
+    const textarea = document.getElementById('novaChatTextarea');
+    const text = textarea.value.trim();
+    if (!text) return;
+    textarea.value = '';
+    textarea.style.height = 'auto';
+    novaChatLocked = true;
+
+    addNovaBubble(text, true);
+
+    // Typing indicator
+    const msgs = document.getElementById('novaMsgs');
+    const typingEl = document.createElement('div');
+    typingEl.className = 'nova-msg';
+    typingEl.innerHTML = '<div class="nova-msg-av">N</div><div class="nova-bubble" style="color:var(--muted);font-style:italic">Думает...</div>';
+    msgs.appendChild(typingEl);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    try {
+      // Добавляем контекст договорённостей Новы
+      const novaCtxExtra = Object.entries(novaState)
+        .filter(([k,v]) => v && k !== 'notes')
+        .map(([k,v]) => `${k}: ${v}`)
+        .join(', ');
+      const reply = await callNovaAPI(text, novaCtxExtra ? 'Договорённости сессии: ' + novaCtxExtra : '');
+      typingEl.remove();
+      addNovaBubble(reply);
+    } catch(e) {
+      typingEl.remove();
+      addNovaBubble('Не получила ответ от сервера. Попробуй ещё раз.');
+    } finally {
+      novaChatLocked = false;
+      textarea.focus();
+    }
   }
 
   function addNovaBubble(html, isUser) {
@@ -2547,6 +3528,7 @@ ${sectionsHtml}
         data: state.data,
         aiData: state.aiData,
         competitorNames: state.competitorNames,
+        enrichedCompetitors: state._enrichedCompetitors || null,
         savedAt: Date.now()
       }));
       // Обновляем отдельный кеш для neurovia payload
@@ -2588,6 +3570,7 @@ ${sectionsHtml}
       state.data = saved.data || {};
       state.aiData = saved.aiData || {};
       state.competitorNames = saved.competitorNames || [];
+      state._enrichedCompetitors = saved.enrichedCompetitors || null;
       document.getElementById('restoreBanner').style.display = 'none';
       document.getElementById('questionsScreen').classList.remove('active');
       document.getElementById('analysisScreen').classList.add('active');
@@ -2598,6 +3581,11 @@ ${sectionsHtml}
 
   function dismissRestore() {
     clearStorage();
+    state.aiData = {};
+    state.competitorNames = [];
+    state._enrichedCompetitors = null;
+    state._analysisId = null;
+    state._searchContext = null;
     document.getElementById('restoreBanner').style.display = 'none';
     document.getElementById('questionsScreen').style.paddingTop = '';
   }
@@ -2605,7 +3593,8 @@ ${sectionsHtml}
   // ===== LOAD ALL TABS (параллельно) =====
   async function loadAllTabs() {
     const btn = document.getElementById('btnLoadAll');
-    const missing = TABS.filter(t => !state.aiData || !state.aiData[t.id]);
+    const LOCAL_TABS = new Set(['cards','evidence','weaknesses']);
+    const missing = TABS.filter(t => !LOCAL_TABS.has(t.id) && (!state.aiData || !state.aiData[t.id]));
     if (missing.length === 0) { updateLoadBtn(); return; }
     btn.disabled = true;
     btn.style.color = '';
@@ -2625,17 +3614,66 @@ ${sectionsHtml}
 
   // Init
   renderQuestion();
-  // Если открыли по ссылке из /admin — пропускаем checkSavedState и сразу грузим анализ
-  const _adminAnalysisId = new URLSearchParams(window.location.search).get('analysis');
-  if (_adminAnalysisId) {
-    const _p = new URLSearchParams(window.location.search);
-    // Скрываем форму и показываем загрузку сразу
+  const _initParams = new URLSearchParams(window.location.search);
+  const _adminAnalysisId = _initParams.get('analysis');
+  const _emailParam = _initParams.get('email');
+
+  if (_emailParam) {
+    // Открыли по email-ссылке — грузим последний анализ по email
+    document.getElementById('questionsScreen').style.display = 'none';
+    document.getElementById('loadingScreen').classList.add('active');
+    fetch('/api/history', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email: decodeURIComponent(_emailParam) })
+    }).then(r => r.json()).then(async data => {
+      const competitors = data.competitors || [];
+      if (competitors.length > 0 && data.analysisData) {
+        _pendingCompetitors = competitors;
+        state.data = {
+          email: decodeURIComponent(_emailParam),
+          area: data.analysisData.area || '',
+          product: data.analysisData.product || '',
+          segment: data.analysisData.segment || '',
+          description: data.analysisData.description || '',
+          geography: Array.isArray(data.analysisData.geography) ? data.analysisData.geography.join(', ') : (data.analysisData.geography || ''),
+          price: data.analysisData.price || ''
+        };
+        state._analysisId = data.analysisId || null;
+        state.competitorNames = competitors.map(c => c.name).filter(Boolean);
+        state.data.competitorUrls = competitors.filter(c => c.url && c.url.startsWith('http')).map(c => c.url).join('\n');
+        state._enrichedCompetitors = competitors.length ? competitors : null;
+        if (data.aiCache && Object.keys(data.aiCache).length > 0) {
+          // Кеш есть — показываем мгновенно без AI-генерации
+          state.aiData = data.aiCache;
+          document.getElementById('loadingScreen').classList.remove('active');
+          document.getElementById('analysisScreen').classList.add('active');
+          document.getElementById('anProduct').textContent = state.data.product || '';
+          const btn = document.getElementById('btnShareLink');
+          if (btn) btn.style.display = '';
+          renderTabs();
+        } else {
+          await runAnalysis();
+        }
+      } else {
+        // Email не найден — показываем форму
+        document.getElementById('loadingScreen').classList.remove('active');
+        document.getElementById('questionsScreen').style.display = '';
+        checkSavedState();
+      }
+    }).catch(() => {
+      document.getElementById('loadingScreen').classList.remove('active');
+      document.getElementById('questionsScreen').style.display = '';
+      checkSavedState();
+    });
+  } else if (_adminAnalysisId) {
+    // Открыли по UUID-ссылке
     document.getElementById('questionsScreen').style.display = 'none';
     document.getElementById('loadingScreen').classList.add('active');
     loadFromHistory(
       _adminAnalysisId,
-      decodeURIComponent(_p.get('area') || ''),
-      decodeURIComponent(_p.get('product') || '')
+      decodeURIComponent(_initParams.get('area') || ''),
+      decodeURIComponent(_initParams.get('product') || ''),
+      true  // autoRun — пропускаем экран подтверждения
     ).then(() => {
       document.getElementById('loadingScreen').classList.remove('active');
     });
