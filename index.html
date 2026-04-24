@@ -1442,12 +1442,16 @@ td:first-child{color:var(--text);font-weight:500}
         <div style="width:36px;height:36px;border:2px solid var(--border2);border-top:2px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite"></div>
         <div style="font-size:12px;color:var(--muted)">Загружаю данные...</div>
       </div>`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 70000);
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: buildAnalysisContext() || undefined, margoContext: getMargoContext() || undefined, clientKey: getClientKey(), analysisId: state._analysisId || null, ..._visitMeta})
+        body: JSON.stringify({...state.data, tab: tabId, competitorNames: state.competitorNames || [], analysisContext: buildAnalysisContext() || undefined, margoContext: getMargoContext() || undefined, clientKey: getClientKey(), analysisId: state._analysisId || null, ..._visitMeta}),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (!response.ok) throw new Error('API error ' + response.status);
       const data = await response.json();
       if (data && data.error) throw new Error(data.error);
@@ -1458,6 +1462,7 @@ td:first-child{color:var(--text);font-weight:500}
         updateLoadBtn();
       }
     } catch (e) {
+      clearTimeout(timeoutId);
       state.lastError = e.message;
     }
     switchTab(TABS.findIndex(t => t.id === tabId));
