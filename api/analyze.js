@@ -321,7 +321,7 @@ async function scrapeForTab(tab, urls, competitorNames) {
   return combined ? `\n\nРЕАЛЬНЫЕ ДАННЫЕ С САЙТОВ КОНКУРЕНТОВ (используй их в анализе):\n${combined}` : '';
 }
 
-function httpPost(hostname, path, headers, body) {
+function httpPost(hostname, path, headers, body, timeoutMs) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body);
     const req = https.request({
@@ -336,6 +336,7 @@ function httpPost(hostname, path, headers, body) {
       });
     });
     req.on('error', reject);
+    req.setTimeout(timeoutMs || 40000, () => { req.destroy(); reject(new Error('AI API timeout after ' + (timeoutMs || 40000) + 'ms')); });
     req.write(data);
     req.end();
   });
